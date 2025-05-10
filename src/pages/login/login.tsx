@@ -18,7 +18,7 @@ export default function FormCliente() {
       <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome" />
       <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
       <input value={cpf} onChange={(e) => setCPF(e.target.value)} placeholder="CPF" />
-      <input value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="Telefone" />
+      <input value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="Telefoneeee" />
       <button type="submit">Cadastrar</button>
     </form>
   );
