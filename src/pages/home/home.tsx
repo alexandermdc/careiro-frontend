@@ -7,6 +7,7 @@ interface Cliente {
   email: string;
   cpf: string;
   telefone: string;
+  senha: string;
 }
 
 export default function Home() {
