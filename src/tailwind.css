@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Componentes customizados */
+@layer components {
+  .all-\[unset\] {
+    all: unset;
+  }
+}
+
+/* Variáveis globais */
+:root {
+  --bot-es-font-family: "Montserrat", Helvetica;
+  --radius: 0.5rem;
+
+  --cinza: 240 243 240;
+  --fundo-claro: 251 252 250;
+  --strokes: 213 215 212;
+  --texto: 54 53 56;
+  --verde-claro: 156 178 23;
+  --verde-escuro: 29 69 16;
+
+  --background: 0 0% 100%;
+  --foreground: 222.2 47.4% 11.2%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 215 20.2% 65.1%;
+}
+
+/* Tema escuro */
+.dark {
+  --background: 224 71% 4%;
+  --foreground: 213 31% 91%;
+  --border: 216 34% 17%;
+  --input: 216 34% 17%;
+  --ring: 216 34% 17%;
+}
+
+/* Aplicações globais */
+* {
+  border-width: 1px;
+  border-style: solid;
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--bot-es-font-family);
+}
