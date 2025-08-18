@@ -1,5 +1,5 @@
 import { CalendarIcon, MapPinIcon, UserPlusIcon } from "lucide-react";
-import {type JSX} from "react";
+import React, {type JSX} from "react";
 import { Button } from "../../../../components/button";
 import { Card, CardContent } from "../../../../components/cards";
 
@@ -208,12 +208,12 @@ export const MainContentSection = (): JSX.Element => {
                 </div>
               </div>
             </CardContent>
-            <div className="inline-flex flex-col items-center gap-2.5 relative flex-[0_0_auto]">
+            <div className="flex justify-center w-full px-4">
               <Button
-                className="h-12 relative inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-fundo-claro rounded-2xl overflow-hidden border border-solid border-[#9cb217] h-auto"
+                className="h-12 inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-fundo-claro rounded-2xl overflow-hidden border border-solid border-[#9cb217]"
                 variant="outline"
               >
-                <span className="w-fit font-[number:var(--bot-es-font-weight)] text-verde-claro text-[length:var(--bot-es-font-size)] text-center leading-[var(--bot-es-line-height)] whitespace-nowrap relative font-bot-es tracking-[var(--bot-es-letter-spacing)] [font-style:var(--bot-es-font-style)]">
+                <span className="font-[number:var(--bot-es-font-weight)] text-verde-claro text-[length:var(--bot-es-font-size)] text-center leading-[var(--bot-es-line-height)] whitespace-nowrap font-bot-es tracking-[var(--bot-es-letter-spacing)] [font-style:var(--bot-es-font-style)]">
                   Text
                 </span>
               </Button>
