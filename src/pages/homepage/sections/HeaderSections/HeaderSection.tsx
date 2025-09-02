@@ -23,8 +23,12 @@ export const HeaderSection = (): JSX.Element => {
         <div className="flex items-center gap-[9px]">
           <img
             className="w-[79px] h-[78px]"
-            alt="Captura de tela"
+            alt="Logo Agriconnect"
             src="https://c.animaapp.com/meda5qjaouVHG5/img/captura-de-tela-2025-07-31-a-s-22-30-53-1.png"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = "https://via.placeholder.com/79x78/1d4510/ffffff?text=Logo";
+            }}
           />
           <div className="[font-family:'Inter',Helvetica] font-bold text-verde-escuro text-[19px] tracking-[0] leading-[normal]">
             Agriconnect

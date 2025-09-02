@@ -1,4 +1,4 @@
-import React, {type JSX} from "react";
+import {type JSX} from "react";
 
 export const FooterSection = (): JSX.Element => {
   const footerSections = [
@@ -35,8 +35,12 @@ export const FooterSection = (): JSX.Element => {
           <div className="flex flex-col items-start">
             <img
               className="w-[118px] h-[117px] mb-[7px]"
-              alt="Captura de tela"
+              alt="Logo Agriconnect"
               src="https://c.animaapp.com/meda5qjaouVHG5/img/captura-de-tela-2025-07-31-a-s-22-30-53-1-1.png"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "https://via.placeholder.com/118x117/1d4510/ffffff?text=Logo";
+              }}
             />
             <div className="[font-family:'Inter',Helvetica] font-bold text-verde-escuro text-[19px] tracking-[0] leading-[normal]">
               Agriconnect
@@ -73,8 +77,12 @@ export const FooterSection = (): JSX.Element => {
             </div>
             <img
               className="w-40 h-12"
-              alt="Frame"
+              alt="Redes Sociais"
               src="https://c.animaapp.com/meda5qjaouVHG5/img/frame-13.svg"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "https://via.placeholder.com/160x48/9cb217/ffffff?text=Redes+Sociais";
+              }}
             />
           </div>
         </div>

@@ -1,71 +1,76 @@
 @import "tailwindcss";
 
 
+/* Variáveis globais para tokens do Tailwind via config existente */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --bot-es-font-family: "Montserrat", Helvetica;
+  --radius: 0.5rem;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Paleta do projeto (em HSL sem a função para uso em hsl(var(--...))) */
+  --cinza: 240 243 240;
+  --fundo-claro: 251 252 250;
+  --strokes: 213 215 212;
+  --texto: 54 53 56;
+  --verde-claro: 156 178 23;
+  --verde-escuro: 29 69 16;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Tokens auxiliares usados nos componentes */
+  --background: 0 0% 100%;
+  --foreground: 222.2 47.4% 11.2%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 215 20.2% 65.1%;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+.dark {
+  --background: 224 71% 4%;
+  --foreground: 213 31% 91%;
+  --border: 216 34% 17%;
+  --input: 216 34% 17%;
+  --ring: 216 34% 17%;
 }
-a:hover {
-  color: #535bf2;
+
+/* Aplicações globais mínimas */
+input,
+textarea,
+button,
+select,
+fieldset {
+  border-width: 1px;
+  border-style: solid;
+  border-color: hsl(var(--border));
+  border-radius: var(--radius);
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--bot-es-font-family);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+/* Utilitários de cor personalizados equivalentes às classes usadas no projeto */
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+/* As variáveis abaixo estão em formato RGB (ex: 54 53 56), então use rgb() */
+.bg-cinza { background-color: rgb(var(--cinza)); }
+.bg-fundo-claro { background-color: rgb(var(--fundo-claro)); }
+.bg-strokes { background-color: rgb(var(--strokes)); }
+.bg-texto { background-color: rgb(var(--texto)); }
+.bg-verde-claro { background-color: rgb(var(--verde-claro)); }
+.bg-verde-escuro { background-color: rgb(var(--verde-escuro)); }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
+.text-cinza { color: rgb(var(--cinza)); }
+.text-fundo-claro { color: rgb(var(--fundo-claro)); }
+.text-strokes { color: rgb(var(--strokes)); }
+.text-texto { color: rgb(var(--texto)); }
+.text-verde-claro { color: rgb(var(--verde-claro)); }
+.text-verde-escuro { color: rgb(var(--verde-escuro)); }
+
+.border-cinza { border-color: rgb(var(--cinza)); }
+.border-fundo-claro { border-color: rgb(var(--fundo-claro)); }
+.border-strokes { border-color: rgb(var(--strokes)); }
+.border-texto { border-color: rgb(var(--texto)); }
+.border-verde-claro { border-color: rgb(var(--verde-claro)); }
+.border-verde-escuro { border-color: rgb(var(--verde-escuro)); }
