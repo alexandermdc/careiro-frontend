@@ -1,9 +1,10 @@
-import {type JSX}from "react";
+import React from "react";
 import { FooterSection } from "./sections/FooterSection/FooterSection";
 import { HeaderSection } from "./sections/HeaderSections/HeaderSection";
 import { MainContentSection } from "./sections/MainContentSection/MainContentSection";
+// removed floating banner button imports
 
-export const Homepage = (): JSX.Element => {
+export const Homepage = (): React.ReactElement => {
   return (
     <main
       className="bg-[#fafcf9] min-h-screen w-full flex flex-col"
@@ -20,6 +21,7 @@ export const Homepage = (): JSX.Element => {
             target.src = "https://via.placeholder.com/1200x630/9cb217/ffffff?text=Banner+Agriconnect";
           }}
         />
+        {/* floating button removed to avoid overlap with header */}
         <MainContentSection />
         <FooterSection />
       </div>

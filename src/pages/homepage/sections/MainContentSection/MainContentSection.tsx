@@ -71,12 +71,12 @@ const categories = [
   {
     title: "Legumes",
     backgroundImage:
-      "https://c.animaapp.com/meda5qjaouVHG5/img/card-categorias.png",
+      "https://c.animaapp.com/meda5qjaouVHG5/img/card-categorias-2.png",
   },
   {
     title: "Frutas",
     backgroundImage:
-      "https://c.animaapp.com/meda5qjaouVHG5/img/card-categorias-1.png",
+      "https://c.animaapp.com/meda5qjaouVHG5/img/card-categorias-2.png",
   },
   {
     title: "Verduras",
