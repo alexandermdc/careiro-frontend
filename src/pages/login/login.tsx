@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '../../components/button';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -15,95 +17,65 @@ const Login: React.FC = () => {
         alert('Login realizado com sucesso!');
     };
 
-    return (
-        <div className="min-h-screen w-screen flex flex-col justify-center items-center bg-green-50 px-4">
-            <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-10">
-                {/* Cabeçalho com identidade da feira */}
-                <header className="mb-8 text-center">
-                    <h1 className="text-4xl font-extrabold text-green-800 mb-2">
-                        Agriconect
-                    </h1>
-                    <p className="text-green-700 font-semibold text-lg">
-                        Feira Livre Online - Conectando você ao campo!
-                    </p>
-                </header>
+        return (
+            <div className="w-screen min-h-screen flex items-center justify-center bg-cinza px-4 py-12">
+                <div className="max-w-md w-full bg-white rounded-2xl shadow-sm p-8 border border-strokes">
+                    <header className="mb-6 text-center">
+                        <h1 className="text-2xl font-bold text-verde-escuro">Agriconnect</h1>
+                        <p className="text-texto text-sm">Feira Livre Online - Conectando você ao campo</p>
+                    </header>
 
-                <form onSubmit={handleSubmit} aria-label="Formulário de login Agriconect">
-                    <div className="mb-6">
-                        <label
-                            htmlFor="email"
-                            className="block text-green-900 font-semibold mb-2"
-                        >
+                    <form onSubmit={handleSubmit} aria-label="Formulário de login Agriconect">
+                        <label htmlFor="email" className="block text-texto font-medium mb-2">
                             E-mail
                         </label>
                         <input
                             id="email"
                             type="email"
                             value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            className="w-full px-4 py-3 border border-green-300 rounded focus:outline-none focus:ring-4 focus:ring-green-400"
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full mb-4 p-3 border border-strokes rounded-md focus:outline-none focus:ring-2 focus:ring-verde-claro bg-fundo-claro text-texto"
                             placeholder="Digite seu e-mail"
                             aria-required="true"
-                            aria-describedby="emailHelp"
                         />
-                        <small id="emailHelp" className="text-green-600">
-                            Exemplo: usuario@exemplo.com
-                        </small>
-                    </div>
 
-                    <div className="mb-6">
-                        <label
-                            htmlFor="password"
-                            className="block text-green-900 font-semibold mb-2"
-                        >
+                        <label htmlFor="password" className="block text-texto font-medium mb-2">
                             Senha
                         </label>
                         <input
                             id="password"
                             type="password"
                             value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            className="w-full px-4 py-3 border border-green-300 rounded focus:outline-none focus:ring-4 focus:ring-green-400"
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full mb-4 p-3 border border-strokes rounded-md focus:outline-none focus:ring-2 focus:ring-verde-claro bg-fundo-claro text-texto"
                             placeholder="Digite sua senha"
                             aria-required="true"
                         />
-                    </div>
 
-                    {error && (
-                        <div
-                            role="alert"
-                            className="mb-6 text-red-700 bg-red-100 border border-red-400 rounded p-3 font-semibold text-center"
-                        >
-                            {error}
+                        {error && (
+                            <div role="alert" className="mb-4 text-red-700 bg-red-100 border border-red-400 rounded p-3 font-medium text-center">
+                                {error}
+                            </div>
+                        )}
+
+                        <Button type="submit" variant="outline" className="w-full border-verde-claro text-verde-escuro py-3 rounded-md shadow-sm hover:shadow-md mb-3">
+                            Entrar
+                        </Button>
+
+                        <div className="text-center">
+                            <p className="mt-2 text-texto">
+                                Não tem uma conta?{' '}
+                                <Link to="/cadastro" className="text-verde-escuro font-medium underline">
+                                    Cadastre-se aqui
+                                </Link>
+                            </p>
                         </div>
-                    )}
+                    </form>
 
-                    <button
-                        type="submit"
-                        className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded transition duration-200 focus:outline-none focus:ring-4 focus:ring-green-500"
-                    >
-                        Entrar
-                    </button>
-
-                    {/* Linha para cadastro */}
-                    <p className="mt-4 text-center text-green-800 font-medium">
-                        Não tem uma conta?{' '}
-                        <a
-                            href="/cadastro"
-                            className="text-green-600 hover:text-green-900 font-bold underline"
-                        >
-                            Cadastre-se aqui
-                        </a>
-                    </p>
-                </form>
+                    <footer className="mt-6 text-center text-texto text-sm">Seja bem-vindo(a) à Agriconnect</footer>
+                </div>
             </div>
-
-            {/* Rodapé com mensagem acolhedora */}
-            <footer className="mt-8 text-center text-green-800 font-medium">
-                Seja bem-vindo(a) à Agriconect — a sua feira livre digital!
-            </footer>
-        </div>
-    );
+        );
 };
 
 export default Login;

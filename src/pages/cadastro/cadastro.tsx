@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // importa useNavigate
+import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import "../../index.css";
+import { Button } from '../../components/button';
 
 export default function FormCliente() {
   const [nome, setNome] = useState('');
@@ -9,79 +10,73 @@ export default function FormCliente() {
   const [cpf, setCPF] = useState('');
   const [telefone, setTelefone] = useState('');
   const [senha, setSenha] = useState('');
-  const navigate = useNavigate(); // inicializa o navigate
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       await api.post('/clientes', { cpf, nome, email, telefone, senha });
       alert('Cliente cadastrado!');
-      navigate('/login'); // redireciona para página de login
+      navigate('/login');
     } catch (error) {
-      alert('Erro ao cadastrar cliente. Tente novamente.');
       console.error(error);
+      alert('Erro ao cadastrar cliente. Tente novamente.');
     }
   };
 
-  const handleVoltarLogin = () => {
-    navigate('/login'); // redireciona para login ao clicar no botão
-  };
+  const handleVoltarLogin = () => navigate('/login');
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-br from-green-200 via-yellow-100 to-green-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md border-2 border-green-300 flex flex-col justify-center items-center"
-      >
-        <h2 className="text-3xl font-extrabold mb-8 text-center text-green-700">
-          Cadastro de Feira Livre
-        </h2>
+    <div className="w-screen min-h-screen flex items-center justify-center bg-cinza px-4 py-12">
+      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-sm w-full max-w-md border border-strokes flex flex-col">
+        <h2 className="text-2xl font-bold mb-4 text-verde-escuro text-center">Cadastro de Feira Livre</h2>
+
         <input
           value={nome}
-          onChange={(e) => setNome(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNome(e.target.value)}
           placeholder="Informe seu nome completo"
-          className="w-full mb-5 p-4 border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 bg-green-50 placeholder-gray-600 text-green-900"
+          className="w-full mb-3 p-3 border border-strokes rounded-md focus:outline-none focus:ring-2 focus:ring-verde-claro bg-fundo-claro text-texto"
         />
+
         <input
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Digite seu e-mail (ex: exemplo@email.com)"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+          placeholder="Digite seu e-mail"
           type="email"
-          className="w-full mb-5 p-4 border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 bg-green-50 placeholder-gray-600 text-green-900"
+          className="w-full mb-3 p-3 border border-strokes rounded-md focus:outline-none focus:ring-2 focus:ring-verde-claro bg-fundo-claro text-texto"
         />
+
         <input
           value={cpf}
-          onChange={(e) => setCPF(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCPF(e.target.value)}
           placeholder="Informe seu CPF (apenas números)"
-          className="w-full mb-5 p-4 border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 bg-green-50 placeholder-gray-600 text-green-900"
+          className="w-full mb-3 p-3 border border-strokes rounded-md focus:outline-none focus:ring-2 focus:ring-verde-claro bg-fundo-claro text-texto"
         />
+
         <input
           value={telefone}
-          onChange={(e) => setTelefone(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTelefone(e.target.value)}
           placeholder="Informe seu telefone (DDD + número)"
-          className="w-full mb-5 p-4 border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 bg-green-50 placeholder-gray-600 text-green-900"
+          className="w-full mb-3 p-3 border border-strokes rounded-md focus:outline-none focus:ring-2 focus:ring-verde-claro bg-fundo-claro text-texto"
         />
+
         <input
           value={senha}
-          onChange={(e) => setSenha(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSenha(e.target.value)}
           placeholder="Crie uma senha"
           type="password"
-          className="w-full mb-7 p-4 border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 bg-green-50 placeholder-gray-600 text-green-900"
+          className="w-full mb-5 p-3 border border-strokes rounded-md focus:outline-none focus:ring-2 focus:ring-verde-claro bg-fundo-claro text-texto"
         />
-        <button
-          type="submit"
-          className="w-full bg-gradient-to-r from-green-400 to-yellow-400 hover:from-green-500 hover:to-yellow-500 text-white font-bold py-4 rounded-lg transition text-lg shadow-md mb-4"
-        >
-          Cadastrar
-        </button>
 
-        <button
-          type="button"
-          onClick={handleVoltarLogin}
-          className="w-full border border-green-400 text-green-700 font-semibold py-3 rounded-lg hover:bg-green-100 transition text-lg"
-        >
-          Voltar para Login
-        </button>
+        <Button type="submit" className="w-full bg-verde-escuro text-white py-3 rounded-md shadow-sm hover:shadow-md mb-3">
+          Cadastrar
+        </Button>
+
+        <Button variant="outline" asChild className="w-full">
+          <button type="button" onClick={handleVoltarLogin} className="w-full py-3 text-texto">
+            Voltar para Login
+          </button>
+        </Button>
       </form>
     </div>
   );

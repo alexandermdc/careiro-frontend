@@ -1,4 +1,5 @@
-import { CalendarIcon, MapPinIcon, UserPlusIcon } from "lucide-react";
+import { CalendarIcon, MapPinIcon } from "lucide-react";
+import JoinSection from '../../../../components/JoinSection';
 import {type JSX} from "react";
 import { Button } from "../../../../components/button";
 import { Card, CardContent } from "../../../../components/cards";
@@ -360,29 +361,7 @@ export const MainContentSection = (): JSX.Element => {
         </div>
       </div>
 
-  <Card className="flex w-full max-w-[1108px] mx-auto items-start gap-2.5 px-0 py-[60px] bg-cinza rounded-[30px] overflow-hidden">
-        <CardContent className="flex flex-wrap items-center justify-between gap-[24px_0px] px-[60px] py-0 relative flex-1 grow">
-          <div className="flex flex-col items-start gap-2 pl-0 pr-[60px] py-0 relative flex-1 grow">
-            <h2 className="relative w-fit mt-[-1.00px] font-t-tulos font-[number:var(--t-tulos-font-weight)] text-verde-escuro text-[length:var(--t-tulos-font-size)] tracking-[var(--t-tulos-letter-spacing)] leading-[var(--t-tulos-line-height)] whitespace-nowrap [font-style:var(--t-tulos-font-style)]">
-              Faça parte do Agriconnect
-            </h2>
-            <p className="relative [font-family:'Inter',Helvetica] font-normal text-texto text-lg tracking-[0] leading-[normal]">
-              Solicite o cadastro da sua associação no Agriconnect. É simples,
-              rápido e prático. Conecte seus produtores e seus produtos ao maior
-              ecommerce da agricultura amazonense e transforme suas realidades.
-            </p>
-          </div>
-          <Button
-            className="h-14 relative flex-[0_0_auto] inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-fundo-claro rounded-2xl overflow-hidden border border-solid border-[#9cb217] h-auto"
-            variant="outline"
-          >
-            <span className="w-fit font-[number:var(--bot-es-font-weight)] text-verde-claro text-[length:var(--bot-es-font-size)] text-center leading-[var(--bot-es-line-height)] whitespace-nowrap relative font-bot-es tracking-[var(--bot-es-letter-spacing)] [font-style:var(--bot-es-font-style)]">
-              Cadastrar associação
-            </span>
-            <UserPlusIcon className="relative w-6 h-6" />
-          </Button>
-        </CardContent>
-      </Card>
+      <JoinSection />
     </section>
   );
 };

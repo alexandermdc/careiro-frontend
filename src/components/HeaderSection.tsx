@@ -48,11 +48,13 @@ export const HeaderSection = (): JSX.Element => {
             <ShoppingBagIcon className="w-6 h-6 text-verde-escuro" />
           </div>
 
-          <Button className="h-12 inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-fundo-claro rounded-2xl border border-solid border-[#9cb217] hover:bg-fundo-claro">
-            <div className="font-[number:var(--bot-es-font-weight)] text-verde-claro text-[length:var(--bot-es-font-size)] text-center leading-[var(--bot-es-line-height)] whitespace-nowrap font-bot-es tracking-[var(--bot-es-letter-spacing)] [font-style:var(--bot-es-font-style)]">
-              Fazer login
-            </div>
-            <UserIcon className="w-6 h-6 text-verde-claro" />
+          <Button asChild variant="outline" size="default" className="h-12 inline-flex items-center justify-center gap-2 px-6 rounded-2xl border-verde-claro">
+            <Link to="/login" aria-label="Ir para login" className="inline-flex items-center gap-2">
+              <span className="font-[number:var(--bot-es-font-weight)] text-verde-claro text-[length:var(--bot-es-font-size)] text-center leading-[var(--bot-es-line-height)] whitespace-nowrap font-bot-es tracking-[var(--bot-es-letter-spacing)] [font-style:var(--bot-es-font-style)]">
+                Fazer login
+              </span>
+              <UserIcon className="w-6 h-6 text-verde-claro" />
+            </Link>
           </Button>
         </div>
       </div>

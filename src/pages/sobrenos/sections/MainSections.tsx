@@ -1,6 +1,5 @@
 import {type JSX} from "react";
-import { Button } from "../../../components/button";
-import { Card, CardContent } from "../../../components/cards";
+import JoinSection from '../../../components/JoinSection';
 
 const contentSections = [
   {
@@ -88,36 +87,7 @@ export const MainContentSection = (): JSX.Element => {
         </p>
       </div>
 
-  <Card className="w-full bg-cinza rounded-[30px] border border-solid border-[#d5d7d4]">
-        <CardContent className="p-[60px]">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div className="flex flex-col gap-2 flex-1 lg:pr-[60px]">
-              <h3 className="font-t-tulos font-[number:var(--t-tulos-font-weight)] text-verde-escuro text-[length:var(--t-tulos-font-size)] tracking-[var(--t-tulos-letter-spacing)] leading-[var(--t-tulos-line-height)] [font-style:var(--t-tulos-font-style)]">
-                Faça parte do Agriconnect
-              </h3>
-              <p className="[font-family:'Inter',Helvetica] font-normal text-texto text-lg tracking-[0] leading-[normal]">
-                Solicite o cadastro da sua associação no Agriconnect. É simples,
-                rápido e prático. Conecte seus produtores e seus produtos ao
-                maior ecommerce da agricultura amazonense e transforme suas
-                realidades.
-              </p>
-            </div>
-            <Button
-              className="h-auto bg-fundo-claro rounded-2xl border border-solid border-[#9cb217] px-6 py-2.5 hover:bg-fundo-claro/90 transition-colors"
-              variant="outline"
-            >
-              <span className="font-[number:var(--bot-es-font-weight)] text-verde-claro text-center leading-[var(--bot-es-line-height)] font-bot-es text-[length:var(--bot-es-font-size)] tracking-[var(--bot-es-letter-spacing)] [font-style:var(--bot-es-font-style)] mr-2">
-                Cadastrar associação
-              </span>
-              <img
-                className="w-6 h-6"
-                alt="User add"
-                src="https://c.animaapp.com/mfh1vpp1e8a9vm/img/user-add.svg"
-              />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <JoinSection />
     </section>
   );
 };
