@@ -1,5 +1,5 @@
 import {type JSX} from "react";
-import JoinSection from '../../../components/JoinSection';
+import { JoinAgriconnectBanner } from '../../../components/JoinAgriconnectBanner';
 
 const contentSections = [
   {
@@ -31,7 +31,7 @@ const participantTypes = [
 
 export const MainContentSection = (): JSX.Element => {
   return (
-    <section className="flex flex-col w-full max-w-[1112px] mx-auto items-center justify-center gap-12 px-4">
+    <section className="flex flex-col w-full max-w-[1112px] mx-auto items-center justify-center gap-12 px-4 py-8">
       {contentSections.map((section) => (
         <div key={section.title} className={`w-full`}>
           <h2 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-2xl tracking-[0] leading-[normal] mb-[45px]">
@@ -87,7 +87,10 @@ export const MainContentSection = (): JSX.Element => {
         </p>
       </div>
 
-      <JoinSection />
+      {/* Espaçamento extra antes do banner */}
+      <div className="mt-16">
+        <JoinAgriconnectBanner />
+      </div>
     </section>
   );
 };

@@ -9,7 +9,7 @@ const navigationItems = [
   { label: "Início", href: "/" },
   { label: "Produtos", href: "/produtos" },
   { label: "Feiras", href: "/feiras" },
-  { label: "Associações", href: "/associacoes" },
+  { label: "Associações", href: "/associacao" },
   { label: "Sobre nós", href: "/sobrenos" },
 ];
 

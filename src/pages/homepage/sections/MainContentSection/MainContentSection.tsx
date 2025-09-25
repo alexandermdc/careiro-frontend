@@ -1,5 +1,5 @@
 import { CalendarIcon, MapPinIcon } from "lucide-react";
-import JoinSection from '../../../../components/JoinSection';
+import { JoinAgriconnectBanner } from '../../../../components/JoinAgriconnectBanner';
 import {type JSX} from "react";
 import { Button } from "../../../../components/button";
 import { Card, CardContent } from "../../../../components/cards";
@@ -361,7 +361,7 @@ export const MainContentSection = (): JSX.Element => {
         </div>
       </div>
 
-      <JoinSection />
+      <JoinAgriconnectBanner />
     </section>
   );
 };

@@ -1,29 +1,43 @@
 import React from "react";
+import { PageLayout } from "../../components/PageLayout";
 import { AboutSectionSobreNos } from "./sections/AboutSobrenos";
-import { FooterSection } from "./sections/FooterSections";
-import { HeaderSection } from "./sections/HeaderSections";
 import { MainContentSection } from "./sections/MainSections";
 
 export const SobreNos = (): React.ReactElement => {
+  // Seções do footer iguais às da associação
+  const sobreNosFooterSections = [
+    {
+      title: "O Agriconnect",
+      links: [
+        { text: "O que é", href: "#" },
+        { text: "Quem faz parte", href: "#" },
+        { text: "Como participar", href: "#" },
+      ],
+    },
+    {
+      title: "Produtos",
+      links: [
+        { text: "Verduras", href: "#" },
+        { text: "Legumes", href: "#" },
+        { text: "Frutas", href: "#" },
+      ],
+    },
+    {
+      title: "Ajuda",
+      links: [
+        { text: "Dúvidas", href: "#" },
+        { text: "Política de Privacidade", href: "#" },
+        { text: "Termo de Uso", href: "#" },
+      ],
+    },
+  ];
+
   return (
-    <div
-      className="bg-[#fafcf9] min-h-screen w-full flex flex-col"
-      data-model-id="347:2352"
-    >
+    <PageLayout footerSections={sobreNosFooterSections}>
       <div className="bg-fundo-claro w-full flex flex-col relative">
-        <div>
-          <HeaderSection />
-        </div>
-        <div>
-          <AboutSectionSobreNos />
-        </div>
-        <div>
-          <MainContentSection />
-        </div>
-        <div>
-          <FooterSection />
-        </div>
+        <AboutSectionSobreNos />
+        <MainContentSection />
       </div>
-    </div>
+    </PageLayout>
   );
 };
