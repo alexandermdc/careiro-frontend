@@ -1,9 +1,10 @@
-import { SearchIcon, ShoppingBagIcon, UserIcon } from "lucide-react";
+import { SearchIcon, ShoppingBagIcon, UserIcon, LogOutIcon } from "lucide-react";
 import { type JSX } from "react";
 import { Link } from 'react-router-dom';
 import { Button } from "./button";
 import { Input } from "./inputs";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList, NavigationMenuLink } from "./navigate_menu";
+import { useAuth } from "../contexts/AuthContext";
 
 const navigationItems = [
   { label: "Início", href: "/" },
@@ -14,6 +15,16 @@ const navigationItems = [
 ];
 
 export const HeaderSection = (): JSX.Element => {
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Erro no logout:', error);
+    }
+  };
+
   return (
     <header className="w-full bg-cinza relative">
       <div className="flex items-center justify-between px-[166px] py-[33px]">
@@ -48,14 +59,37 @@ export const HeaderSection = (): JSX.Element => {
             <ShoppingBagIcon className="w-6 h-6 text-verde-escuro" />
           </div>
 
-          <Button asChild variant="outline" size="default" className="h-12 inline-flex items-center justify-center gap-2 px-6 rounded-2xl border-verde-claro">
-            <Link to="/login" aria-label="Ir para login" className="inline-flex items-center gap-2">
-              <span className="font-[number:var(--bot-es-font-weight)] text-verde-claro text-[length:var(--bot-es-font-size)] text-center leading-[var(--bot-es-line-height)] whitespace-nowrap font-bot-es tracking-[var(--bot-es-letter-spacing)] [font-style:var(--bot-es-font-style)]">
-                Fazer login
+          {isAuthenticated ? (
+            <div className="flex items-center gap-4">
+              <span className="text-verde-escuro font-medium">
+                Olá, {user?.nome}
               </span>
-              <UserIcon className="w-6 h-6 text-verde-claro" />
-            </Link>
-          </Button>
+              <Button asChild variant="outline" size="default" className="h-12 inline-flex items-center justify-center gap-2 px-4 rounded-2xl border-verde-claro">
+                <Link to="/dashboard" className="inline-flex items-center gap-2">
+                  <span className="font-medium text-verde-claro">Dashboard</span>
+                  <UserIcon className="w-5 h-5 text-verde-claro" />
+                </Link>
+              </Button>
+              <Button 
+                onClick={handleLogout}
+                variant="outline" 
+                size="default" 
+                className="h-12 inline-flex items-center justify-center gap-2 px-4 rounded-2xl border-red-500 text-red-500 hover:bg-red-50"
+              >
+                <span className="font-medium">Sair</span>
+                <LogOutIcon className="w-5 h-5" />
+              </Button>
+            </div>
+          ) : (
+            <Button asChild variant="outline" size="default" className="h-12 inline-flex items-center justify-center gap-2 px-6 rounded-2xl border-verde-claro">
+              <Link to="/login" aria-label="Ir para login" className="inline-flex items-center gap-2">
+                <span className="font-[number:var(--bot-es-font-weight)] text-verde-claro text-[length:var(--bot-es-font-size)] text-center leading-[var(--bot-es-line-height)] whitespace-nowrap font-bot-es tracking-[var(--bot-es-letter-spacing)] [font-style:var(--bot-es-font-style)]">
+                  Fazer login
+                </span>
+                <UserIcon className="w-6 h-6 text-verde-claro" />
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
 

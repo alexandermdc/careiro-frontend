@@ -22,3 +22,6 @@ vite-log.txt
 *.njsproj
 *.sln
 *.sw?
+
+AUTENTICACAO.md
+AUTHENTICATION.md
