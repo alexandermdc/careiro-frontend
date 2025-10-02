@@ -17,31 +17,95 @@ export interface CreateAssociacaoData {
 class AssociacaoService {
   // Buscar todas as associações (rota pública)
   async getAll(): Promise<Associacao[]> {
-    const response = await api.get('/associacao');
-    return response.data;
+    try {
+      console.log('🔍 Buscando todas as associações...');
+      const response = await api.get('/associacao');
+      console.log('✅ Associações encontradas:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Erro ao buscar associações:', error);
+      console.error('📋 Detalhes do erro:', error.response?.data);
+      throw new Error(error.response?.data?.message || 'Erro ao buscar associações');
+    }
   }
 
   // Buscar associação por ID (rota pública)
   async getById(id: string): Promise<Associacao> {
-    const response = await api.get(`/associacao/${id}`);
-    return response.data;
+    try {
+      console.log('🔍 Buscando associação por ID:', id);
+      const response = await api.get(`/associacao/${id}`);
+      console.log('✅ Associação encontrada:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Erro ao buscar associação:', error);
+      console.error('📋 Detalhes do erro:', error.response?.data);
+      throw new Error(error.response?.data?.message || 'Erro ao buscar associação');
+    }
   }
 
   // Criar associação (requer autenticação)
   async create(data: CreateAssociacaoData): Promise<Associacao> {
-    const response = await api.post('/associacao/cadastro', data);
-    return response.data;
+    try {
+      console.log('📝 Criando nova associação...');
+      console.log('📋 Dados enviados:', JSON.stringify(data, null, 2));
+      console.log('🔐 Token atual:', localStorage.getItem('accessToken') ? 'Presente' : 'Ausente');
+      
+      const response = await api.post('/associacao/cadastro', data);
+      
+      console.log('✅ Associação criada com sucesso:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Erro ao criar associação:', error);
+      console.error('📋 Detalhes completos do erro:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        headers: error.response?.headers
+      });
+      
+      // Tentar extrair mensagem mais específica
+      const errorMessage = 
+        error.response?.data?.message || 
+        error.response?.data?.error ||
+        error.response?.data ||
+        error.message ||
+        'Erro ao criar associação';
+      
+      throw new Error(errorMessage);
+    }
   }
 
   // Atualizar associação (requer autenticação)
   async update(id: string, data: Partial<CreateAssociacaoData>): Promise<Associacao> {
-    const response = await api.put(`/associacao/${id}`, data);
-    return response.data;
+    try {
+      console.log('✏️ Atualizando associação ID:', id);
+      console.log('📋 Dados para atualização:', data);
+      
+      const response = await api.put(`/associacao/${id}`, data);
+      
+      console.log('✅ Associação atualizada:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Erro ao atualizar associação:', error);
+      console.error('📋 Detalhes do erro:', error.response?.data);
+      throw new Error(error.response?.data?.message || 'Erro ao atualizar associação');
+    }
   }
 
   // Deletar associação (requer autenticação)
   async delete(id: string): Promise<void> {
-    await api.delete(`/associacao/${id}`);
+    try {
+      console.log('🗑️ Deletando associação ID:', id);
+      
+      await api.delete(`/associacao/${id}`);
+      
+      console.log('✅ Associação deletada com sucesso');
+    } catch (error: any) {
+      console.error('❌ Erro ao deletar associação:', error);
+      console.error('📋 Detalhes do erro:', error.response?.data);
+      throw new Error(error.response?.data?.message || 'Erro ao deletar associação');
+    }
   }
 }
 

@@ -23,5 +23,4 @@ vite-log.txt
 *.sln
 *.sw?
 
-AUTENTICACAO.md
-AUTHENTICATION.md
+*.md

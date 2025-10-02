@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { Homepage } from './pages/homepage/home';
 import { SobreNos } from './pages/sobrenos/sobreNos';
 import { Associacao } from './pages/associacao/Associacao';
+import CadastroAssociacao from './pages/associacao/CadastroAssociacao';
 import { Associacoes } from './pages/associacoes/Associacoes';
 import { Produtores } from './pages/produtores/Produtores';
 import { Feiras } from './pages/feiras/feiras';
@@ -11,6 +12,7 @@ import { Produtos } from './pages/produtos/Produtos';
 import FormCliente from './pages/cadastro/cadastro';
 import Login from './pages/login/login';
 import Dashboard from './pages/dashboard/Dashboard';
+import PerfilCliente from './pages/perfil/PerfilCliente';
 
 function App() {
   return (
@@ -35,6 +37,22 @@ function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/associacao/cadastro" 
+          element={
+            <ProtectedRoute>
+              <CadastroAssociacao />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/perfil" 
+          element={
+            <ProtectedRoute>
+              <PerfilCliente />
             </ProtectedRoute>
           } 
         />

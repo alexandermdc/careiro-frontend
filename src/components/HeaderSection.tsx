@@ -65,8 +65,8 @@ export const HeaderSection = (): JSX.Element => {
                 Olá, {user?.nome}
               </span>
               <Button asChild variant="outline" size="default" className="h-12 inline-flex items-center justify-center gap-2 px-4 rounded-2xl border-verde-claro">
-                <Link to="/dashboard" className="inline-flex items-center gap-2">
-                  <span className="font-medium text-verde-claro">Dashboard</span>
+                <Link to="/perfil" className="inline-flex items-center gap-2">
+                  <span className="font-medium text-verde-claro">Meu Perfil</span>
                   <UserIcon className="w-5 h-5 text-verde-claro" />
                 </Link>
               </Button>

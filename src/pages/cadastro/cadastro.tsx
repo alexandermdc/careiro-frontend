@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../../services/api';
+import clienteService from '../../services/clienteService';
 import "../../index.css";
 import { Button } from '../../components/button';
 import feiraImg from '../../assets/img/Feira.png';
@@ -15,13 +15,19 @@ export default function FormCliente() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    console.log('📝 Iniciando cadastro de cliente...');
+    console.log('📋 Dados do formulário:', { cpf, nome, email, telefone, senha: '[OCULTO]' });
+    
     try {
-      await api.post('/clientes', { cpf, nome, email, telefone, senha });
-      alert('Cliente cadastrado!');
+      await clienteService.criar({ cpf, nome, email, telefone, senha });
+      
+      console.log('✅ Cliente cadastrado com sucesso!');
+      alert('Cliente cadastrado com sucesso!');
       navigate('/login');
-    } catch (error) {
-      console.error(error);
-      alert('Erro ao cadastrar cliente. Tente novamente.');
+    } catch (error: any) {
+      console.error('❌ Erro no cadastro:', error);
+      alert(error.message || 'Erro ao cadastrar cliente. Tente novamente.');
     }
   };
 
