@@ -185,7 +185,11 @@ export const AssociacoesListSection: React.FC = () => {
 
                 <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
                   <Users className="w-4 h-4" />
-                  <span>Responsável: {associacao.vendedor}</span>
+                  <span>
+                    {associacao.vendedor && associacao.vendedor.length > 0
+                      ? `${associacao.vendedor.length} vendedor(es) vinculado(s)`
+                      : 'Nenhum vendedor vinculado'}
+                  </span>
                 </div>
 
                 {/* Actions */}
@@ -195,7 +199,8 @@ export const AssociacoesListSection: React.FC = () => {
                     Ver Detalhes
                   </button>
                   
-                  {isAuthenticated && user?.email === associacao.vendedor && (
+                  {/* Apenas administradores podem editar/deletar */}
+                  {isAuthenticated && ['admin@agriconect.com', 'getulio@agriconect.com', 'adm@teste.com'].includes(user?.email || '') && (
                     <>
                       <button className="bg-yellow-50 text-yellow-600 px-3 py-2 rounded-lg hover:bg-yellow-100 transition-colors">
                         <Edit className="w-4 h-4" />

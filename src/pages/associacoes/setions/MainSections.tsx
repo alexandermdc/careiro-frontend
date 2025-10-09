@@ -6,7 +6,7 @@ import { JoinAgriconnectBanner } from '../../../components/JoinAgriconnectBanner
 const associationsData = [
   {
     id: 1,
-    name: "Associação Mamuri",
+    name: "Associação Mamori",
     image: "https://c.animaapp.com/mfyndft0ii9IQr/img/rectangle-60.png",
     delay: "200ms",
   },

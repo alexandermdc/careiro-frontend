@@ -1,21 +1,27 @@
 import api from './api';
 
+export interface Vendedor {
+  id_vendedor: string;
+  nome: string;
+  telefone: string;
+  tipo_vendedor: 'PF' | 'PJ';
+  tipo_documento?: 'CPF' | 'CNPJ';
+  numero_documento?: string;
+}
+
 export interface Associacao {
   id_associacao: string;
   nome: string;
   descricao: string;
-  vendedor: string;
+  vendedor?: Vendedor[];
 }
 
 export interface CreateAssociacaoData {
-  id_associacao: string;
   nome: string;
   descricao: string;
-  vendedor: string;
 }
 
 class AssociacaoService {
-  // Buscar todas as associações (rota pública)
   async getAll(): Promise<Associacao[]> {
     try {
       console.log('🔍 Buscando todas as associações...');
@@ -24,12 +30,10 @@ class AssociacaoService {
       return response.data;
     } catch (error: any) {
       console.error('❌ Erro ao buscar associações:', error);
-      console.error('📋 Detalhes do erro:', error.response?.data);
       throw new Error(error.response?.data?.message || 'Erro ao buscar associações');
     }
   }
 
-  // Buscar associação por ID (rota pública)
   async getById(id: string): Promise<Associacao> {
     try {
       console.log('🔍 Buscando associação por ID:', id);
@@ -38,37 +42,29 @@ class AssociacaoService {
       return response.data;
     } catch (error: any) {
       console.error('❌ Erro ao buscar associação:', error);
-      console.error('📋 Detalhes do erro:', error.response?.data);
       throw new Error(error.response?.data?.message || 'Erro ao buscar associação');
     }
   }
 
-  // Criar associação (requer autenticação)
   async create(data: CreateAssociacaoData): Promise<Associacao> {
     try {
       console.log('📝 Criando nova associação...');
       console.log('📋 Dados enviados:', JSON.stringify(data, null, 2));
-      console.log('🔐 Token atual:', localStorage.getItem('accessToken') ? 'Presente' : 'Ausente');
       
       const response = await api.post('/associacao/cadastro', data);
       
       console.log('✅ Associação criada com sucesso:', response.data);
-      return response.data;
+      return response.data.associacao || response.data;
     } catch (error: any) {
       console.error('❌ Erro ao criar associação:', error);
-      console.error('📋 Detalhes completos do erro:', {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        headers: error.response?.headers
-      });
       
-      // Tentar extrair mensagem mais específica
+      if (error.response?.status === 403) {
+        throw new Error('Acesso negado. Apenas administradores podem criar associações.');
+      }
+      
       const errorMessage = 
         error.response?.data?.message || 
         error.response?.data?.error ||
-        error.response?.data ||
         error.message ||
         'Erro ao criar associação';
       
@@ -76,35 +72,40 @@ class AssociacaoService {
     }
   }
 
-  // Atualizar associação (requer autenticação)
   async update(id: string, data: Partial<CreateAssociacaoData>): Promise<Associacao> {
     try {
-      console.log('✏️ Atualizando associação ID:', id);
-      console.log('📋 Dados para atualização:', data);
-      
+      console.log('📝 Atualizando associação:', id);
       const response = await api.put(`/associacao/${id}`, data);
-      
-      console.log('✅ Associação atualizada:', response.data);
-      return response.data;
+      console.log('✅ Associação atualizada com sucesso:', response.data);
+      return response.data.associacao || response.data;
     } catch (error: any) {
       console.error('❌ Erro ao atualizar associação:', error);
-      console.error('📋 Detalhes do erro:', error.response?.data);
-      throw new Error(error.response?.data?.message || 'Erro ao atualizar associação');
+      
+      if (error.response?.status === 403) {
+        throw new Error('Acesso negado. Apenas administradores podem atualizar associações.');
+      }
+      
+      throw new Error(error.response?.data?.message || error.response?.data?.error || 'Erro ao atualizar associação');
     }
   }
 
-  // Deletar associação (requer autenticação)
   async delete(id: string): Promise<void> {
     try {
-      console.log('🗑️ Deletando associação ID:', id);
-      
+      console.log('🗑️ Deletando associação:', id);
       await api.delete(`/associacao/${id}`);
-      
       console.log('✅ Associação deletada com sucesso');
     } catch (error: any) {
       console.error('❌ Erro ao deletar associação:', error);
-      console.error('📋 Detalhes do erro:', error.response?.data);
-      throw new Error(error.response?.data?.message || 'Erro ao deletar associação');
+      
+      if (error.response?.status === 403) {
+        throw new Error('Acesso negado. Apenas administradores podem deletar associações.');
+      }
+      
+      if (error.response?.data?.vendedores_vinculados) {
+        throw new Error(`Não é possível deletar associação com ${error.response.data.vendedores_vinculados} vendedor(es) vinculado(s).`);
+      }
+      
+      throw new Error(error.response?.data?.message || error.response?.data?.error || 'Erro ao deletar associação');
     }
   }
 }

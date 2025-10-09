@@ -15,7 +15,7 @@ const featuredProducts = [
   {
     type: "association",
     image: "https://c.animaapp.com/meda5qjaouVHG5/img/rectangle-56-1.png",
-    title: "Associação Mamuri",
+    title: "Associação Mamori",
   },
   {
     type: "product",

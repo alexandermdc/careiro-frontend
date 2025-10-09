@@ -100,9 +100,18 @@ class ClienteService {
   async atualizar(cpf: string, data: UpdateClienteData): Promise<Cliente> {
     try {
       console.log('✏️ Atualizando cliente CPF:', cpf);
-      console.log('📋 Dados para atualização:', { ...data, senha: data.senha ? '[OCULTO]' : undefined });
+      console.log('📋 Dados para atualização (antes da limpeza):', { ...data, senha: data.senha ? '[OCULTO]' : undefined });
       
-      const response = await api.put(`/clientes/${cpf}`, data);
+      // Limpar formatação do telefone (remover parênteses, espaços e hífens)
+      const cleanData = { ...data };
+      if (cleanData.telefone) {
+        cleanData.telefone = cleanData.telefone.replace(/\D/g, ''); // Remove tudo que não é número
+        console.log('📞 Telefone limpo:', cleanData.telefone);
+      }
+      
+      console.log('📋 Dados limpos para envio:', { ...cleanData, senha: cleanData.senha ? '[OCULTO]' : undefined });
+      
+      const response = await api.put(`/clientes/${cpf}`, cleanData);
       
       console.log('✅ Cliente atualizado:', response.data);
       return response.data;

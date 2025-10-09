@@ -5,6 +5,11 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface VendedorLoginCredentials {
+  id_vendedor: string;
+  password: string;
+}
+
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
@@ -12,6 +17,24 @@ export interface AuthResponse {
     nome: string;
     email: string;
     cpf: string;
+  };
+}
+
+export interface VendedorAuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  vendedor: {
+    id_vendedor: string;
+    nome: string;
+    telefone: string;
+    endereco_venda: string;
+    tipo_vendedor: 'PF' | 'PJ';
+    tipo_documento: 'CPF' | 'CNPJ';
+    numero_documento: string;
+    associacao?: {
+      id_associacao: string;
+      nome: string;
+    } | null;
   };
 }
 
@@ -33,11 +56,41 @@ class AuthService {
       
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify(cliente));
+      localStorage.setItem('user', JSON.stringify({
+        ...cliente,
+        tipo: 'cliente'
+      }));
       
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Erro no login');
+    }
+  }
+
+  async loginVendedor(credentials: VendedorLoginCredentials): Promise<VendedorAuthResponse> {
+    try {
+      console.log('🔐 Login de vendedor...');
+      
+      const response = await api.post('/auth/login/vendedor', {
+        id_vendedor: credentials.id_vendedor,
+        senha: credentials.password
+      });
+      
+      const { accessToken, refreshToken, vendedor } = response.data;
+      
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('user', JSON.stringify({
+        ...vendedor,
+        tipo: 'vendedor'
+      }));
+      
+      console.log('✅ Login de vendedor realizado');
+      
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Erro no login de vendedor:', error);
+      throw new Error(error.response?.data?.error || 'Erro no login do vendedor');
     }
   }
 
@@ -63,13 +116,23 @@ class AuthService {
     return !!(token && user);
   }
 
-  getCurrentUser(): User | null {
+  getCurrentUser(): any | null {
     const userStr = localStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
   }
 
   getToken(): string | null {
     return localStorage.getItem('accessToken');
+  }
+
+  isVendedor(): boolean {
+    const user = this.getCurrentUser();
+    return user?.tipo === 'vendedor';
+  }
+
+  isCliente(): boolean {
+    const user = this.getCurrentUser();
+    return user?.tipo === 'cliente';
   }
 }
 

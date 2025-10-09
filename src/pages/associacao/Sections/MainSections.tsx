@@ -144,7 +144,7 @@ export const MainContentSection = (): React.ReactElement => {
 
           <div className="flex flex-col gap-6 flex-1">
             <h1 className="[font-family:'Inter',Helvetica] font-bold text-texto text-2xl">
-              Associação Mamuri
+              Associação Mamori
             </h1>
 
             <Button
@@ -252,7 +252,7 @@ export const MainContentSection = (): React.ReactElement => {
 
       {/* Products Section Title */}
       <h2 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-2xl w-full ">
-        Produtos da Mamuri
+        Produtos da Mamori
       </h2>
 
       {/* Category Filters and Product Count */}

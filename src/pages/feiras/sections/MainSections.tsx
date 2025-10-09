@@ -97,11 +97,11 @@ export const MainContentSection = (): React.ReactElement => {
             <div className="flex items-center gap-2">
               <img
                 src={associacaoImg}
-                alt="Associação Mamuri"
+                alt="Associação Mamori"
                 className="w-8 h-8 rounded-full object-cover"
               />
               <h1 className="[font-family:'montserrat'] text-texto text-1xl">
-                Associação Mamuri
+                Associação Mamori
               </h1>
             </div>
             <Button

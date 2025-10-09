@@ -1,5 +1,25 @@
 import { Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+im        <Route 
+          path="/perfil" 
+          element={
+            <ProtectedRoute>
+              <PerfilCliente />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/produtos/cadastro" 
+          element={
+            <ProtectedRoute>
+              <CadastroProduto />
+            </ProtectedRoute>
+          } 
+        />
+      </Routes>
+    </AuthProvider>
+  );
+}
+export default App;rovider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Homepage } from './pages/homepage/home';
 import { SobreNos } from './pages/sobrenos/sobreNos';
@@ -10,10 +30,8 @@ import { Produtores } from './pages/produtores/Produtores';
 import { Feiras } from './pages/feiras/feiras';
 import { Produtos } from './pages/produtos/Produtos';
 import CadastroProduto from './pages/produtos/CadastroProduto';
-import CadastroVendedor from './pages/vendedor/CadastroVendedor';
 import FormCliente from './pages/cadastro/cadastro';
 import Login from './pages/login/login';
-import LoginVendedor from './pages/login/LoginVendedor';
 import Dashboard from './pages/dashboard/Dashboard';
 import PerfilCliente from './pages/perfil/PerfilCliente';
 
@@ -22,11 +40,12 @@ function App() {
     <AuthProvider>
       <Routes>
         {/* Rotas públicas */}
-        <Route path="/" element={<Homepage />} />
+        <Route path="/" element={
+          <Homepage />
+          } />
         <Route path="/sobrenos" element={<SobreNos />} />
         <Route path="/cadastro" element={<FormCliente />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/login/vendedor" element={<LoginVendedor />} />
         <Route path="/associacao" element={<Associacao />} />
         <Route path="/associacoes" element={<Associacoes />} />
         <Route path="/produtores" element={<Produtores />} />
@@ -58,25 +77,8 @@ function App() {
             </ProtectedRoute>
           } 
         />
-        <Route 
-          path="/produtos/cadastro" 
-          element={
-            <ProtectedRoute>
-              <CadastroProduto />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/vendedor/cadastro" 
-          element={
-            <ProtectedRoute>
-              <CadastroVendedor />
-            </ProtectedRoute>
-          } 
-        />
       </Routes>
     </AuthProvider>
   );
 }
-
 export default App;

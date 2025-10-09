@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Building2, User, FileText, BadgeCheck } from 'lucide-react';
+import { Building2, FileText } from 'lucide-react';
 import associacaoService from '../../services/associacaoService';
 import type { CreateAssociacaoData } from '../../services/associacaoService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -10,10 +10,8 @@ const CadastroAssociacao: React.FC = () => {
   const { user } = useAuth();
   
   const [formData, setFormData] = useState<CreateAssociacaoData>({
-    id_associacao: '',
     nome: '',
-    descricao: '',
-    vendedor: user?.email || ''
+    descricao: ''
   });
   
   const [loading, setLoading] = useState(false);
@@ -57,8 +55,8 @@ const CadastroAssociacao: React.FC = () => {
     console.log('🚀 Iniciando cadastro de associação...');
     console.log('📋 Dados do formulário:', formData);
     
-    if (!formData.id_associacao || !formData.nome || !formData.descricao) {
-      setError('Todos os campos são obrigatórios');
+    if (!formData.nome || !formData.descricao) {
+      setError('Nome e descrição são obrigatórios');
       console.log('❌ Erro: Campos obrigatórios não preenchidos');
       return;
     }
@@ -80,10 +78,8 @@ const CadastroAssociacao: React.FC = () => {
       
       // Limpar formulário após sucesso
       setFormData({
-        id_associacao: '',
         nome: '',
-        descricao: '',
-        vendedor: user?.email || ''
+        descricao: ''
       });
       
       // Redirecionar após 2 segundos
@@ -162,25 +158,6 @@ const CadastroAssociacao: React.FC = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* ID da Associação */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ID da Associação
-                </label>
-                <div className="relative">
-                  <BadgeCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="text"
-                    name="id_associacao"
-                    value={formData.id_associacao}
-                    onChange={handleInputChange}
-                    placeholder="Ex: ASSOC-001"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary-green)] focus:border-transparent transition-all"
-                    required
-                  />
-                </div>
-              </div>
-
               {/* Nome */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -220,25 +197,6 @@ const CadastroAssociacao: React.FC = () => {
               </div>
 
               {/* Vendedor (readonly - usuário logado) */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Responsável
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="email"
-                    name="vendedor"
-                    value={formData.vendedor}
-                    readOnly
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
-                  />
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Automaticamente preenchido com seu e-mail
-                </p>
-              </div>
-
               {/* Botões de Ação */}
               <div className="space-y-3">
                 {/* Botão Submit Principal */}

@@ -94,13 +94,13 @@ export const MainContentSection = (): React.ReactElement => {
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-5">
           <img
             className="w-full lg:w-[357px] h-[357px] object-cover rounded-lg"
-            alt="Produtor Marcelo Mamuri"
+            alt="Produtor Marcelo Mamori"
             src="../src/assets/img/ImgExample.png"
           />
 
           <div className="flex flex-col gap-6 flex-1">
             <h1 className="[font-family:'Inter',Helvetica] font-bold text-texto text-2xl">
-              Marcelo Mamuri
+              Marcelo Mamori
             </h1>
 
             <Button
@@ -134,7 +134,7 @@ export const MainContentSection = (): React.ReactElement => {
       {/* Subscriptions Section */}
       <section className="flex flex-col w-full max-w-[467px] items-start gap-2 ">
         <h2 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-2xl">
-          Produtos do Marcelo Mamuri
+          Produtos do Marcelo Mamori
         </h2>
         <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-base">
           Os melhores produtos sempre na sua casa
