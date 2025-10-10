@@ -219,18 +219,6 @@ export const AssociacoesListSection: React.FC = () => {
           ))}
         </div>
       )}
-
-      {/* Debug Info */}
-      <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-        <h4 className="font-semibold mb-2">🐛 Debug Info:</h4>
-        <div className="text-sm text-gray-600 space-y-1">
-          <p>Total de associações: {associacoes.length}</p>
-          <p>Usuário autenticado: {isAuthenticated ? 'Sim' : 'Não'}</p>
-          <p>Email do usuário: {user?.email || 'N/A'}</p>
-          <p>Estado de loading: {loading ? 'Carregando' : 'Concluído'}</p>
-          <p>Erro: {error || 'Nenhum'}</p>
-        </div>
-      </div>
     </div>
   );
 };

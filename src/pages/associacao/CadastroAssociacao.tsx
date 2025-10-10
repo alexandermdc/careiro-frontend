@@ -100,7 +100,7 @@ const CadastroAssociacao: React.FC = () => {
       {/* Header Simples */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <Link to="/associacao" className="text-[var(--primary-green)] hover:text-[var(--secondary-green)] font-medium flex items-center gap-2">
+          <Link to="/associacao/cadastro" className="text-[var(--primary-green)] hover:text-[var(--secondary-green)] font-medium flex items-center gap-2">
             ← Voltar para Associações
           </Link>
         </div>
@@ -203,7 +203,7 @@ const CadastroAssociacao: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-[var(--primary-green)] to-[var(--secondary-green)] text-white py-4 px-6 rounded-xl hover:from-[var(--secondary-green)] hover:to-[var(--primary-green)] focus:ring-4 focus:ring-green-200 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full bg-gradient-to-r from-[#2D5016] to-[#2D5016] text-white py-4 px-6 rounded-xl hover:from-[#2D5016] hover:to-[#2D5016] focus:ring-4 focus:ring-green-300 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {loading ? (
                     <div className="flex items-center justify-center gap-3">
@@ -219,86 +219,8 @@ const CadastroAssociacao: React.FC = () => {
                 </button>
 
                 {/* Botões de Teste */}
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      console.log('🧪 TESTE: Verificando GET /associacao...');
-                      try {
-                        const response = await fetch('http://localhost:3000/associacao');
-                        const data = await response.json();
-                        console.log('✅ GET OK:', { status: response.status, data });
-                        alert(`GET OK! Status: ${response.status}`);
-                      } catch (error) {
-                        console.error('❌ GET Error:', error);
-                        alert('Erro no GET!');
-                      }
-                    }}
-                    className="bg-blue-500 text-white py-2 px-3 rounded-lg hover:bg-blue-600 transition-colors text-xs"
-                  >
-                    🔍 Testar GET
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      console.log('🧪 TESTE: Verificando POST /associacao/cadastro...');
-                      const testData = {
-                        id_associacao: 'TEST-001',
-                        nome: 'Teste Associação',
-                        descricao: 'Descrição de teste',
-                        vendedor: user?.email || 'test@test.com'
-                      };
-                      
-                      try {
-                        const response = await fetch('http://localhost:3000/associacao/cadastro', {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-                          },
-                          body: JSON.stringify(testData)
-                        });
-                        
-                        const result = await response.text();
-                        console.log('📤 POST Result:', { 
-                          status: response.status, 
-                          statusText: response.statusText,
-                          result 
-                        });
-                        
-                        if (response.ok) {
-                          alert(`POST OK! Status: ${response.status}`);
-                        } else {
-                          alert(`POST Erro! Status: ${response.status} - ${result}`);
-                        }
-                      } catch (error) {
-                        console.error('❌ POST Error:', error);
-                        alert('Erro no POST!');
-                      }
-                    }}
-                    className="bg-orange-500 text-white py-2 px-3 rounded-lg hover:bg-orange-600 transition-colors text-xs"
-                  >
-                    📤 Testar POST
-                  </button>
-                </div>
               </div>
-            </form>
-
-            {/* Debug Info */}
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-semibold text-blue-800 mb-2">🐛 Debug Info:</h4>
-              <div className="text-sm text-blue-600 space-y-1">
-                <p><strong>User Email:</strong> {user?.email || 'N/A'}</p>
-                <p><strong>User Nome:</strong> {user?.nome || 'N/A'}</p>
-                <p><strong>User CPF:</strong> {user?.cpf || 'N/A'}</p>
-                <p><strong>Form Data:</strong></p>
-                <pre className="bg-blue-100 p-2 rounded text-xs overflow-auto">
-                  {JSON.stringify(formData, null, 2)}
-                </pre>
-                <p><strong>Token Present:</strong> {localStorage.getItem('accessToken') ? '✅ Sim' : '❌ Não'}</p>
-              </div>
-            </div>
+            </form> 
 
             <div className="mt-4 text-center text-sm text-gray-600">
               <Link 

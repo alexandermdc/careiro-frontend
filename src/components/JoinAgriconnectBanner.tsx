@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { UserPlusIcon } from "lucide-react";
 import { Button } from "./button";
 import { Card, CardContent } from "./cards";
@@ -18,6 +19,17 @@ export const JoinAgriconnectBanner = ({
   onButtonClick,
   className = "",
 }: JoinAgriconnectBannerProps): React.ReactElement => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (onButtonClick) {
+      onButtonClick();
+    } else {
+      // Redireciona para a página de cadastro de associação
+      navigate('/associacao');
+    }
+  };
+
   return (
     <Card className={`w-full h-60 bg-[#eff3ef] rounded-[30px] border-[#d5d7d4] overflow-hidden ${className}`}>
       <CardContent className="flex flex-col lg:flex-row items-center justify-between h-full p-8 lg:px-[61px]">
@@ -31,7 +43,7 @@ export const JoinAgriconnectBanner = ({
         </div>
         <Button
           variant="outline"
-          onClick={onButtonClick}
+          onClick={handleClick}
           className="h-14 bg-fundo-claro border-[#9cb217] text-verde-claro hover:bg-verde-claro hover:text-fundo-claro transition-colors px-6 py-2.5 rounded-2xl flex-shrink-0 mt-4 lg:mt-0"
         >
           <span className="font-[number:var(--bot-es-font-weight)] text-[length:var(--bot-es-font-size)] font-bot-es">
