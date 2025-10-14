@@ -14,8 +14,15 @@ import CadastroVendedor from './pages/vendedor/CadastroVendedor';
 import FormCliente from './pages/cadastro/cadastro';
 import Login from './pages/login/login';
 import LoginVendedor from './pages/login/LoginVendedor';
+import LoginTeste from './pages/login/LoginTeste';
 import Dashboard from './pages/dashboard/Dashboard';
 import PerfilCliente from './pages/perfil/PerfilCliente';
+import ProdutosTeste from './pages/produtos/ProdutosTeste';
+import CarrinhoPage from './pages/carrinho/CarrinhoPage';
+import PagamentoRetorno from './pages/pagamento/PagamentoRetorno';
+import CheckoutReal from './pages/checkout/CheckoutReal';
+import PagamentoSucessoReal from './pages/pagamento/PagamentoSucessoReal';
+import PagamentoFalhaReal from './pages/pagamento/PagamentoFalhaReal';
 
 function App() {
   return (
@@ -27,11 +34,22 @@ function App() {
         <Route path="/cadastro" element={<FormCliente />} />
         <Route path="/login" element={<Login />} />
         <Route path="/login/vendedor" element={<LoginVendedor />} />
+        <Route path="/login-teste" element={<LoginTeste />} />
         <Route path="/associacao" element={<Associacao />} />
         <Route path="/associacoes" element={<Associacoes />} />
         <Route path="/produtores" element={<Produtores />} />
         <Route path="/feiras" element={<Feiras />} />
         <Route path="/produtos" element={<Produtos />} />
+        
+        {/* Rotas de Teste - Carrinho */}
+        <Route path="/produtos-teste" element={<ProdutosTeste />} />
+        <Route path="/carrinho" element={<CarrinhoPage />} />
+        <Route path="/pagamento/retorno" element={<PagamentoRetorno />} />
+        
+        {/* Rotas de Pagamento Real - Mercado Pago */}
+        <Route path="/checkout" element={<CheckoutReal />} />
+        <Route path="/pagamento/sucesso" element={<PagamentoSucessoReal />} />
+        <Route path="/pagamento/falha" element={<PagamentoFalhaReal />} />
         
         {/* Rotas protegidas */}
         <Route 
