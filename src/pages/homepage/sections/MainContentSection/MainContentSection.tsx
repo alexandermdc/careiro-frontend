@@ -12,7 +12,7 @@ interface ProdutoAPI {
   preco: number;
   preco_promocao?: number;
   is_promocao: boolean;
-  imagem: string;
+  image: string;
   quantidade_estoque: number;
   fk_feira: string;
   feira?: {
@@ -192,7 +192,7 @@ export const MainContentSection = (): JSX.Element => {
                     <img
                       className="h-[263px] relative self-stretch w-full object-cover"
                       alt={produto.nome}
-                      src={produto.imagem || 'https://via.placeholder.com/263x263/9cb217/ffffff?text=Produto'}
+                      src={produto.image|| 'https://via.placeholder.com/263x263/9cb217/ffffff?text=Produto'}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = "https://via.placeholder.com/263x263/9cb217/ffffff?text=" + encodeURIComponent(produto.nome);

@@ -8,12 +8,12 @@ export const AboutSectionSobreNos = (): JSX.Element => {
       <div className="flex items-center justify-center px-4">
         <div className="flex flex-col lg:flex-row items-center justify-center gap-12 max-w-6xl w-full">
           <div className="flex-1 text-center lg:text-left">
-            <h1 className="[font-family:'Montserrat',Helvetica] font-bold text-verde-escuro text-5xl lg:text-6xl mb-6">
-              AgriConnect
-            </h1>
-            <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-lg lg:text-xl leading-relaxed">
-              Plataforma que conecta produtores rurais diretamente aos consumidores
-            </p>
+              <img
+                src="/src/assets/img/20230803_agriculturafamiliar.jpg"
+                alt="Agricultores conectando com consumidores"
+                className="w-full max-w-3xl mx-auto rounded-3xl shadow-2xl"
+                style={{ minHeight: "420px", minWidth: "360px" }}
+              />
           </div>
 
           <div className="flex-1 max-w-lg">

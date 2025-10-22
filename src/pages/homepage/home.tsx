@@ -1,20 +1,46 @@
 import React from "react";
 import { PageLayout } from "../../components/PageLayout";
 import { MainContentSection } from "./sections/MainContentSection/MainContentSection";
+import { Card, CardContent } from "../../components/cards";
+import { Button } from "../../components/button";
 
 export const Homepage = (): React.ReactElement => {
   return (
     <PageLayout>
       <div className="bg-fundo-claro w-full flex flex-col items-center">
-        <img
-          className="w-full max-w-[1440px] h-[630px] object-cover"
-          alt="Banner Principal"
-          src="https://c.animaapp.com/meda5qjaouVHG5/img/group-127.png"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = "https://via.placeholder.com/1200x630/9cb217/ffffff?text=Banner+Agriconnect";
-          }}
-        />
+        <section className="w-full bg-gradient-to-br from-verde-claro/10 to-verde-escuro/5 py-20">
+          <div className="flex items-center justify-center px-4">
+            <div className="flex flex-col lg:flex-row items-center justify-center gap-12 max-w-6xl w-full">
+                <div className="flex-1 text-center lg:text-left">
+                  <img
+                  src="/src/assets/img/20230803_agriculturafamiliar.jpg"
+                  alt="Agricultores conectando com consumidores"
+                  className="w-full max-w-3xl mx-auto rounded-3xl shadow-2xl"
+                  style={{ minHeight: "420px", minWidth: "360px" }}
+                  />
+                </div>
+
+              <div className="flex-1 max-w-lg">
+                <Card className="bg-white border-0 shadow-2xl">
+                  <CardContent className="p-10 text-center">
+                    <h2 className="[font-family:'Montserrat',Helvetica] font-semibold text-verde-escuro text-3xl lg:text-4xl leading-tight mb-10">
+                      Conectando os melhores agricultores até você
+                    </h2>
+
+                    <Button
+                      className="bg-verde-escuro hover:bg-verde-escuro/90 text-white [font-family:'Montserrat',Helvetica] font-bold text-xl lg:text-2xl px-12 py-6 h-auto transition-all duration-300 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105"
+                      onClick={() => {
+                        console.log('Navegando para a loja...');
+                      }}
+                    >
+                      COMPRE AGORA
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
         <MainContentSection />
       </div>
     </PageLayout>
