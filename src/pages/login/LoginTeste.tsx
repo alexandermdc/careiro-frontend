@@ -13,7 +13,7 @@ export default function LoginTeste() {
     localStorage.setItem('userEmail', email);
     
     alert(`✅ Login simulado com sucesso!\n\nEmail: ${email}`);
-    navigate('/produtos-teste');
+    navigate('/produtos');
   };
 
   return (

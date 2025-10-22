@@ -1,12 +1,14 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
 interface Produto {
-  id: string;
+  id: string | number;   // Aceita string ou number
   nome: string;
   preco: number;
   imagem?: string;
   vendedor?: string;
+  id_vendedor?: string;  // UUID do vendedor
+  fk_feira?: string | number; // Aceita string (UUID) ou number
 }
 
 interface ItemCarrinho extends Produto {
@@ -16,8 +18,8 @@ interface ItemCarrinho extends Produto {
 interface CarrinhoContextType {
   itens: ItemCarrinho[];
   adicionarAoCarrinho: (produto: Produto) => void;
-  removerDoCarrinho: (id: string) => void;
-  atualizarQuantidade: (id: string, quantidade: number) => void;
+  removerDoCarrinho: (id: string | number) => void;
+  atualizarQuantidade: (id: string | number, quantidade: number) => void;
   limparCarrinho: () => void;
   totalItens: number;
   valorTotal: number;
@@ -25,8 +27,30 @@ interface CarrinhoContextType {
 
 const CarrinhoContext = createContext<CarrinhoContextType | undefined>(undefined);
 
+const CARRINHO_STORAGE_KEY = 'agriconnect_carrinho';
+
 export const CarrinhoProvider = ({ children }: { children: ReactNode }) => {
-  const [itens, setItens] = useState<ItemCarrinho[]>([]);
+  // Inicializar do localStorage
+  const [itens, setItens] = useState<ItemCarrinho[]>(() => {
+    try {
+      const carrinhoSalvo = localStorage.getItem(CARRINHO_STORAGE_KEY);
+      if (carrinhoSalvo) {
+        return JSON.parse(carrinhoSalvo);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar carrinho do localStorage:', error);
+    }
+    return [];
+  });
+
+  // Salvar no localStorage sempre que itens mudar
+  useEffect(() => {
+    try {
+      localStorage.setItem(CARRINHO_STORAGE_KEY, JSON.stringify(itens));
+    } catch (error) {
+      console.error('Erro ao salvar carrinho no localStorage:', error);
+    }
+  }, [itens]);
 
   const adicionarAoCarrinho = (produto: Produto) => {
     setItens((prevItens) => {
@@ -44,11 +68,11 @@ export const CarrinhoProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const removerDoCarrinho = (id: string) => {
+  const removerDoCarrinho = (id: string | number) => {
     setItens((prevItens) => prevItens.filter((item) => item.id !== id));
   };
 
-  const atualizarQuantidade = (id: string, quantidade: number) => {
+  const atualizarQuantidade = (id: string | number, quantidade: number) => {
     if (quantidade <= 0) {
       removerDoCarrinho(id);
       return;

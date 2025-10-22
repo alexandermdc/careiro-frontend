@@ -1,18 +1,37 @@
-import { ShoppingBagIcon, Loader2, AlertCircle } from "lucide-react";
+import { ShoppingBagIcon, Loader2, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { JoinAgriconnectBanner } from '../../../components/JoinAgriconnectBanner';
 import React, { useEffect, useState } from "react";
 import { Badge } from "../../../components/badge";
 import { Card, CardContent } from "../../../components/cards";
 import { Button } from "../../../components";
-import { Carousel } from '../../../components/Carousel';
-import produtoService, { type Produto, type Categoria } from '../../../services/produtoService';
+import { Carousel } from "../../../components/Carousel";
+import produtoService, {
+  type Produto as ProdutoOriginal,
+  type Categoria,
+} from "../../../services/produtoService";
+import { useCarrinho } from '../../../contexts/CarrinhoContext';
+import { useNavigate } from 'react-router-dom';
+
+// The original `Produto` type seems to be missing fields. Let's extend it.
+type Produto = ProdutoOriginal & {
+  id_produto: string;
+  id_categoria: string;
+  is_promocao: boolean;
+  preco_promocao?: number;
+  fk_vendedor?: string;
+};
 
 export const MainContentSection = (): React.ReactElement => {
+    const navigate = useNavigate();
+    const { adicionarAoCarrinho, totalItens } = useCarrinho();
     const [produtos, setProdutos] = useState<Produto[]>([]);
     const [categorias, setCategorias] = useState<Categoria[]>([]);
     const [categoriaAtiva, setCategoriaAtiva] = useState<string | null>(null);
+    const [paginaAtual, setPaginaAtual] = useState(1);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    
+    const PRODUTOS_POR_PAGINA = 16;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -25,7 +44,10 @@ export const MainContentSection = (): React.ReactElement => {
                     produtoService.listarCategorias()
                 ]);
                 
-                setProdutos(produtosData);
+                console.log('📦 Produtos carregados da API:', produtosData);
+                console.log('🔍 Primeiro produto:', produtosData[0]);
+                
+                setProdutos(produtosData as Produto[]);
                 setCategorias(categoriasData);
             } catch (err: any) {
                 console.error('Erro ao carregar dados:', err);
@@ -44,6 +66,56 @@ export const MainContentSection = (): React.ReactElement => {
 
     // Produtos em destaque (is_promocao e disponível)
     const produtosDestaque = produtos.filter(p => p.is_promocao && p.disponivel);
+    
+    // Cálculos de paginação
+    const totalPaginas = Math.ceil(produtosFiltrados.length / PRODUTOS_POR_PAGINA);
+    const indiceInicio = (paginaAtual - 1) * PRODUTOS_POR_PAGINA;
+    const indiceFim = indiceInicio + PRODUTOS_POR_PAGINA;
+    const produtosPaginados = produtosFiltrados.slice(indiceInicio, indiceFim);
+    
+    // Resetar para página 1 quando mudar categoria
+    useEffect(() => {
+        setPaginaAtual(1);
+    }, [categoriaAtiva]);
+    
+    const irParaPagina = (pagina: number) => {
+        setPaginaAtual(pagina);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleAdicionarAoCarrinho = (produto: Produto) => {
+        // Verificar se está logado
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            alert('⚠️ Você precisa estar logado para adicionar produtos ao carrinho!');
+            navigate('/login');
+            return;
+        }
+
+        // Verificar se produto está disponível
+        if (!produto.disponivel) {
+            alert('⚠️ Este produto não está disponível no momento.');
+            return;
+        }
+
+        // Converter formato da API para formato do carrinho
+        const produtoCarrinho = {
+            id: produto.id_produto,
+            nome: produto.nome,
+            preco: produto.is_promocao && produto.preco_promocao 
+                ? produto.preco_promocao 
+                : produto.preco,
+            imagem: produto.imagem || '',
+            vendedor: produto.feira?.nome || 'Feira',
+            id_vendedor: produto.fk_vendedor || '',
+            fk_feira: produto.fk_feira || undefined
+        };
+
+        adicionarAoCarrinho(produtoCarrinho);
+        
+        // Feedback visual
+        alert(`✅ ${produto.nome} adicionado ao carrinho!`);
+    };
 
     const formatarPreco = (valor: number) => {
         return new Intl.NumberFormat('pt-BR', {
@@ -82,7 +154,7 @@ export const MainContentSection = (): React.ReactElement => {
             <img
                 className="h-[263px] relative self-stretch w-full object-cover"
                 alt={produto.nome}
-                src={produto.image || "https://via.placeholder.com/263x263/9cb217/ffffff?text=Produto"}
+                src={produto.imagem || "https://via.placeholder.com/263x263/9cb217/ffffff?text=Produto"}
                 onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = "https://via.placeholder.com/263x263/9cb217/ffffff?text=" + encodeURIComponent(produto.nome);
@@ -102,6 +174,12 @@ export const MainContentSection = (): React.ReactElement => {
                     </div>
                 )}
                 
+                {/* DEBUG - Remover depois */}
+                <div className="w-full mb-2 p-2 bg-yellow-50 text-xs">
+                    <p>✓ disponivel: {produto.disponivel ? 'true' : 'false'}</p>
+                    <p>✓ estoque: {produto.quantidade_estoque}</p>
+                </div>
+                
                 <div className="flex items-center gap-2 relative self-stretch w-full flex-[0_0_auto]">
                     {produto.is_promocao && produto.preco_promocao ? (
                         <>
@@ -120,11 +198,19 @@ export const MainContentSection = (): React.ReactElement => {
                 </div>
 
                 <Button
+                    onClick={() => handleAdicionarAoCarrinho(produto)}
+                    disabled={!produto.disponivel}
                     variant="outline"
-                    className="h-auto w-fit bg-fundo-claro border-[#9cb217] text-verde-claro hover:bg-verde-claro hover:text-fundo-claro transition-colors px-6 py-2.5 rounded-2xl mt-2"
+                    className={`h-auto w-fit border-[#9cb217] px-6 py-2.5 rounded-2xl mt-2 transition-colors ${
+                        produto.disponivel
+                            ? 'bg-fundo-claro text-verde-claro hover:bg-verde-claro hover:text-fundo-claro cursor-pointer'
+                            : 'bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed'
+                    }`}
                 >
                     <span className="font-[number:var(--bot-es-font-weight)] text-[length:var(--bot-es-font-size)] font-bot-es">
-                        Adicionar à sacola
+                        {produto.disponivel
+                            ? 'Adicionar à sacola'
+                            : 'Indisponível'}
                     </span>
                     <ShoppingBagIcon className="w-6 h-6 ml-2" />
                 </Button>
@@ -194,9 +280,78 @@ export const MainContentSection = (): React.ReactElement => {
 
             <div className="w-full">
                 {produtosFiltrados.length > 0 ? (
-                    <div className="w-full max-w-[1108px] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[19px] pb-4">
-                        {produtosFiltrados.map(produto => renderProdutoCard(produto))}
-                    </div>
+                    <>
+                        <div className="w-full max-w-[1108px] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[19px] pb-8">
+                            {produtosPaginados.map(produto => renderProdutoCard(produto))}
+                        </div>
+                        
+                        {/* Controles de Paginação */}
+                        {totalPaginas > 1 && (
+                            <div className="w-full max-w-[1108px] mx-auto flex items-center justify-center gap-2 mt-8">
+                                {/* Botão Anterior */}
+                                <button
+                                    onClick={() => irParaPagina(paginaAtual - 1)}
+                                    disabled={paginaAtual === 1}
+                                    className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-colors ${
+                                        paginaAtual === 1
+                                            ? 'border-gray-300 text-gray-400 cursor-not-allowed'
+                                            : 'border-verde-claro text-verde-claro hover:bg-verde-claro hover:text-white'
+                                    }`}
+                                    aria-label="Página anterior"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                </button>
+                                
+                                {/* Números das páginas */}
+                                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((numeroPagina) => {
+                                    // Mostrar apenas algumas páginas ao redor da atual
+                                    if (
+                                        numeroPagina === 1 ||
+                                        numeroPagina === totalPaginas ||
+                                        (numeroPagina >= paginaAtual - 2 && numeroPagina <= paginaAtual + 2)
+                                    ) {
+                                        return (
+                                            <button
+                                                key={numeroPagina}
+                                                onClick={() => irParaPagina(numeroPagina)}
+                                                className={`flex items-center justify-center w-10 h-10 rounded-lg border font-semibold transition-colors ${
+                                                    paginaAtual === numeroPagina
+                                                        ? 'bg-verde-claro text-white border-verde-claro'
+                                                        : 'border-verde-claro text-verde-claro hover:bg-verde-claro hover:text-white'
+                                                }`}
+                                            >
+                                                {numeroPagina}
+                                            </button>
+                                        );
+                                    } else if (
+                                        numeroPagina === paginaAtual - 3 ||
+                                        numeroPagina === paginaAtual + 3
+                                    ) {
+                                        return (
+                                            <span key={numeroPagina} className="px-2 text-gray-400">
+                                                ...
+                                            </span>
+                                        );
+                                    }
+                                    return null;
+                                })}
+                                
+                                {/* Botão Próximo */}
+                                <button
+                                    onClick={() => irParaPagina(paginaAtual + 1)}
+                                    disabled={paginaAtual === totalPaginas}
+                                    className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-colors ${
+                                        paginaAtual === totalPaginas
+                                            ? 'border-gray-300 text-gray-400 cursor-not-allowed'
+                                            : 'border-verde-claro text-verde-claro hover:bg-verde-claro hover:text-white'
+                                    }`}
+                                    aria-label="Próxima página"
+                                >
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <div className="w-full max-w-[1108px] mx-auto text-center py-12">
                         <p className="text-texto text-lg">
@@ -207,6 +362,20 @@ export const MainContentSection = (): React.ReactElement => {
                     </div>
                 )}
             </div>
+            
+            {/* Botão flutuante do carrinho */}
+            {totalItens > 0 && (
+                <div className="fixed bottom-6 right-6 z-50">
+                    <button
+                        onClick={() => navigate('/carrinho')}
+                        className="bg-verde-claro text-white px-6 py-4 rounded-full shadow-lg hover:bg-verde-escuro transition font-bold text-lg flex items-center gap-2"
+                    >
+                        <ShoppingBagIcon className="w-6 h-6" />
+                        Ver Carrinho ({totalItens})
+                    </button>
+                </div>
+            )}
+            
             <JoinAgriconnectBanner />
         </section>
     );

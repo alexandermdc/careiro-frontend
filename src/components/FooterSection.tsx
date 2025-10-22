@@ -46,7 +46,7 @@ export const FooterSection = ({ sections = defaultSections }: FooterSectionProps
   return (
     <footer className="w-full bg-cinza py-8 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 items-start">
           {/* Logo Section */}
           <div className="flex flex-col items-start gap-1">
             <img
@@ -92,18 +92,55 @@ export const FooterSection = ({ sections = defaultSections }: FooterSectionProps
 
           {/* Social Media Section */}
           <div className="flex flex-col gap-1">
-            <div className="[font-family:'Inter',Helvetica] font-normal text-texto text-base tracking-[0] leading-[normal]">
+            <h3 className="[font-family:'Inter',Helvetica] font-bold text-texto text-lg tracking-[0] leading-[normal] mb-1">
               Acesse nossas redes!
+            </h3>
+            <div className="flex flex-col gap-2">
+              <a
+                href="https://facebook.com/agriconnect"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook Agriconnect"
+                className="inline-flex items-center gap-2 text-texto hover:text-verde-escuro transition-colors"
+              >
+                <img 
+                  src="/src/assets/img/ic_baseline-facebook.svg" 
+                  alt="Facebook" 
+                  className="w-6 h-6"
+                />
+                <span className="[font-family:'Montserrat',Helvetica] text-sm">Facebook</span>
+              </a>
+
+              <a
+                href="https://instagram.com/agriconnect"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram Agriconnect"
+                className="inline-flex items-center gap-2 text-texto hover:text-verde-escuro transition-colors"
+              >
+                <img 
+                  src="/src/assets/img/lets-icons_insta.svg" 
+                  alt="Instagram" 
+                  className="w-6 h-6"
+                />
+                <span className="[font-family:'Montserrat',Helvetica] text-sm">Instagram</span>
+              </a>
+
+              <a
+                href="https://linkedin.com/company/agriconnect"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn Agriconnect"
+                className="inline-flex items-center gap-2 text-texto hover:text-verde-escuro transition-colors"
+              >
+                <img 
+                  src="/src/assets/img/mdi_linkedin.svg" 
+                  alt="LinkedIn" 
+                  className="w-6 h-6"
+                />
+                <span className="[font-family:'Montserrat',Helvetica] text-sm">LinkedIn</span>
+              </a>
             </div>
-            <img
-              className="w-32 h-10"
-              alt="Redes Sociais"
-              src="https://c.animaapp.com/mfyaim5kgxckXx/img/frame-13.svg"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = "https://via.placeholder.com/128x40/1d4510/ffffff?text=Redes";
-              }}
-            />
           </div>
         </div>
 

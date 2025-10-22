@@ -17,12 +17,13 @@ import LoginVendedor from './pages/login/LoginVendedor';
 import LoginTeste from './pages/login/LoginTeste';
 import Dashboard from './pages/dashboard/Dashboard';
 import PerfilCliente from './pages/perfil/PerfilCliente';
-import ProdutosTeste from './pages/produtos/ProdutosTeste';
 import CarrinhoPage from './pages/carrinho/CarrinhoPage';
 import PagamentoRetorno from './pages/pagamento/PagamentoRetorno';
 import CheckoutReal from './pages/checkout/CheckoutReal';
+import CheckoutPedido from './pages/checkout/CheckoutPedido';
 import PagamentoSucessoReal from './pages/pagamento/PagamentoSucessoReal';
 import PagamentoFalhaReal from './pages/pagamento/PagamentoFalhaReal';
+import MeusPedidos from './pages/pedidos/MeusPedidos';
 
 function App() {
   return (
@@ -41,8 +42,7 @@ function App() {
         <Route path="/feiras" element={<Feiras />} />
         <Route path="/produtos" element={<Produtos />} />
         
-        {/* Rotas de Teste - Carrinho */}
-        <Route path="/produtos-teste" element={<ProdutosTeste />} />
+        {/* Rotas de Carrinho */}
         <Route path="/carrinho" element={<CarrinhoPage />} />
         <Route path="/pagamento/retorno" element={<PagamentoRetorno />} />
         
@@ -50,6 +50,10 @@ function App() {
         <Route path="/checkout" element={<CheckoutReal />} />
         <Route path="/pagamento/sucesso" element={<PagamentoSucessoReal />} />
         <Route path="/pagamento/falha" element={<PagamentoFalhaReal />} />
+        
+        {/* Rotas de Pedidos */}
+        <Route path="/checkout-pedido" element={<CheckoutPedido />} />
+        <Route path="/pedidos" element={<MeusPedidos />} />
         
         {/* Rotas protegidas */}
         <Route 

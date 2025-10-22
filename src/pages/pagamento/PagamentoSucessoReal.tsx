@@ -105,7 +105,7 @@ export default function PagamentoSucessoReal() {
           {/* Ações */}
           <div className="flex gap-4 justify-center">
             <button
-              onClick={() => navigate('/produtos-teste')}
+              onClick={() => navigate('/produtos')}
               className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition font-semibold"
             >
               Continuar Comprando

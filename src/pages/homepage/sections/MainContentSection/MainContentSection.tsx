@@ -1,37 +1,24 @@
 import { CalendarIcon, MapPinIcon } from "lucide-react";
 import { JoinAgriconnectBanner } from '../../../../components/JoinAgriconnectBanner';
-import {type JSX} from "react";
+import {type JSX, useState, useEffect} from "react";
 import { Button } from "../../../../components/button";
 import { Card, CardContent } from "../../../../components/cards";
+import api from "../../../../services/api";
 
-const featuredProducts = [
-  {
-    type: "product",
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/rectangle-56.png",
-    title: "Abóbora (kg)",
-    originalPrice: "R$ 10,30",
-    salePrice: "R$ 08,55",
-  },
-  {
-    type: "association",
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/rectangle-56-1.png",
-    title: "Associação Mamori",
-  },
-  {
-    type: "product",
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/rectangle-56-2.png",
-    title: "Banana Prata (kg)",
-    originalPrice: "R$ 10,00",
-    salePrice: "R$ 08,70",
-  },
-  {
-    type: "product",
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/rectangle-56-3.png",
-    title: "Maçã Verde (unid)",
-    originalPrice: "R$ 03,45",
-    salePrice: "R$ 02,60",
-  },
-];
+interface ProdutoAPI {
+  id_produto: string;
+  nome: string;
+  descricao: string;
+  preco: number;
+  preco_promocao?: number;
+  is_promocao: boolean;
+  imagem: string;
+  quantidade_estoque: number;
+  fk_feira: string;
+  feira?: {
+    nome: string;
+  };
+}
 
 const fairs = [
   {
@@ -143,6 +130,30 @@ const howItWorksSteps = [
 ];
 
 export const MainContentSection = (): JSX.Element => {
+  const [produtosDestaque, setProdutosDestaque] = useState<ProdutoAPI[]>([]);
+  const [carregandoProdutos, setCarregandoProdutos] = useState(true);
+
+  useEffect(() => {
+    buscarProdutosDestaque();
+  }, []);
+
+  const buscarProdutosDestaque = async () => {
+    try {
+      setCarregandoProdutos(true);
+      const response = await api.get('/produto');
+      
+      // Pegar apenas os 4 primeiros produtos
+      const primeirosProdutos = response.data.slice(0, 4);
+      setProdutosDestaque(primeirosProdutos);
+      
+      console.log('✅ Produtos em destaque carregados:', primeirosProdutos.length);
+    } catch (error) {
+      console.error('❌ Erro ao buscar produtos:', error);
+    } finally {
+      setCarregandoProdutos(false);
+    }
+  };
+
   return (
     <section className="flex flex-col w-full items-center gap-16 px-4 md:px-6 py-16">
       <div className="w-full">
@@ -152,46 +163,67 @@ export const MainContentSection = (): JSX.Element => {
           </h2>
         </div>
 
-            <div className="w-full max-w-[1108px] mx-auto flex items-center justify-center gap-[19px] overflow-x-auto pb-4">
-        {featuredProducts.map((item, index) => (
-          <Card
-            key={index}
-            className="flex-col min-w-[263px] w-[263px] items-start gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-[25px] overflow-hidden"
-          >
-            <img
-              className="h-[263px] relative self-stretch w-full object-cover"
-              alt={item.title}
-              src={item.image}
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = "https://via.placeholder.com/263x263/9cb217/ffffff?text=" + encodeURIComponent(item.title);
-              }}
-            />
-            <CardContent
-              className={`flex flex-col ${item.type === "association" ? "items-center" : "items-start"} px-4 py-0 relative self-stretch w-full flex-[0_0_auto]`}
-            >
-              {item.type === "product" ? (
-                <>
-                  <div className="w-[231px] h-6 mt-[-1.00px] font-medium text-texto text-base leading-[normal] relative [font-family:'Montserrat',Helvetica] tracking-[0]">
-                    {item.title}
+        <div className="w-full max-w-[1108px] mx-auto flex items-center justify-center gap-[19px]">
+          {carregandoProdutos ? (
+            // Loading state
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-verde-escuro"></div>
+              <p className="mt-2 text-gray-600">Carregando produtos...</p>
+            </div>
+          ) : produtosDestaque.length === 0 ? (
+            // Empty state
+            <div className="text-center py-8">
+              <p className="text-gray-600">Nenhum produto disponível no momento.</p>
+            </div>
+          ) : (
+            // Produtos reais do banco
+            produtosDestaque.map((produto) => {
+              const precoFinal = produto.is_promocao && produto.preco_promocao
+                ? produto.preco_promocao
+                : produto.preco;
+              const temPromocao = produto.is_promocao && produto.preco_promocao;
+
+              return (
+                <Card
+                  key={produto.id_produto}
+                  className="flex-col min-w-[263px] w-[263px] items-start gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-[25px] overflow-hidden"
+                >
+                  <div className="relative w-full">
+                    <img
+                      className="h-[263px] relative self-stretch w-full object-cover"
+                      alt={produto.nome}
+                      src={produto.imagem || 'https://via.placeholder.com/263x263/9cb217/ffffff?text=Produto'}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "https://via.placeholder.com/263x263/9cb217/ffffff?text=" + encodeURIComponent(produto.nome);
+                      }}
+                    />
+                    {temPromocao && (
+                      <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                        PROMOÇÃO
+                      </span>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2 relative self-stretch w-full flex-[0_0_auto]">
-                    <div className="relative w-fit [font-family:'Montserrat',Helvetica] font-normal italic text-[#9f9f9f] text-sm text-center tracking-[0] leading-[normal] line-through">
-                      {item.originalPrice}
+                  
+                  <CardContent className="flex flex-col items-start px-4 py-0 relative self-stretch w-full flex-[0_0_auto]">
+                    <div className="w-[231px] h-6 mt-[-1.00px] font-medium text-texto text-base leading-[normal] relative [font-family:'Montserrat',Helvetica] tracking-[0]">
+                      {produto.nome}
                     </div>
-                    <div className="relative w-fit mt-[-1.00px] [font-family:'Montserrat',Helvetica] font-bold text-verde-escuro text-base text-center tracking-[0] leading-[normal]">
-                      {item.salePrice}
+                    <div className="flex items-center gap-2 relative self-stretch w-full flex-[0_0_auto]">
+                      {temPromocao && (
+                        <div className="relative w-fit [font-family:'Montserrat',Helvetica] font-normal italic text-[#9f9f9f] text-sm text-center tracking-[0] leading-[normal] line-through">
+                          R$ {produto.preco.toFixed(2)}
+                        </div>
+                      )}
+                      <div className="relative w-fit mt-[-1.00px] [font-family:'Montserrat',Helvetica] font-bold text-verde-escuro text-base text-center tracking-[0] leading-[normal]">
+                        R$ {precoFinal.toFixed(2)}
+                      </div>
                     </div>
-                  </div>
-                </>
-              ) : (
-                <div className="self-stretch h-6 font-bold text-texto text-base text-center leading-[normal] relative [font-family:'Montserrat',Helvetica] tracking-[0]">
-                  {item.title}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
         </div>
       </div>
 
@@ -205,7 +237,7 @@ export const MainContentSection = (): JSX.Element => {
         </p>
         </div>
 
-            <div className="w-full max-w-[1108px] mx-auto flex items-center justify-center gap-[19px] overflow-x-auto pb-4">
+            <div className="w-full max-w-[1108px] mx-auto flex items-center justify-center gap-[19px] pb-4">
         {fairs.map((fair, index) => (
           <Card
             key={index}

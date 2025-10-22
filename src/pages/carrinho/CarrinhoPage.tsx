@@ -110,7 +110,7 @@ export default function CarrinhoPage() {
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Carrinho Vazio</h2>
             <p className="text-gray-600 mb-6">Adicione produtos para começar suas compras</p>
             <button
-              onClick={() => navigate('/produtos-teste')}
+            onClick={() => navigate('/produtos')}
               className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-semibold"
             >
               Ver Produtos
@@ -128,7 +128,7 @@ export default function CarrinhoPage() {
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">🛒 Meu Carrinho</h1>
           <button
-            onClick={() => navigate('/produtos-teste')}
+            onClick={() => navigate('/produtos')}
             className="bg-white text-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition font-semibold"
           >
             ← Continuar Comprando
@@ -230,26 +230,11 @@ export default function CarrinhoPage() {
 
               <button
                 onClick={handleFinalizarCompra}
-                disabled={processando}
-                className={`w-full py-4 rounded-lg font-bold text-white transition ${
-                  processando
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-green-600 hover:bg-green-700'
-                }`}
-              >
-                {processando ? '⏳ Processando...' : '💳 Finalizar Compra (Teste)'}
-              </button>
-
-              <button
-                onClick={() => navigate('/checkout')}
                 className="w-full mt-3 py-4 rounded-lg font-bold bg-blue-600 hover:bg-blue-700 text-white transition"
+                disabled={processando}
               >
-                🚀 Finalizar Compra (REAL - Com Backend)
+                 {processando ? 'Processando...' : 'Criar Pedido e Pagar'}
               </button>
-
-              <p className="text-xs text-gray-500 mt-4 text-center">
-                Use o botão AZUL para testar a integração real com o backend do Mercado Pago
-              </p>
             </div>
           </div>
         </div>

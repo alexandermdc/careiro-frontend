@@ -1,16 +1,18 @@
 import api from './api';
 
 export interface Produto {
-  id_produto: string;
-  nome: string;
-  descricao: string;
-  image: string;
-  is_promocao: boolean;
-  preco: number;
-  preco_promocao?: number;
-  fk_vendedor: string;
-  id_categoria: string;
-  disponivel: boolean;
+    id: number;
+    nome: string;
+    descricao: string;
+    preco: number;
+    disponivel: boolean;
+    quantidade_estoque?: number; // Opcional - backend pode não retornar
+    fk_feira?: number; // Opcional - backend pode não retornar
+    imagem?: string;
+    feira?: {
+        id: number;
+        nome: string;
+    };
 }
 
 export interface CreateProdutoData {

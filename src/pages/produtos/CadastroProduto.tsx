@@ -31,7 +31,8 @@ const CadastroProduto: React.FC = () => {
     preco_promocao: undefined,
     fk_vendedor: user?.cpf || '', // Assumindo que o vendedor usa CPF como ID
     id_categoria: '',
-    disponivel: true,
+    disponivel: true, // Por padrão, o produto é cadastrado como disponível
+
   });
 
   useEffect(() => {
