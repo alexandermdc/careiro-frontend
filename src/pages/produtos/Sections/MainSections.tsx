@@ -105,7 +105,7 @@ export const MainContentSection = (): React.ReactElement => {
             preco: produto.is_promocao && produto.preco_promocao 
                 ? produto.preco_promocao 
                 : produto.preco,
-            imagem: produto.imagem || '',
+            imagem: produto.image || '',
             vendedor: produto.feira?.nome || 'Feira',
             id_vendedor: produto.fk_vendedor || '',
             fk_feira: produto.fk_feira || undefined
@@ -154,7 +154,7 @@ export const MainContentSection = (): React.ReactElement => {
             <img
                 className="h-[263px] relative self-stretch w-full object-cover"
                 alt={produto.nome}
-                src={produto.imagem || "https://via.placeholder.com/263x263/9cb217/ffffff?text=Produto"}
+                src={produto.image || "https://via.placeholder.com/263x263/9cb217/ffffff?text=Produto"}
                 onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = "https://via.placeholder.com/263x263/9cb217/ffffff?text=" + encodeURIComponent(produto.nome);

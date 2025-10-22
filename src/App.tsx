@@ -19,7 +19,6 @@ import Dashboard from './pages/dashboard/Dashboard';
 import PerfilCliente from './pages/perfil/PerfilCliente';
 import CarrinhoPage from './pages/carrinho/CarrinhoPage';
 import PagamentoRetorno from './pages/pagamento/PagamentoRetorno';
-import CheckoutReal from './pages/checkout/CheckoutReal';
 import CheckoutPedido from './pages/checkout/CheckoutPedido';
 import PagamentoSucessoReal from './pages/pagamento/PagamentoSucessoReal';
 import PagamentoFalhaReal from './pages/pagamento/PagamentoFalhaReal';
@@ -47,7 +46,6 @@ function App() {
         <Route path="/pagamento/retorno" element={<PagamentoRetorno />} />
         
         {/* Rotas de Pagamento Real - Mercado Pago */}
-        <Route path="/checkout" element={<CheckoutReal />} />
         <Route path="/pagamento/sucesso" element={<PagamentoSucessoReal />} />
         <Route path="/pagamento/falha" element={<PagamentoFalhaReal />} />
         

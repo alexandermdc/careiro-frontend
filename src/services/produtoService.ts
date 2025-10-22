@@ -8,7 +8,7 @@ export interface Produto {
     disponivel: boolean;
     quantidade_estoque?: number; // Opcional - backend pode não retornar
     fk_feira?: number; // Opcional - backend pode não retornar
-    imagem?: string;
+    image?: string;
     feira?: {
         id: number;
         nome: string;
@@ -30,7 +30,7 @@ export interface CreateProdutoData {
 export interface UpdateProdutoData {
   nome?: string;
   descricao?: string;
-  image?: string;
+  imagem?: string;
   is_promocao?: boolean;
   preco?: number;
   preco_promocao?: number;
