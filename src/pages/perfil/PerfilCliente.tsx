@@ -732,21 +732,7 @@ const PerfilCliente: React.FC = () => {
             )}
           </div>
         </div>
-
-        {/* Debug Info */}
-        <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h4 className="font-semibold text-blue-800 mb-2">🐛 Debug Info:</h4>
-          <div className="text-sm text-blue-600 space-y-1">
-            <p><strong>Cliente CPF:</strong> {cliente?.cpf ? `***.***.***-${cliente.cpf.slice(-2)}` : 'N/A'}</p>
-            <p><strong>Cliente Nome:</strong> {cliente?.nome || 'N/A'}</p>
-            <p><strong>Cliente Email:</strong> {cliente?.email || 'N/A'}</p>
-            <p><strong>Cliente Telefone:</strong> {cliente?.telefone || 'N/A'}</p>
-            <p><strong>Total Favoritos:</strong> {favoritos.length}</p>
-            <p><strong>Modal Aberto:</strong> {showEditModal ? '✅ Sim' : '❌ Não'}</p>
-          </div>
-        </div>
       </div>
-
       {/* Modal de Edição */}
       <EditModal
         isOpen={showEditModal}

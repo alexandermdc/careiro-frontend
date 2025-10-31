@@ -32,6 +32,12 @@ export interface Produto {
   categoria?: string;
 }
 
+export interface Favorito {
+  cliente_cpf: string;
+  produto_id: string;
+  produto?: Produto;
+}
+
 class ClienteService {
   // Listar todos os clientes (rota pública)
   async listarTodos(): Promise<Cliente[]> {
@@ -165,6 +171,30 @@ class ClienteService {
       throw new Error(
         error.response?.data?.message || 
         'Erro ao adicionar favorito'
+      );
+    }
+  }
+
+  // Remover produto dos favoritos (requer autenticação)
+  async removerFavorito(clienteCpf: string, produtoId: string): Promise<void> {
+    try {
+      console.log('💔 Removendo favorito...');
+      console.log('👤 Cliente CPF:', clienteCpf);
+      console.log('🛍️ Produto ID:', produtoId);
+      
+      const response = await api.delete(`/clientes/${clienteCpf}/favoritos`, {
+        data: { produto_id: produtoId }
+      });
+      
+      console.log('✅ Favorito removido:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Erro ao remover favorito:', error);
+      console.error('📋 Detalhes do erro:', error.response?.data);
+      
+      throw new Error(
+        error.response?.data?.message || 
+        'Erro ao remover favorito'
       );
     }
   }

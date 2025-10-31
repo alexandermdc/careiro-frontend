@@ -22,6 +22,21 @@ const CadastroProduto: React.FC = () => {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   
+  // Verificar se é vendedor
+  useEffect(() => {
+    if (!user) {
+      alert('⚠️ Você precisa estar logado como vendedor para cadastrar produtos!');
+      navigate('/login/vendedor');
+      return;
+    }
+    
+    if (user.tipo !== 'vendedor' || !user.id_vendedor) {
+      alert('⚠️ Apenas vendedores podem cadastrar produtos!');
+      navigate('/');
+      return;
+    }
+  }, [user, navigate]);
+  
   const [formData, setFormData] = useState<CreateProdutoData>({
     nome: '',
     descricao: '',
@@ -29,9 +44,10 @@ const CadastroProduto: React.FC = () => {
     is_promocao: false,
     preco: 0,
     preco_promocao: undefined,
-    fk_vendedor: user?.cpf || '', // Assumindo que o vendedor usa CPF como ID
+    fk_vendedor: user?.id_vendedor || '', // UUID do vendedor logado
     id_categoria: '',
-    disponivel: true,
+    disponivel: true, // Por padrão, o produto é cadastrado como disponível
+
   });
 
   useEffect(() => {
@@ -118,6 +134,11 @@ const CadastroProduto: React.FC = () => {
 
     try {
       setLoading(true);
+      
+      // Verificar token antes de enviar
+      const token = localStorage.getItem('accessToken');
+      console.log('🔑 Token no localStorage:', token ? 'Existe ✅' : 'Não existe ❌');
+      console.log('👤 User:', user);
       console.log('📤 Enviando produto:', formData);
       
       const produtoCriado = await produtoService.criar(formData);
@@ -431,7 +452,7 @@ const CadastroProduto: React.FC = () => {
                 }`}
                 disabled={loading}
               />
-              {errors.image && (
+              {errors.imagem && (
                 <p className="text-red-600 text-sm mt-1">⚠️ {errors.image}</p>
               )}
               

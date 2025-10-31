@@ -52,9 +52,13 @@ class AuthService {
         senha: credentials.password
       });
       
-      const { accessToken, refreshToken, cliente } = response.data;
+      // Backend retorna: token, accessToken, refreshToken, cliente
+      const { token, accessToken, refreshToken, cliente } = response.data;
       
-      localStorage.setItem('accessToken', accessToken);
+      // Usar 'token' como principal, 'accessToken' como fallback
+      const finalToken = token || accessToken;
+      
+      localStorage.setItem('accessToken', finalToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify({
         ...cliente,

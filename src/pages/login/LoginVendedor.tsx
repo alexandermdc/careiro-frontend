@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Lock, AlertCircle } from 'lucide-react';
-import authService from '../../services/authService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const LoginVendedor: React.FC = () => {
   const navigate = useNavigate();
+  const { loginVendedor } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -31,11 +32,7 @@ const LoginVendedor: React.FC = () => {
     setError('');
 
     try {
-      await authService.loginVendedor({
-        id_vendedor: formData.id_vendedor,
-        password: formData.password
-      });
-      
+      await loginVendedor(formData.id_vendedor, formData.password);
       navigate('/produtos/cadastro');
       
     } catch (err: any) {

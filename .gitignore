@@ -22,5 +22,5 @@ vite-log.txt
 *.njsproj
 *.sln
 *.sw?
-
+*.ts
 *.md
