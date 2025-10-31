@@ -1,4 +1,4 @@
-import { ShoppingBagIcon, Loader2, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { ShoppingBagIcon, Loader2, AlertCircle, ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { JoinAgriconnectBanner } from '../../../components/JoinAgriconnectBanner';
 import React, { useEffect, useState } from "react";
 import { Badge } from "../../../components/badge";
@@ -10,6 +10,7 @@ import produtoService, {
   type Categoria,
 } from "../../../services/produtoService";
 import { useCarrinho } from '../../../contexts/CarrinhoContext';
+import { useFavoritos } from '../../../contexts/FavoritosContext';
 import { useNavigate } from 'react-router-dom';
 
 // The original `Produto` type seems to be missing fields. Let's extend it.
@@ -24,6 +25,7 @@ type Produto = ProdutoOriginal & {
 export const MainContentSection = (): React.ReactElement => {
     const navigate = useNavigate();
     const { adicionarAoCarrinho, totalItens } = useCarrinho();
+    const { isFavorito, toggleFavorito } = useFavoritos();
     const [produtos, setProdutos] = useState<Produto[]>([]);
     const [categorias, setCategorias] = useState<Categoria[]>([]);
     const [categoriaAtiva, setCategoriaAtiva] = useState<string | null>(null);
@@ -45,7 +47,9 @@ export const MainContentSection = (): React.ReactElement => {
                 ]);
                 
                 console.log('📦 Produtos carregados da API:', produtosData);
-                console.log('🔍 Primeiro produto:', produtosData[0]);
+                console.log('🔍 Primeiro produto completo:', JSON.stringify(produtosData[0], null, 2));
+                console.log('🖼️ Campo image do primeiro produto:', produtosData[0]?.image);
+                console.log('📋 Campos do primeiro produto:', Object.keys(produtosData[0] || {}));
                 
                 setProdutos(produtosData as Produto[]);
                 setCategorias(categoriasData);
@@ -117,6 +121,24 @@ export const MainContentSection = (): React.ReactElement => {
         alert(`✅ ${produto.nome} adicionado ao carrinho!`);
     };
 
+    const handleToggleFavorito = async (produto_id: string | number) => {
+        // Verificar se está logado
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            alert('⚠️ Você precisa estar logado para favoritar produtos!');
+            navigate('/login');
+            return;
+        }
+
+        try {
+            await toggleFavorito(produto_id);
+            const isFav = isFavorito(produto_id);
+            alert(isFav ? 'Produto adicionado aos favoritos!' : 'Produto removido dos favoritos!');
+        } catch (error: any) {
+            alert('Erro ao atualizar favorito: ' + error.message);
+        }
+    };
+
     const formatarPreco = (valor: number) => {
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
@@ -149,8 +171,23 @@ export const MainContentSection = (): React.ReactElement => {
     const renderProdutoCard = (produto: Produto) => (
         <Card
             key={produto.id_produto}
-            className="flex-col min-w-[263px] w-[263px] items-start gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-[25px] overflow-hidden"
+            className="flex-col min-w-[263px] w-[263px] items-start gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-[25px] overflow-hidden relative"
         >
+            {/* Botão de Favorito - Posição absoluta */}
+            <button
+                onClick={() => handleToggleFavorito(produto.id_produto)}
+                className="absolute top-3 right-3 z-10 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110"
+                title={isFavorito(produto.id_produto) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+            >
+                <Heart 
+                    className={`w-5 h-5 transition-colors ${
+                        isFavorito(produto.id_produto) 
+                            ? 'text-gray-400 hover:text-red-400'
+                            : 'fill-red-500 text-red-500'
+                    }`}
+                />
+            </button>
+            
             <img
                 className="h-[263px] relative self-stretch w-full object-cover"
                 alt={produto.nome}

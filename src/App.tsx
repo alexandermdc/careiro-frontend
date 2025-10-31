@@ -1,5 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { FavoritosProvider } from './contexts/FavoritosContext';
+import { BuscaProvider } from './contexts/BuscaContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Homepage } from './pages/homepage/home';
 import { SobreNos } from './pages/sobrenos/sobreNos';
@@ -14,7 +16,6 @@ import CadastroVendedor from './pages/vendedor/CadastroVendedor';
 import FormCliente from './pages/cadastro/cadastro';
 import Login from './pages/login/login';
 import LoginVendedor from './pages/login/LoginVendedor';
-import LoginTeste from './pages/login/LoginTeste';
 import Dashboard from './pages/dashboard/Dashboard';
 import PerfilCliente from './pages/perfil/PerfilCliente';
 import CarrinhoPage from './pages/carrinho/CarrinhoPage';
@@ -23,18 +24,21 @@ import CheckoutPedido from './pages/checkout/CheckoutPedido';
 import PagamentoSucessoReal from './pages/pagamento/PagamentoSucessoReal';
 import PagamentoFalhaReal from './pages/pagamento/PagamentoFalhaReal';
 import MeusPedidos from './pages/pedidos/MeusPedidos';
+import Favoritos from './pages/favoritos/Favoritos';
+import BuscaResultados from './pages/busca/BuscaResultados';
 
 function App() {
   return (
     <AuthProvider>
-      <Routes>
-        {/* Rotas públicas */}
-        <Route path="/" element={<Homepage />} />
+      <FavoritosProvider>
+        <BuscaProvider>
+          <Routes>
+            {/* Rotas públicas */}
+            <Route path="/" element={<Homepage />} />
         <Route path="/sobrenos" element={<SobreNos />} />
         <Route path="/cadastro" element={<FormCliente />} />
         <Route path="/login" element={<Login />} />
         <Route path="/login/vendedor" element={<LoginVendedor />} />
-        <Route path="/login-teste" element={<LoginTeste />} />
         <Route path="/associacao" element={<Associacao />} />
         <Route path="/associacoes" element={<Associacoes />} />
         <Route path="/produtores" element={<Produtores />} />
@@ -52,6 +56,12 @@ function App() {
         {/* Rotas de Pedidos */}
         <Route path="/checkout-pedido" element={<CheckoutPedido />} />
         <Route path="/pedidos" element={<MeusPedidos />} />
+        
+        {/* Rotas de Favoritos */}
+        <Route path="/favoritos" element={<Favoritos />} />
+        
+        {/* Rotas de Busca */}
+        <Route path="/busca" element={<BuscaResultados />} />
         
         {/* Rotas protegidas */}
         <Route 
@@ -88,13 +98,11 @@ function App() {
         />
         <Route 
           path="/vendedor/cadastro" 
-          element={
-            <ProtectedRoute>
-              <CadastroVendedor />
-            </ProtectedRoute>
-          } 
+          element={<CadastroVendedor />} 
         />
       </Routes>
+        </BuscaProvider>
+      </FavoritosProvider>
     </AuthProvider>
   );
 }

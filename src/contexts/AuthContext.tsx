@@ -1,13 +1,26 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import authService from '../services/authService';
-import type { User } from '../services/authService';
+
+// Tipo unificado para cliente ou vendedor
+interface AppUser {
+  tipo?: 'cliente' | 'vendedor';
+  nome: string;
+  email?: string;
+  cpf?: string;
+  id_vendedor?: string;
+  telefone?: string;
+  tipo_vendedor?: 'PF' | 'PJ';
+  endereco_venda?: string;
+  numero_documento?: string;
+}
 
 interface AuthContextData {
-  user: User | null;
+  user: AppUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginVendedor: (id_vendedor: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -18,7 +31,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +47,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       const response = await authService.login({ email, password });
-      setUser(response.cliente);
+      setUser({ ...response.cliente, tipo: 'cliente' } as AppUser);
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginVendedor = async (id_vendedor: string, password: string): Promise<void> => {
+    try {
+      setIsLoading(true);
+      const response = await authService.loginVendedor({ id_vendedor, password });
+      setUser({ ...response.vendedor, tipo: 'vendedor' } as AppUser);
     } catch (error) {
       throw error;
     } finally {
@@ -63,6 +88,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isAuthenticated,
         isLoading,
         login,
+        loginVendedor,
         logout,
       }}
     >

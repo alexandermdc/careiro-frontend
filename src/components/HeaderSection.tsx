@@ -1,10 +1,11 @@
 import { SearchIcon, ShoppingBagIcon, UserIcon, LogOutIcon } from "lucide-react";
-import { type JSX } from "react";
-import { Link } from 'react-router-dom';
+import { type JSX, useState } from "react";
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "./button";
 import { Input } from "./inputs";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList, NavigationMenuLink } from "./navigate_menu";
 import { useAuth } from "../contexts/AuthContext";
+import { useBusca } from "../contexts/BuscaContext";
 
 const navigationItems = [
   { label: "Início", href: "/" },
@@ -16,12 +17,29 @@ const navigationItems = [
 
 export const HeaderSection = (): JSX.Element => {
   const { user, isAuthenticated, logout } = useAuth();
+  const { buscar } = useBusca();
+  const navigate = useNavigate();
+  const [termoBusca, setTermoBusca] = useState('');
 
   const handleLogout = async () => {
     try {
       await logout();
     } catch (error) {
       console.error('Erro no logout:', error);
+    }
+  };
+
+  const handleBuscar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (termoBusca.trim()) {
+      await buscar(termoBusca);
+      navigate('/busca');
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleBuscar(e as any);
     }
   };
 
@@ -46,9 +64,14 @@ export const HeaderSection = (): JSX.Element => {
         <div className="flex items-center bg-fundo-claro rounded-[30px] border border-solid border-[#d5d7d4] px-6 py-3 w-[487px]">
           <Input
             placeholder="O que você procura?"
+            value={termoBusca}
+            onChange={(e) => setTermoBusca(e.target.value)}
+            onKeyPress={handleKeyPress}
             className="border-0 bg-transparent [font-family:'Montserrat',Helvetica] font-normal text-texto text-base flex-1 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
-          <SearchIcon className="w-6 h-6 text-texto" />
+          <button onClick={handleBuscar} className="cursor-pointer">
+            <SearchIcon className="w-6 h-6 text-texto hover:text-verde-escuro transition-colors" />
+          </button>
         </div>
 
         <div className="flex items-center gap-8">
