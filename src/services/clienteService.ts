@@ -24,12 +24,18 @@ export interface UpdateClienteData {
 }
 
 export interface Produto {
-  id: string;
+  id_produto: string;
   nome: string;
-  preco: number;
   descricao: string;
-  imagem?: string;
-  categoria?: string;
+  preco: number;
+  preco_promocao?: number;
+  is_promocao: boolean;
+  image?: string;
+  quantidade_estoque?: number;
+  fk_feira?: string;
+  feira?: {
+    nome: string;
+  };
 }
 
 export interface Favorito {
@@ -206,8 +212,30 @@ class ClienteService {
       
       const response = await api.get(`/clientes/${clienteCpf}/favoritos`);
       
-      console.log('✅ Favoritos encontrados:', response.data);
-      return response.data || [];
+      console.log('✅ Favoritos encontrados (raw):', response.data);
+      console.log('📋 Tipo de response.data:', typeof response.data);
+      console.log('📋 É array?:', Array.isArray(response.data));
+      
+      // Se retornar array de objetos com propriedade 'produto', extrair os produtos
+      let produtos: Produto[] = [];
+      
+      if (Array.isArray(response.data)) {
+        produtos = response.data.map((item: any) => {
+          // Se o item tem uma propriedade 'produto', usar ela
+          if (item.produto) {
+            console.log('📦 Item com propriedade produto:', item.produto);
+            return item.produto;
+          }
+          // Senão, assumir que o item já é o produto
+          console.log('📦 Item é produto direto:', item);
+          return item;
+        });
+      }
+      
+      console.log('✅ Produtos processados:', produtos);
+      console.log('📊 Total processado:', produtos.length);
+      
+      return produtos;
     } catch (error: any) {
       console.error('❌ Erro ao listar favoritos:', error);
       console.error('📋 Detalhes do erro:', error.response?.data);

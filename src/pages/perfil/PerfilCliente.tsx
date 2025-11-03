@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -11,11 +12,14 @@ import {
   ArrowLeft,
   LogOut,
   Save,
-  X
+  X,
+  ShoppingBag
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useFavoritos } from '../../contexts/FavoritosContext';
+import { useCarrinho } from '../../contexts/CarrinhoContext';
 import clienteService from '../../services/clienteService';
-import type { Cliente, Produto, UpdateClienteData } from '../../services/clienteService';
+import type { Cliente, UpdateClienteData } from '../../services/clienteService';
 
 // Componente Modal
 const EditModal: React.FC<{
@@ -278,16 +282,15 @@ const EditModal: React.FC<{
 
 const PerfilCliente: React.FC = () => {
   const { user, logout } = useAuth();
+  const { favoritos, removerFavorito, carregarFavoritos } = useFavoritos();
+  const { adicionarAoCarrinho } = useCarrinho();
   
   const [activeTab, setActiveTab] = useState('pedidos');
   const [loading, setLoading] = useState(true);
   const [cliente, setCliente] = useState<Cliente | null>(null);
-  const [favoritos, setFavoritos] = useState<Produto[]>([]);
   const [error, setError] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
 
-  console.log('🎯 Componente PerfilCliente renderizado');
-  console.log('👤 Usuário do contexto:', user);
 
   useEffect(() => {
     if (user?.cpf) {
@@ -306,11 +309,10 @@ const PerfilCliente: React.FC = () => {
       const dadosCompletos = await clienteService.buscarPerfilCompleto(user.cpf);
       
       setCliente(dadosCompletos.cliente);
-      setFavoritos(dadosCompletos.favoritos);
       
       console.log('✅ Dados carregados:', {
         cliente: dadosCompletos.cliente.nome,
-        favoritos: dadosCompletos.favoritos.length
+        favoritos: favoritos.length
       });
       
     } catch (err: any) {
@@ -654,12 +656,29 @@ const PerfilCliente: React.FC = () => {
               </div>
             )}
 
-            {activeTab === 'favoritos' && (
+            {activeTab === 'favoritos' && (() => {
+              console.log('🎨 Renderizando aba de favoritos');
+              console.log('❤️ Array de favoritos:', favoritos);
+              console.log('📊 Quantidade:', favoritos.length);
+              
+              return (
               <div className="bg-white rounded-lg shadow-sm">
                 <div className="p-6 border-b border-gray-200">
-                  <h3 className="text-xl font-bold text-gray-900">
-                    Produtos Favoritos ({favoritos.length})
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      <Heart className="w-6 h-6 text-red-500" />
+                      Produtos Favoritos ({favoritos.length})
+                    </h3>
+                    <button
+                      onClick={() => {
+                        console.log('🔄 Botão Recarregar clicado');
+                        carregarFavoritos();
+                      }}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+                    >
+                      🔄 Recarregar Favoritos
+                    </button>
+                  </div>
                 </div>
                 
                 {favoritos.length === 0 ? (
@@ -671,41 +690,75 @@ const PerfilCliente: React.FC = () => {
                     </p>
                     <Link 
                       to="/produtos" 
-                      className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+                      className="inline-block bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
                     >
                       Explorar Produtos
                     </Link>
                   </div>
                 ) : (
                   <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {favoritos.map((produto) => (
-                        <div key={produto.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                          <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
-                              <img 
-                                src={produto.imagem || 'https://via.placeholder.com/64x64/f0f0f0/999?text=Produto'} 
-                                alt={produto.nome}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900 mb-1">
-                                {produto.nome}
-                              </h4>
-                              <p className="text-gray-600 text-sm mb-2">
-                                {produto.descricao}
-                              </p>
-                              <div className="flex items-center justify-between">
-                                <span className="text-lg font-bold text-green-500">
-                                  R$ {produto.preco.toFixed(2)}
+                        <div key={produto.id_produto} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white group">
+                          <div className="relative">
+                            <img 
+                              src={produto.image || 'https://via.placeholder.com/300x200/f0f0f0/999?text=Produto'} 
+                              alt={produto.nome}
+                              className="w-full h-48 object-cover"
+                            />
+                            <button
+                              onClick={() => removerFavorito(produto.id_produto)}
+                              className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-red-500 rounded-full shadow-md transition-all group-hover:scale-110"
+                              title="Remover dos favoritos"
+                            >
+                              <Heart className="w-5 h-5 fill-red-500 text-red-500 hover:fill-white hover:text-white transition-colors" />
+                            </button>
+                          </div>
+                          
+                          <div className="p-4">
+                            <h4 className="font-bold text-gray-900 mb-2 line-clamp-1">
+                              {produto.nome}
+                            </h4>
+                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                              {produto.descricao}
+                            </p>
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-2xl font-bold text-green-500">
+                                R$ {produto.preco.toFixed(2)}
+                              </span>
+                              {produto.quantidade_estoque !== undefined && (
+                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                  produto.quantidade_estoque > 0 
+                                    ? 'bg-green-100 text-green-700' 
+                                    : 'bg-red-100 text-red-700'
+                                }`}>
+                                  {produto.quantidade_estoque > 0 ? 'Disponível' : 'Indisponível'}
                                 </span>
-                                <button className="text-green-500 hover:text-green-700 text-sm font-medium">
-                                  Ver produto
-                                </button>
-                              </div>
+                              )}
                             </div>
+                            <button
+                              onClick={() => {
+                                // Converter Produto para formato do carrinho
+                                adicionarAoCarrinho({
+                                  id: produto.id_produto,
+                                  nome: produto.nome,
+                                  preco: produto.preco,
+                                  imagem: produto.image,
+                                  fk_feira: produto.fk_feira
+                                });
+                                // Toast de sucesso
+                                const toast = document.createElement('div');
+                                toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
+                                toast.textContent = 'Produto adicionado ao carrinho!';
+                                document.body.appendChild(toast);
+                                setTimeout(() => toast.remove(), 3000);
+                              }}
+                              disabled={produto.quantidade_estoque === 0}
+                              className="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <ShoppingBag className="w-4 h-4" />
+                              Adicionar ao Carrinho
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -713,7 +766,8 @@ const PerfilCliente: React.FC = () => {
                   </div>
                 )}
               </div>
-            )}
+              );
+            })()}
 
             {activeTab === 'assinaturas' && (
               <div className="bg-white rounded-lg shadow-sm p-8 text-center">

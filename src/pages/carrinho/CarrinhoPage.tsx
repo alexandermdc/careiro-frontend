@@ -1,12 +1,22 @@
 import { useCarrinho } from '../../contexts/CarrinhoContext';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import axios from 'axios';
+import logoAgriconect from '../../assets/img/logoagriconect.svg';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import pedidoService from '../../services/pedidoService';
+import pagamentoService from '../../services/pagamentoService';
 
 export default function CarrinhoPage() {
-  const { itens, removerDoCarrinho, atualizarQuantidade, limparCarrinho, valorTotal, totalItens } = useCarrinho();
+  const { itens, removerDoCarrinho, atualizarQuantidade, valorTotal } = useCarrinho();
   const navigate = useNavigate();
   const [processando, setProcessando] = useState(false);
+
+  console.log('🛒 Itens no carrinho:', itens.map(item => ({
+    nome: item.nome,
+    tem_imagem: !!item.imagem,
+    eh_base64: item.imagem?.startsWith('data:image'),
+    tamanho: item.imagem?.length
+  })));
 
   const handleFinalizarCompra = async () => {
     if (itens.length === 0) {
@@ -25,70 +35,40 @@ export default function CarrinhoPage() {
     setProcessando(true);
 
     try {
-      // Gerar ID único para o pedido
-      const testeId = `pedido-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // 1. Criar pedido no banco de dados
+      console.log('📝 Etapa 1: Criando pedido no banco...');
       
-      // Preparar itens no formato esperado pelo backend
-      const itensParaBackend = itens.map(item => ({
-        id_produto: item.id,
-        quantidade: item.quantidade
-      }));
-      
-      console.log('📦 Dados do carrinho:', {
-        testeId,
-        totalItens,
-        valorTotal,
-        itens: itensParaBackend
+      const pedido = await pedidoService.criarPedido({
+        data_pedido: new Date().toISOString(),
+        fk_feira: null, // Pode ser null se não for vinculado a feira específica
+        produtos: itens.map(item => ({
+          produto_id: String(item.id),
+          quantidade: item.quantidade,
+          id_vendedor: item.id_vendedor || '', // Pegar do item se disponível
+        }))
       });
 
-      // Chamar a API do backend com TODOS os dados necessários
-      const response = await axios.post(
-        'http://localhost:3000/mercadopago/pagamento',
-        { 
-          testeId,
-          itens: itensParaBackend,
-          valorTotal
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
+      console.log('✅ Pedido criado com ID:', pedido.pedido_id);
 
-      console.log('✅ Resposta do backend:', response.data);
+      // 2. Criar preferência de pagamento no Mercado Pago
+      console.log('💳 Etapa 2: Criando pagamento no Mercado Pago...');
+      
+      const { initPoint } = await pagamentoService.criarPreferencia(pedido.pedido_id);
 
-      // Redirecionar para o Mercado Pago
-      if (response.data.initPoint) {
-        console.log('🔄 Redirecionando para Mercado Pago...');
-        window.location.href = response.data.initPoint;
-      } else if (response.data.init_point) {
-        console.log('🔄 Redirecionando para Mercado Pago...');
-        window.location.href = response.data.init_point;
-      } else {
-        console.error('❌ Resposta sem init_point:', response.data);
-        alert('Erro: Link de pagamento não foi gerado pelo backend');
-      }
+      // 3. Redirecionar para o Mercado Pago
+      console.log('🔄 Etapa 3: Redirecionando para checkout...');
+      pagamentoService.redirecionarParaCheckout(initPoint);
 
     } catch (error: any) {
-      console.error('❌ Erro ao processar pagamento:', error);
-      
-      if (error.response) {
-        console.error('Detalhes do erro:', {
-          status: error.response.status,
-          data: error.response.data
-        });
-        
-        if (error.response.status === 401) {
-          alert('⚠️ Sessão expirada! Faça login novamente.');
-          localStorage.removeItem('accessToken');
-          navigate('/login');
-        } else {
-          alert(`Erro ao processar pagamento:\n${error.response.data?.error || error.message}`);
-        }
+      console.error('❌ Erro ao processar compra:', error);
+
+      // Tratamento de erro de sessão expirada
+      if (error.message.includes('Sessão expirada') || error.message.includes('401')) {
+        alert('⚠️ Sessão expirada! Faça login novamente.');
+        localStorage.removeItem('accessToken');
+        navigate('/login');
       } else {
-        alert(`Erro de conexão:\n${error.message}\n\nVerifique se o backend está rodando em http://localhost:3000`);
+        alert(`Erro ao processar compra:\n${error.message}`);
       }
     } finally {
       setProcessando(false);
@@ -98,9 +78,20 @@ export default function CarrinhoPage() {
   if (itens.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-green-600 text-white p-4 shadow-md">
-          <div className="container mx-auto">
-            <h1 className="text-2xl font-bold">🛒 Meu Carrinho</h1>
+        <header className="bg-[#F0F3F0] text-gray-800 shadow-md w-full h-[135px] flex items-center">
+          <div className="container mx-auto px-6 flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/produtos')}
+                className="p-2 hover:bg-gray-200 rounded-full transition"
+                title="Voltar para produtos"
+              >
+                <ArrowLeft className="w-6 h-6 text-gray-700" />
+              </button>
+              <img src={logoAgriconect} alt="Logo Agriconnect" className="h-20" />
+            </div>
+            <div className="flex-1"></div> {/* Espaçador flexível */}
+            <h1 className="text-[24px] font-bold text-[#1A3C11] text-center [font-family:'Montserrat',Helvetica] leading-normal mr-8">Sua sacola</h1>
           </div>
         </header>
 
@@ -124,119 +115,154 @@ export default function CarrinhoPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-green-600 text-white p-4 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">🛒 Meu Carrinho</h1>
-          <button
-            onClick={() => navigate('/produtos')}
-            className="bg-white text-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition font-semibold"
-          >
-            ← Continuar Comprando
-          </button>
+      <header className="bg-[#F0F3F0] text-gray-800 shadow-md w-full h-[135px] flex items-center">
+        <div className="container mx-auto px-6 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/produtos')}
+              className="p-2 hover:bg-gray-200 rounded-full transition"
+              title="Voltar para produtos"
+            >
+              <ArrowLeft className="w-6 h-6 text-gray-700" />
+            </button>
+            <img src={logoAgriconect} alt="Logo Agriconnect" className="h-20" />
+          </div>
+          <div className="flex-1"></div> {/* Espaçador flexível */}
+          <h1 className="text-[24px] font-bold text-[#1A3C11] text-center [font-family:'Montserrat',Helvetica] leading-normal mr-8">Sua sacola</h1>
         </div>
       </header>
 
       {/* Conteúdo */}
-      <div className="container mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Lista de Itens */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-800">
-                Produtos ({totalItens} {totalItens === 1 ? 'item' : 'itens'})
-              </h2>
-              <button
-                onClick={limparCarrinho}
-                className="text-red-600 hover:text-red-700 font-semibold"
-              >
-                Limpar Carrinho
-              </button>
-            </div>
+      <div className="container mx-auto px-6 py-8 mb-40 max-w-[1110px]">
+        {/* Título: Resumo da compra */}
+        <h2 className="text-[#1D4510] font-montserrat text-2xl font-bold leading-[30px] mb-6">
+          Resumo da compra
+        </h2>
 
-            {itens.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white rounded-lg shadow-md p-4 flex gap-4"
-              >
-                <img
-                  src={item.imagem}
-                  alt={item.nome}
-                  className="w-24 h-24 object-cover rounded-lg"
-                />
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    {item.nome}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    Vendedor: {item.vendedor}
-                  </p>
-                  <p className="text-xl font-bold text-green-600">
-                    R$ {item.preco.toFixed(2)}
-                  </p>
-                </div>
-                <div className="flex flex-col justify-between items-end">
-                  <button
-                    onClick={() => removerDoCarrinho(item.id)}
-                    className="text-red-600 hover:text-red-700 text-sm font-semibold"
-                  >
-                    Remover
-                  </button>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => atualizarQuantidade(item.id, item.quantidade - 1)}
-                      className="bg-gray-200 hover:bg-gray-300 w-8 h-8 rounded font-bold"
-                    >
-                      -
-                    </button>
-                    <span className="font-semibold w-8 text-center">
-                      {item.quantidade}
+        {/* Cabeçalho da tabela */}
+        <div className="flex w-full h-20 px-11 py-6 items-center shrink-0 rounded-2xl border border-[#D5D7D4] bg-[#F0F3F0] mb-4">
+          <div className="grid grid-cols-12 gap-4 w-full items-center font-bold text-gray-700 text-sm">
+            <div className="col-span-6">Produto</div>
+            <div className="col-span-2 text-center">Preço</div>
+            <div className="col-span-2 text-center">Quantidade</div>
+            <div className="col-span-2 text-right">Total</div>
+          </div>
+        </div>
+
+        {/* Lista de produtos - cada um com sua própria borda */}
+        <div className="space-y-4">
+          {itens.map((item) => (
+            <div 
+              key={item.id} 
+              className="bg-white rounded-2xl border border-[#D5D7D4] hover:shadow-md transition min-h-[112px] px-[33px] py-6 flex items-center"
+            >
+                <div className="grid grid-cols-12 gap-4 items-center w-full">
+                  {/* Produto (imagem + nome) */}
+                  <div className="col-span-6 flex items-center gap-4">
+                    {item.imagem && (item.imagem.startsWith('data:image') || item.imagem.startsWith('http')) ? (
+                      <img
+                        src={item.imagem}
+                        alt={item.nome}
+                        className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent && !parent.querySelector('.placeholder-mini')) {
+                            const placeholder = document.createElement('div');
+                            placeholder.className = 'placeholder-mini w-20 h-20 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center';
+                            placeholder.innerHTML = '<svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>';
+                            parent.insertBefore(placeholder, target);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="w-20 h-20 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="font-semibold text-gray-800 text-base">
+                        {item.nome}
+                      </h3>
+                      {item.vendedor && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          Vendedor: {item.vendedor}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Preço */}
+                  <div className="col-span-2 text-center">
+                    <span className="text-gray-800 font-medium">
+                      R${item.preco.toFixed(2)}
+                    </span>
+                  </div>
+
+                  {/* Quantidade */}
+                  <div className="col-span-2 flex justify-center">
+                    <div className="flex items-center gap-3 border border-[#9CB217] bg-[#FBFCFA] rounded-[16px] px-4 py-2">
+                      <button
+                        onClick={() => atualizarQuantidade(item.id, item.quantidade - 1)}
+                        className="w-6 h-6 flex items-center justify-center hover:bg-[#9CB217]/10 rounded-full transition text-[#9CB217]"
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                      </button>
+                      <span className="font-semibold text-[#1A3C11] w-8 text-center">
+                        {item.quantidade}
+                      </span>
+                      <button
+                        onClick={() => atualizarQuantidade(item.id, item.quantidade + 1)}
+                        className="w-6 h-6 flex items-center justify-center hover:bg-[#9CB217]/10 rounded-full transition text-[#9CB217]"
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="12" y1="5" x2="12" y2="19"></line>
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Total */}
+                  <div className="col-span-2 text-right">
+                    <span className="text-gray-800 font-bold text-lg">
+                      R${(item.preco * item.quantidade).toFixed(2)}
                     </span>
                     <button
-                      onClick={() => atualizarQuantidade(item.id, item.quantidade + 1)}
-                      className="bg-gray-200 hover:bg-gray-300 w-8 h-8 rounded font-bold"
+                      onClick={() => removerDoCarrinho(item.id)}
+                      className="block text-red-500 hover:text-red-700 text-xs mt-2 ml-auto"
                     >
-                      +
+                      Remover
                     </button>
                   </div>
-                  <p className="text-sm text-gray-600 mt-2">
-                    Subtotal: R$ {(item.preco * item.quantidade).toFixed(2)}
-                  </p>
                 </div>
               </div>
             ))}
           </div>
+        </div>
 
-          {/* Resumo */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                Resumo do Pedido
-              </h2>
-              
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-gray-600">
-                  <span>Subtotal ({totalItens} {totalItens === 1 ? 'item' : 'itens'})</span>
-                  <span className="font-semibold">R$ {valorTotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Frete</span>
-                  <span className="font-semibold text-green-600">Grátis</span>
-                </div>
-                <div className="border-t pt-3 flex justify-between text-xl font-bold">
-                  <span>Total</span>
-                  <span className="text-green-600">R$ {valorTotal.toFixed(2)}</span>
-                </div>
-              </div>
-
-              <button
-                onClick={handleFinalizarCompra}
-                className="w-full mt-3 py-4 rounded-lg font-bold bg-blue-600 hover:bg-blue-700 text-white transition"
-                disabled={processando}
-              >
-                 {processando ? 'Processando...' : 'Criar Pedido e Pagar'}
-              </button>
-            </div>
+      {/* Total a Pagar - Fixo no fundo */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#F0F3F0] shadow-lg border-t border-gray-300 z-50">
+        <div className="container mx-auto px-6 py-6 flex justify-between items-center max-w-5xl">
+          <div className="flex flex-col">
+            <span className="text-gray-600 text-sm mb-1">Total a pagar</span>
+            <span className="text-[#1A3C11] text-3xl font-bold [font-family:'Montserrat',Helvetica]">
+              R$ {valorTotal.toFixed(2)}
+            </span>
           </div>
+          <button
+            onClick={handleFinalizarCompra}
+            className="bg-[#1D4510] hover:bg-[#163809] text-white px-10 py-4 rounded-2xl font-bold text-lg transition flex items-center gap-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={processando}
+          >
+            {processando ? 'Processando...' : 'Finalizar Compra'}
+            <ArrowRight className="w-6 h-6" />
+          </button>
         </div>
       </div>
     </div>
