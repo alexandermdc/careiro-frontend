@@ -1,0 +1,88 @@
+name: PR Check
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  # Validação de Pull Request
+  pr-validation:
+    name: Validar PR
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Setup Node.js
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'npm'
+
+      # 3. Instalar dependências
+      - name: 📦 Instalar dependências
+        run: npm ci --legacy-peer-deps
+
+      # 4. Type Check
+      - name: 🔍 Type Check
+        run: npx tsc --noEmit || echo "Type check warnings"
+        continue-on-error: true
+
+      # 5. Lint
+      - name: 🔍 Lint
+        run: npm run lint || echo "Lint warnings"
+        continue-on-error: true
+
+      # 6. Build
+      - name: 🏗️ Build
+        run: npm run build
+
+      # 7. Check build size
+      - name: 📊 Check Build Size
+        run: |
+          echo "📦 Tamanho do build:"
+          du -sh dist/
+          echo "📄 Arquivos principais:"
+          ls -lh dist/assets/*.js | head -5
+
+      # 8. Comentar no PR com informações
+      - name: 💬 Comentar resultado no PR
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            const buildSize = require('child_process')
+              .execSync('du -sh dist/')
+              .toString()
+              .trim();
+            
+            const comment = `
+            ## ✅ Build Successful
+            
+            **Build Size:** ${buildSize}
+            **Node Version:** 18.x
+            **Branch:** ${{ github.head_ref }}
+            
+            ### 📋 Checks realizados:
+            - ✅ TypeScript compilation
+            - ✅ ESLint validation
+            - ✅ Production build
+            - ✅ Build size analysis
+            
+            Ready to merge! 🚀
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

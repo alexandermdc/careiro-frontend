@@ -1,0 +1,88 @@
+name: Code Quality
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  schedule:
+    # Roda toda segunda-feira às 9h
+    - cron: '0 9 * * 1'
+
+jobs:
+  # Análise de qualidade de código
+  code-quality:
+    name: Análise de Qualidade
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'npm'
+
+      - name: 📦 Instalar dependências
+        run: npm ci --legacy-peer-deps
+
+      - name: 🔍 ESLint Report
+        run: |
+          npm run lint > eslint-report.txt || true
+          cat eslint-report.txt
+
+      - name: 📊 Análise de complexidade
+        run: |
+          echo "=== Arquivos maiores ==="
+          find src -name "*.tsx" -o -name "*.ts" | xargs wc -l | sort -rn | head -10
+
+      - name: 🔎 Buscar TODOs e FIXMEs
+        run: |
+          echo "=== TODOs encontrados ==="
+          grep -r "TODO" src/ || echo "Nenhum TODO encontrado"
+          echo ""
+          echo "=== FIXMEs encontrados ==="
+          grep -r "FIXME" src/ || echo "Nenhum FIXME encontrado"
+
+      - name: 📈 Upload ESLint Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eslint-report
+          path: eslint-report.txt
+          retention-days: 30
+
+  # Verificação de dependências
+  dependency-check:
+    name: Verificar Dependências
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'npm'
+
+      - name: 🔒 Audit de segurança
+        run: npm audit --audit-level=moderate || echo "Vulnerabilidades encontradas"
+        continue-on-error: true
+
+      - name: 📦 Verificar dependências desatualizadas
+        run: npm outdated || echo "Algumas dependências desatualizadas"
+        continue-on-error: true
+
+      - name: 🔍 Check for unused dependencies
+        run: npx depcheck || echo "Possíveis dependências não utilizadas"
+        continue-on-error: true
