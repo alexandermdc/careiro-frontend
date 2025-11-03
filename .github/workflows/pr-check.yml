@@ -6,6 +6,12 @@ on:
       - main
       - develop
 
+# Adicionar permissões para comentar no PR
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   # Validação de Pull Request
   pr-validation:
