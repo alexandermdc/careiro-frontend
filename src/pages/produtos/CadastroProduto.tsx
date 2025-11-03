@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -8,7 +9,9 @@ import {
   Tag,
   Image as ImageIcon,
   FileText,
-  CheckCircle
+  CheckCircle,
+  Upload,
+  X
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import produtoService from '../../services/produtoService';
@@ -21,6 +24,8 @@ const CadastroProduto: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string>('');
   
   // Verificar se é vendedor
   useEffect(() => {
@@ -119,6 +124,125 @@ const CadastroProduto: React.FC = () => {
     validateField(field, value);
   };
 
+  // Função para lidar com upload de imagem
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    if (!file.type.startsWith('image/')) {
+      setErrors(prev => ({ ...prev, image: 'Por favor, selecione uma imagem válida' }));
+      return;
+    }
+
+    // Validar tamanho (máximo 2MB)
+    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+    if (file.size > MAX_SIZE) {
+      setErrors(prev => ({ ...prev, image: 'A imagem deve ter no máximo 2MB' }));
+      return;
+    }
+
+    setUploadingImage(true);
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.image;
+      return newErrors;
+    });
+
+    try {
+      console.log('📤 Processando imagem:', {
+        nome: file.name,
+        tamanho_original: `${(file.size / 1024).toFixed(2)} KB`,
+        tipo: file.type
+      });
+
+      // Comprimir e redimensionar a imagem
+      const compressedBase64 = await compressImage(file);
+      
+      console.log('✅ Imagem comprimida:', {
+        tamanho_base64: `${(compressedBase64.length / 1024).toFixed(2)} KB`,
+        primeiros_50_chars: compressedBase64.substring(0, 50)
+      });
+
+      // Atualizar preview e formData
+      setImagePreview(compressedBase64);
+      setFormData(prev => ({ ...prev, image: compressedBase64 }));
+      setUploadingImage(false);
+
+    } catch (error) {
+      console.error('❌ Erro no upload:', error);
+      setErrors(prev => ({ ...prev, image: 'Erro ao fazer upload da imagem' }));
+      setUploadingImage(false);
+    }
+  };
+
+  // Função para comprimir imagem
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // Criar canvas para redimensionar
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          if (!ctx) {
+            reject(new Error('Erro ao criar canvas'));
+            return;
+          }
+
+          // Definir tamanho máximo (400x400 - bem menor)
+          const MAX_WIDTH = 400;
+          const MAX_HEIGHT = 400;
+          
+          let width = img.width;
+          let height = img.height;
+
+          // Redimensionar proporcionalmente
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = (height * MAX_WIDTH) / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = (width * MAX_HEIGHT) / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          // Desenhar imagem redimensionada
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Converter para base64 com qualidade 0.4 (40% - alta compressão)
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.4);
+          resolve(compressedBase64);
+        };
+
+        img.onerror = () => reject(new Error('Erro ao carregar imagem'));
+        img.src = e.target?.result as string;
+      };
+
+      reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Função para remover imagem
+  const handleRemoveImage = () => {
+    setImagePreview('');
+    setFormData(prev => ({ ...prev, image: '' }));
+    
+    // Limpar o input file
+    const fileInput = document.getElementById('image-upload') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -139,7 +263,15 @@ const CadastroProduto: React.FC = () => {
       const token = localStorage.getItem('accessToken');
       console.log('🔑 Token no localStorage:', token ? 'Existe ✅' : 'Não existe ❌');
       console.log('👤 User:', user);
-      console.log('📤 Enviando produto:', formData);
+      console.log('📤 Enviando produto:', {
+        ...formData,
+        image: formData.image ? `base64... (${formData.image.length} caracteres)` : 'sem imagem'
+      });
+      console.log('🖼️ Tamanho da imagem:', {
+        caracteres: formData.image.length,
+        kb: (formData.image.length / 1024).toFixed(2),
+        eh_base64: formData.image.startsWith('data:image')
+      });
       
       const produtoCriado = await produtoService.criar(formData);
       
@@ -439,34 +571,67 @@ const CadastroProduto: React.FC = () => {
             </h2>
             
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                URL da Imagem *
-              </label>
-              <input
-                type="url"
-                value={formData.image}
-                onChange={(e) => handleInputChange('image', e.target.value)}
-                placeholder="https://exemplo.com/imagem.jpg"
-                className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all ${
-                  errors.image ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                }`}
-                disabled={loading}
-              />
-              {errors.imagem && (
-                <p className="text-red-600 text-sm mt-1">⚠️ {errors.image}</p>
-              )}
-              
-              {formData.image && !errors.image && (
-                <div className="mt-4">
-                  <p className="text-sm text-gray-600 mb-2">Preview:</p>
-                  <img 
-                    src={formData.image} 
-                    alt="Preview" 
-                    className="w-48 h-48 object-cover rounded-xl border-2 border-gray-200"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://via.placeholder.com/192x192/f0f0f0/999?text=Imagem+Inválida';
-                    }}
-                  />
+              {!imagePreview ? (
+                // Área de upload
+                <div>
+                  <label 
+                    htmlFor="image-upload"
+                    className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-green-500 hover:bg-green-50 transition-all"
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      {uploadingImage ? (
+                        <>
+                          <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+                          <p className="text-sm text-gray-600">Processando imagem...</p>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-12 h-12 text-gray-400 mb-3" />
+                          <p className="mb-2 text-sm text-gray-600">
+                            <span className="font-semibold">Clique para fazer upload</span> ou arraste a imagem
+                          </p>
+                          <p className="text-xs text-gray-500">PNG, JPG, JPEG, WEBP (máx. 2MB)</p>
+                        </>
+                      )}
+                    </div>
+                    <input
+                      id="image-upload"
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={loading || uploadingImage}
+                    />
+                  </label>
+                  
+                  {errors.image && (
+                    <p className="text-red-600 text-sm mt-2 flex items-center gap-1">
+                      ⚠️ {errors.image}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                // Preview da imagem com opção de remover
+                <div className="relative">
+                  <div className="relative w-full h-64 border-2 border-gray-200 rounded-xl overflow-hidden">
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview do produto" 
+                      className="w-full h-full object-contain bg-gray-50"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors shadow-lg"
+                      disabled={loading}
+                      title="Remover imagem"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <p className="text-sm text-green-600 mt-2 flex items-center gap-1">
+                    ✅ Imagem carregada com sucesso
+                  </p>
                 </div>
               )}
             </div>

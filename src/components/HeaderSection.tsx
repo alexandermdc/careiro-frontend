@@ -75,12 +75,12 @@ export const HeaderSection = (): JSX.Element => {
         </div>
 
         <div className="flex items-center gap-8">
-          <div className="flex items-center gap-2 p-2">
+          <Link to="/carrinho" className="flex items-center gap-2 p-2 hover:opacity-80 transition-opacity cursor-pointer">
             <div className="[font-family:'Montserrat',Helvetica] font-bold text-verde-escuro text-base text-center tracking-[0] leading-[normal]">
               Sacola
             </div>
             <ShoppingBagIcon className="w-6 h-6 text-verde-escuro" />
-          </div>
+          </Link>
 
           {isAuthenticated ? (
             <div className="flex items-center gap-4">

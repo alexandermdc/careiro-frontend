@@ -1,3 +1,4 @@
+/*eslint-disable @typescript-eslint/no-unused-vars */
 import { ShoppingBagIcon, Loader2, AlertCircle, ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { JoinAgriconnectBanner } from '../../../components/JoinAgriconnectBanner';
 import React, { useEffect, useState } from "react";
@@ -24,7 +25,7 @@ type Produto = ProdutoOriginal & {
 
 export const MainContentSection = (): React.ReactElement => {
     const navigate = useNavigate();
-    const { adicionarAoCarrinho, totalItens } = useCarrinho();
+    const { adicionarAoCarrinho } = useCarrinho();
     const { isFavorito, toggleFavorito } = useFavoritos();
     const [produtos, setProdutos] = useState<Produto[]>([]);
     const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -45,12 +46,7 @@ export const MainContentSection = (): React.ReactElement => {
                     produtoService.listarTodos(),
                     produtoService.listarCategorias()
                 ]);
-                
-                console.log('📦 Produtos carregados da API:', produtosData);
-                console.log('🔍 Primeiro produto completo:', JSON.stringify(produtosData[0], null, 2));
-                console.log('🖼️ Campo image do primeiro produto:', produtosData[0]?.image);
-                console.log('📋 Campos do primeiro produto:', Object.keys(produtosData[0] || {}));
-                
+
                 setProdutos(produtosData as Produto[]);
                 setCategorias(categoriasData);
             } catch (err: any) {
@@ -115,6 +111,14 @@ export const MainContentSection = (): React.ReactElement => {
             fk_feira: produto.fk_feira || undefined
         };
 
+        console.log('🛒 Adicionando ao carrinho:', {
+            nome: produto.nome,
+            tem_imagem: !!produto.image,
+            eh_base64: produto.image?.startsWith('data:image'),
+            tamanho_imagem: produto.image?.length,
+            primeiros_100_chars: produto.image?.substring(0, 100)
+        });
+
         adicionarAoCarrinho(produtoCarrinho);
         
         // Feedback visual
@@ -122,19 +126,30 @@ export const MainContentSection = (): React.ReactElement => {
     };
 
     const handleToggleFavorito = async (produto_id: string | number) => {
+        console.log('🎯 handleToggleFavorito chamado para produto:', produto_id);
+        
         // Verificar se está logado
         const token = localStorage.getItem('accessToken');
+        console.log('🔑 Token encontrado:', token ? 'Sim' : 'Não');
+        
         if (!token) {
+            console.warn('⚠️ Usuário não autenticado');
             alert('⚠️ Você precisa estar logado para favoritar produtos!');
             navigate('/login');
             return;
         }
 
         try {
+            console.log('🔄 Chamando toggleFavorito...');
             await toggleFavorito(produto_id);
+            
+            console.log('✅ toggleFavorito concluído, verificando estado...');
             const isFav = isFavorito(produto_id);
+            console.log('❤️ Produto é favorito agora?', isFav);
+            
             alert(isFav ? 'Produto adicionado aos favoritos!' : 'Produto removido dos favoritos!');
         } catch (error: any) {
+            console.error('❌ Erro no handleToggleFavorito:', error);
             alert('Erro ao atualizar favorito: ' + error.message);
         }
     };
@@ -188,15 +203,40 @@ export const MainContentSection = (): React.ReactElement => {
                 />
             </button>
             
-            <img
-                className="h-[263px] relative self-stretch w-full object-cover"
-                alt={produto.nome}
-                src={produto.image || "https://via.placeholder.com/263x263/9cb217/ffffff?text=Produto"}
-                onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = "https://via.placeholder.com/263x263/9cb217/ffffff?text=" + encodeURIComponent(produto.nome);
-                }}
-            />
+            {/* Imagem do produto com fallback */}
+            {produto.image && (produto.image.startsWith('data:image') || produto.image.startsWith('http')) ? (
+                <img
+                    className="h-[263px] relative self-stretch w-full object-cover"
+                    alt={produto.nome}
+                    src={produto.image}
+                    onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        // Ocultar imagem se falhar
+                        target.style.display = 'none';
+                        // Mostrar placeholder
+                        const parent = target.parentElement;
+                        if (parent && !parent.querySelector('.placeholder-produto')) {
+                            const placeholder = document.createElement('div');
+                            placeholder.className = 'placeholder-produto h-[263px] w-full bg-gray-100 flex items-center justify-center flex-col gap-2';
+                            placeholder.innerHTML = `
+                                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span class="text-gray-500 text-sm">${produto.nome}</span>
+                            `;
+                            parent.insertBefore(placeholder, target);
+                        }
+                    }}
+                />
+            ) : (
+                <div className="h-[263px] w-full bg-gray-100 flex items-center justify-center flex-col gap-2">
+                    <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-gray-500 text-sm">{produto.nome}</span>
+                </div>
+            )}
+            
             <CardContent className="flex flex-col items-start px-4 py-0 relative self-stretch w-full flex-[0_0_auto]">
                 <div className="w-[231px] h-6 mt-[-1.00px] font-medium text-texto text-base leading-[normal] relative [font-family:'Montserrat',Helvetica] tracking-[0]">
                     {produto.nome}
@@ -399,19 +439,6 @@ export const MainContentSection = (): React.ReactElement => {
                     </div>
                 )}
             </div>
-            
-            {/* Botão flutuante do carrinho */}
-            {totalItens > 0 && (
-                <div className="fixed bottom-6 right-6 z-50">
-                    <button
-                        onClick={() => navigate('/carrinho')}
-                        className="bg-verde-claro text-white px-6 py-4 rounded-full shadow-lg hover:bg-verde-escuro transition font-bold text-lg flex items-center gap-2"
-                    >
-                        <ShoppingBagIcon className="w-6 h-6" />
-                        Ver Carrinho ({totalItens})
-                    </button>
-                </div>
-            )}
             
             <JoinAgriconnectBanner />
         </section>
