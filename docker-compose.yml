@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     container_name: agriconnect-frontend
     ports:
-      - "3001:80"  # Porta 3001 no host, 80 no container
+      - "5173:80"  # Porta 5173 no host (mesma do Vite), 80 no container
     restart: unless-stopped
     networks:
       - agriconnect-network
@@ -24,3 +24,4 @@ services:
 networks:
   agriconnect-network:
     driver: bridge
+    # external: true  # Comentado - a network será criada automaticamente
