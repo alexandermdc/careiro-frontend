@@ -27,6 +27,7 @@ import MeusPedidos from './pages/pedidos/MeusPedidos';
 import Favoritos from './pages/favoritos/Favoritos';
 import BuscaResultados from './pages/busca/BuscaResultados';
 
+
 function App() {
   return (
     <AuthProvider>
