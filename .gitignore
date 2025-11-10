@@ -24,3 +24,4 @@ vite-log.txt
 *.sln
 *.sw?
 *.md
+.env
