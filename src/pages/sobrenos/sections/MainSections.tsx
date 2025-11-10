@@ -5,12 +5,12 @@ const contentSections = [
   {
     title: "O que é o projeto?",
     content:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec cursus tincidunt pharetra. Morbi nec venenatis tortor, sit amet egestas nisi. Morbi consequat justo augue, at vestibulum purus condimentum id. Duis felis magna, placerat vel lacus a, aliquam aliquet ex. Etiam id lectus justo. Donec pellentesque ipsum a nisl dapibus, non hendrerit enim gravida. Maecenas vel est ac risus viverra sagittis vitae vitae nulla. Vivamus et interdum ex. Fusce porttitor odio ut ornare consequat. Etiam tempus elementum urna non vulputate. Sed ullamcorper sapien ultricies accumsan scelerisque. Donec placerat tellus id pharetra tempus.",
+      "A Rede de Produtores Agroecológicos do Careiro (REPAC) no Amazonas tem suas origens em 2015. Desde então, trabalha em prol das comunidades adjacentes, incentivando o fortalecimento dos conhecimentos de agroecologia e da economia local. Dessa forma, a fim de melhorar a comunicação dos produtores com os consumidores e fortalecer os laços dessa comunidade, nasceu o Agriconnect, plataforma com o intuito de gerar uma comercialização direta entre os produtores e consumidores, ajudando os produtores a gerenciarem seus produtos e vendas.\n\nO Agriconnect ressalta a importância de criar vínculos entre as associações produtoras e a comunidade geral, enaltecendo os produtos regionais e criando uma maior divulgação dos produtos e trabalho dos produtores.\n\nNa plataforma, é possível fazer compras de produtos e retirá-los em locais determinados, além das assinaturas disponíveis para a compra semanal e mensal de itens de ótima qualidade.\n\nNo Agriconnect, a tecnologia é aliada na criação de redes entre agricultores e clientes ao estabelecer um novo meio de compras e vendas dos produtos voltados para as feiras locais.",
   },
   {
     title: "Quem faz parte?",
     content:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec cursus tincidunt pharetra. Morbi nec venenatis tortor, sit amet egestas nisi. Morbi consequat justo augue, at vestibulum purus condimentum id. Duis felis magna, placerat vel lacus a, aliquam aliquet ex. Etiam id lectus justo. Donec pellentesque ipsum a nisl dapibus, non hendrerit enim gravida. Maecenas vel est ac risus viverra sagittis vitae vitae nulla. Vivamus et interdum ex. Fusce porttitor odio ut ornare consequat. Etiam tempus elementum urna non vulputate. Sed ullamcorper sapien ultricies accumsan scelerisque. Donec placerat tellus id pharetra tempus.\nInteger et finibus enim. Pellentesque id odio sed ipsum bibendum luctus ut eget nibh. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Maecenas risus mauris, hendrerit eget ligula ut, egestas porttitor neque. Vestibulum in nisl ex.",
+      "Os produtores e associações participantes do Agriconnect estão envolvidos com o movimento agroecológico do Careiro de modo que toda sua produção adota os preceitos da agroecologia, visando oferecer produtos mais saudáveis e que fomentem o bem-viver alimentar no município.",
   },
 ];
 
@@ -19,13 +19,13 @@ const participantTypes = [
     title: "Produtores",
     image: "https://c.animaapp.com/mfh1vpp1e8a9vm/img/image-4.png",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec cursus tincidunt pharetra. Morbi nec venenatis tortor, sit amet egestas nisi. Morbi consequat justo augue, at vestibulum purus condimentum id. Duis felis magna, placerat vel lacus a, aliquam aliquet ex.",
+      "Os produtores, dentro do Agriconnect, podem incluir dados sobre as suas produções e disponibilizar os produtos colhidos para serem vendidos, facilitando o processo de registro e acompanhamento da quantidade colhida, vendida e em estoque.",
   },
   {
     title: "Associações",
     image: "https://c.animaapp.com/mfh1vpp1e8a9vm/img/image-5.png",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec cursus tincidunt pharetra. Morbi nec venenatis tortor, sit amet egestas nisi. Morbi consequat justo augue, at vestibulum purus condimentum id. Duis felis magna, placerat vel lacus a, aliquam aliquet ex.",
+      "A Associação de Produtores Orgânicos União e Força, fundada em 2022, é a principal associação vinculada ao Agriconnect. Os seus produtores, localizados na estrada de Autazes (km 14), comercializam produtos na Feira da Agricultura Familiar na sede do município de Careiro e na Feira Orgânica do Comercial PC, também na estrada de Autazes. Produzem e vendem, principalmente, hortaliças, frutas, farinhas e temperos.\n\nA Associação Unidos Venceremos da região do Mamori, Careiro, foi fundada em 2019 e está localizada na BR-319, Km 28, Ramal do Mamori. Atualmente conta com 18 produtores agroecológicos que trabalham no sistema orgânico. Produzem e vendem principalmente hortaliças, frutas e tubérculos.\n\nAssociação São José, localiza-se também na BR-319, no Km 68, Ramal do São José, possui mais de 10 anos de atuação. Atualmente, possui a Feira de Empreendedorismo Rural realizada todos os domingos no Km 11 do ramal onde são comercializados produtos regionais de produtores da região.\n\nNo Agriconnect, as associações podem visualizar dados sobre o desempenho da organização e resumos sobre o rendimento dos produtos, produtores e feiras. Na plataforma, é possível visualizar todos os âmbitos gerenciados por uma associação e adicionar os produtores afiliados, adicionando-os ao sistema de maneira vinculada à associação.",
   },
 ];
 
@@ -37,7 +37,7 @@ export const MainContentSection = (): JSX.Element => {
           <h2 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-2xl tracking-[0] leading-[normal] mb-[45px]">
             {section.title}
           </h2>
-          <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-base tracking-[0] leading-[normal] whitespace-pre-line">
+          <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-base tracking-[0] leading-[normal] whitespace-pre-line text-justify">
             {section.content}
           </p>
         </div>
@@ -55,7 +55,7 @@ export const MainContentSection = (): JSX.Element => {
                 alt={type.title}
                 src={type.image}
               />
-              <p className="text-center [font-family:'Montserrat',Helvetica] font-normal text-texto text-base tracking-[0] leading-[normal] max-w-[411px]">
+              <p className="text-justify [font-family:'Montserrat',Helvetica] font-normal text-texto text-base tracking-[0] leading-[normal] max-w-[411px]">
                 {type.description}
               </p>
             </div>
@@ -63,34 +63,20 @@ export const MainContentSection = (): JSX.Element => {
         </div>
       </div>
 
-  <div className="w-full">
+      <div className="w-full">
         <h2 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-2xl tracking-[0] leading-[normal] mb-[45px]">
           Como participar?
         </h2>
-        <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-base tracking-[0] leading-[normal]">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec cursus
-          tincidunt pharetra. Morbi nec venenatis tortor, sit amet egestas nisi.
-          Morbi consequat justo augue, at vestibulum purus condimentum id. Duis
-          felis magna, placerat vel lacus a, aliquam aliquet ex. Etiam id lectus
-          justo. Donec pellentesque ipsum a nisl dapibus, non hendrerit enim
-          gravida. Maecenas vel est ac risus viverra sagittis vitae vitae nulla.
-          Vivamus et interdum ex. Fusce porttitor odio ut ornare consequat.
-          Etiam tempus elementum urna non vulputate. Sed ullamcorper sapien
-          ultricies accumsan scelerisque. Donec placerat tellus id pharetra
-          tempus.
-          <br />
-          Integer et finibus enim. Pellentesque id odio sed ipsum bibendum
-          luctus ut eget nibh. Pellentesque habitant morbi tristique senectus et
-          netus et malesuada fames ac turpis egestas. Maecenas risus mauris,
-          hendrerit eget ligula ut, egestas porttitor neque. Vestibulum in nisl
-          ex.
+        <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-base tracking-[0] leading-[normal] text-justify">
+          A associação que deseja fazer parte do Agriconnect deve enviar uma 
+          solicitação de cadastro para o e-mail do projeto. Após analisada e 
+          aceita, a associação começa a fazer parte do projeto e começa a utilizar 
+          os serviços da plataforma onde poderá divulgar e comercializar seus 
+          produtos, além de possuir uma ferramenta para a gestão produtiva da 
+          associação e dos produtores, individualmente.
         </p>
-      </div>
-
-      {/* Espaçamento extra antes do banner */}
-      <div className="mt-16">
+      </div>      {/* Espaçamento extra antes do banner */}
         <JoinAgriconnectBanner />
-      </div>
     </section>
   );
 };
