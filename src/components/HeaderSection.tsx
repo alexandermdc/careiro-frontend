@@ -104,7 +104,8 @@ export const HeaderSection = (): JSX.Element => {
               </Button>
             </div>
           ) : (
-            <Button asChild variant="outline" size="default" className="h-12 inline-flex items-center justify-center gap-2 px-6 rounded-2xl border-verde-claro">
+            <>
+              <Button asChild variant="outline" size="default" className="h-12 inline-flex items-center justify-center gap-2 px-6 rounded-2xl border-verde-claro">
               <Link to="/login" aria-label="Ir para login" className="inline-flex items-center gap-2">
                 <span className="font-[number:var(--bot-es-font-weight)] text-verde-claro text-[length:var(--bot-es-font-size)] text-center leading-[var(--bot-es-line-height)] whitespace-nowrap font-bot-es tracking-[var(--bot-es-letter-spacing)] [font-style:var(--bot-es-font-style)]">
                   Fazer login
@@ -112,6 +113,16 @@ export const HeaderSection = (): JSX.Element => {
                 <UserIcon className="w-6 h-6 text-verde-claro" />
               </Link>
             </Button>
+            <Button asChild variant="outline" size="default" className="h-12 inline-flex items-center justify-center gap-2 px-6 rounded-2xl border-verde-claro">
+              <a
+        href="/app-careiro.apk"
+        download
+        className="bg-green-700 text-white py-3 px-6 rounded-lg shadow-md hover:bg-green-800 transition-all"
+      >
+        Baixar App
+      </a>
+            </Button>
+            </>            
           )}
         </div>
       </div>
