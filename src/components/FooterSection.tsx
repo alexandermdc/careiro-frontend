@@ -97,14 +97,14 @@ export const FooterSection = ({ sections = defaultSections }: FooterSectionProps
             </h3>
             <div className="flex flex-col gap-2">
               <a
-                href="https://facebook.com/agriconnect"
+                href=""
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook Agriconnect"
                 className="inline-flex items-center gap-2 text-texto hover:text-verde-escuro transition-colors"
               >
                 <img 
-                  src="/src/assets/img/ic_baseline-facebook.svg" 
+                  src="/img/ic_baseline-facebook.svg" 
                   alt="Facebook" 
                   className="w-6 h-6"
                 />
@@ -119,7 +119,7 @@ export const FooterSection = ({ sections = defaultSections }: FooterSectionProps
                 className="inline-flex items-center gap-2 text-texto hover:text-verde-escuro transition-colors"
               >
                 <img 
-                  src="/src/assets/img/lets-icons_insta.svg" 
+                  src="img/lets-icons_insta.svg" 
                   alt="Instagram" 
                   className="w-6 h-6"
                 />
@@ -134,7 +134,7 @@ export const FooterSection = ({ sections = defaultSections }: FooterSectionProps
                 className="inline-flex items-center gap-2 text-texto hover:text-verde-escuro transition-colors"
               >
                 <img 
-                  src="/src/assets/img/mdi_linkedin.svg" 
+                  src="img/mdi_linkedin.svg" 
                   alt="LinkedIn" 
                   className="w-6 h-6"
                 />

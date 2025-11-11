@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '../../components/button';
-import { useAuth } from '../../contexts/AuthContext';
-import feiraImg from '../../assets/img/LoginCadastro.png';
+import { Button } from "../../components/button";
+import { useAuth } from "../../contexts/AuthContext";
 
-const Login: React.FC = () => {
+const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -41,7 +40,7 @@ const Login: React.FC = () => {
                 <div 
                     className="hidden lg:flex lg:w-[70%] relative"
                     style={{
-                        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${feiraImg})`,
+                        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(/img/LoginCadastro.png)`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat'

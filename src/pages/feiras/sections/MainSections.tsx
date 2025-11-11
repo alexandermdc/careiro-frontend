@@ -12,13 +12,11 @@ import {
 } from "../../../components/bradcrumb";
 import { Button } from "../../../components/button";
 import { JoinAgriconnectBanner } from "../../../components/JoinAgriconnectBanner";
-import feiraImg from "../../../assets/img/Feira.png";
-import associacaoImg from "../../../assets/img/Associacao.png";
 
 export const MainContentSection = (): React.ReactElement => {
       const producers = [
     {
-      image: "../src/assets/img/AssociaMamori.png",
+      image: "img/AssociaMamori.png",
       name: "Associaçao Amuri",
     },
     {
@@ -84,7 +82,7 @@ export const MainContentSection = (): React.ReactElement => {
           <img
             className="w-full lg:w-[357px] h-[357px] object-cover rounded-lg"
             alt="Feira da Matriz"
-            src={feiraImg}
+            src="/img/Feira.png"
           />
 
           <div className="flex flex-col justify-center gap-6 flex-1">
@@ -96,7 +94,7 @@ export const MainContentSection = (): React.ReactElement => {
             </h1>
             <div className="flex items-center gap-2">
               <img
-                src={associacaoImg}
+                src="/img/Associacao.png"
                 alt="Associação Mamori"
                 className="w-8 h-8 rounded-full object-cover"
               />
