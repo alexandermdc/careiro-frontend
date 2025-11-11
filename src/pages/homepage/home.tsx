@@ -3,7 +3,6 @@ import { PageLayout } from "../../components/PageLayout";
 import { MainContentSection } from "./sections/MainContentSection/MainContentSection";
 import { Card, CardContent } from "../../components/cards";
 import { Button } from "../../components/button";
-import agriculturaFamiliar from "../../assets/img/20230803_agriculturafamiliar.jpg";
 
 export const Homepage = (): React.ReactElement => {
   return (
@@ -14,7 +13,7 @@ export const Homepage = (): React.ReactElement => {
             <div className="flex flex-col lg:flex-row items-center justify-center gap-12 max-w-6xl w-full">
                 <div className="flex-1 text-center lg:text-left">
                   <img
-                  src={agriculturaFamiliar}
+                  src="/img/20230803_agriculturafamiliar.jpg"
                   alt="Agricultores conectando com consumidores"
                   className="w-full max-w-3xl mx-auto rounded-3xl shadow-2xl"
                   style={{ minHeight: "420px", minWidth: "360px" }}

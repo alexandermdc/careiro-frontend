@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import clienteService from '../../services/clienteService';
 import "../../index.css";
 import { Button } from '../../components/button';
-import feiraImg from '../../assets/img/Feira.png';
 
 export default function FormCliente() {
   const [nome, setNome] = useState('');
@@ -35,7 +34,7 @@ export default function FormCliente() {
       <div 
         className="hidden lg:flex lg:w-[70%] relative"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${feiraImg})`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(/img/Feira.png)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'

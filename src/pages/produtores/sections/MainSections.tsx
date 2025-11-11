@@ -95,7 +95,7 @@ export const MainContentSection = (): React.ReactElement => {
           <img
             className="w-full lg:w-[357px] h-[357px] object-cover rounded-lg"
             alt="Produtor Marcelo Mamori"
-            src="../src/assets/img/ImgExample.png"
+            src="img/ImgExample.png"
           />
 
           <div className="flex flex-col gap-6 flex-1">

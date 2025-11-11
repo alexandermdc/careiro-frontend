@@ -1,7 +1,6 @@
 import { useCarrinho } from '../../contexts/CarrinhoContext';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import logoAgriconect from '../../assets/img/logoagriconect.svg';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import pedidoService from '../../services/pedidoService';
 import pagamentoService from '../../services/pagamentoService';
@@ -83,7 +82,7 @@ export default function CarrinhoPage() {
               >
                 <ArrowLeft className="w-6 h-6 text-gray-700" />
               </button>
-              <img src={logoAgriconect} alt="Logo Agriconnect" className="h-20" />
+              <img src="/img/logoagriconect.svg" alt="Logo Agriconnect" className="h-20" />
             </div>
             <div className="flex-1"></div> {/* Espaçador flexível */}
             <h1 className="text-[24px] font-bold text-[#1A3C11] text-center [font-family:'Montserrat',Helvetica] leading-normal mr-8">Sua sacola</h1>
@@ -120,7 +119,7 @@ export default function CarrinhoPage() {
             >
               <ArrowLeft className="w-6 h-6 text-gray-700" />
             </button>
-            <img src={logoAgriconect} alt="Logo Agriconnect" className="h-20" />
+            <img src="/img/logoagriconect.svg" alt="Logo Agriconnect" className="h-20" />
           </div>
           <div className="flex-1"></div> {/* Espaçador flexível */}
           <h1 className="text-[24px] font-bold text-[#1A3C11] text-center [font-family:'Montserrat',Helvetica] leading-normal mr-8">Sua sacola</h1>
