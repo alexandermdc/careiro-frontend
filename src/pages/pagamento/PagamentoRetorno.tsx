@@ -9,16 +9,8 @@ export default function PagamentoRetorno() {
   useEffect(() => {
     // Pegar status da URL
     const statusParam = searchParams.get('status');
-    const paymentId = searchParams.get('payment_id');
-    const preferenceId = searchParams.get('preference_id');
-    const externalReference = searchParams.get('external_reference');
 
-    console.log('🔄 Retorno do Mercado Pago:', {
-      status: statusParam,
-      paymentId,
-      preferenceId,
-      externalReference
-    });
+
 
     if (statusParam === 'sucesso' || statusParam === 'approved') {
       setStatus('success');

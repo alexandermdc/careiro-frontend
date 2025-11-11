@@ -73,7 +73,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await authService.logout();
       setUser(null);
     } catch (error) {
-      console.error('Erro no logout:', error);
     } finally {
       setIsLoading(false);
     }

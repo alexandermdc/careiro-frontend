@@ -11,12 +11,7 @@ export default function CarrinhoPage() {
   const navigate = useNavigate();
   const [processando, setProcessando] = useState(false);
 
-  console.log('🛒 Itens no carrinho:', itens.map(item => ({
-    nome: item.nome,
-    tem_imagem: !!item.imagem,
-    eh_base64: item.imagem?.startsWith('data:image'),
-    tamanho: item.imagem?.length
-  })));
+
 
   const handleFinalizarCompra = async () => {
     if (itens.length === 0) {
@@ -36,7 +31,7 @@ export default function CarrinhoPage() {
 
     try {
       // 1. Criar pedido no banco de dados
-      console.log('📝 Etapa 1: Criando pedido no banco...');
+
       
       const pedido = await pedidoService.criarPedido({
         data_pedido: new Date().toISOString(),
@@ -48,15 +43,15 @@ export default function CarrinhoPage() {
         }))
       });
 
-      console.log('✅ Pedido criado com ID:', pedido.pedido_id);
+
 
       // 2. Criar preferência de pagamento no Mercado Pago
-      console.log('💳 Etapa 2: Criando pagamento no Mercado Pago...');
+
       
       const { initPoint } = await pagamentoService.criarPreferencia(pedido.pedido_id);
 
       // 3. Redirecionar para o Mercado Pago
-      console.log('🔄 Etapa 3: Redirecionando para checkout...');
+
       pagamentoService.redirecionarParaCheckout(initPoint);
 
     } catch (error: any) {

@@ -43,9 +43,7 @@ class PedidoService {
    * Criar um novo pedido com produtos
    */
   async criarPedido(dados: CriarPedidoDTO): Promise<Pedido> {
-    console.log('📦 Criando pedido:', dados);
     const response = await api.post('/pedido/cadastro', dados);
-    console.log('✅ Pedido criado:', response.data);
     return response.data;
   }
 

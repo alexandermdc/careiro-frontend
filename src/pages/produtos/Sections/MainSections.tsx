@@ -111,14 +111,6 @@ export const MainContentSection = (): React.ReactElement => {
             fk_feira: produto.fk_feira || undefined
         };
 
-        console.log('🛒 Adicionando ao carrinho:', {
-            nome: produto.nome,
-            tem_imagem: !!produto.image,
-            eh_base64: produto.image?.startsWith('data:image'),
-            tamanho_imagem: produto.image?.length,
-            primeiros_100_chars: produto.image?.substring(0, 100)
-        });
-
         adicionarAoCarrinho(produtoCarrinho);
         
         // Feedback visual
@@ -126,11 +118,11 @@ export const MainContentSection = (): React.ReactElement => {
     };
 
     const handleToggleFavorito = async (produto_id: string | number) => {
-        console.log('🎯 handleToggleFavorito chamado para produto:', produto_id);
+
         
         // Verificar se está logado
         const token = localStorage.getItem('accessToken');
-        console.log('🔑 Token encontrado:', token ? 'Sim' : 'Não');
+
         
         if (!token) {
             console.warn('⚠️ Usuário não autenticado');
@@ -140,12 +132,12 @@ export const MainContentSection = (): React.ReactElement => {
         }
 
         try {
-            console.log('🔄 Chamando toggleFavorito...');
+  
             await toggleFavorito(produto_id);
             
-            console.log('✅ toggleFavorito concluído, verificando estado...');
+
             const isFav = isFavorito(produto_id);
-            console.log('❤️ Produto é favorito agora?', isFav);
+ 
             
             alert(isFav ? 'Produto adicionado aos favoritos!' : 'Produto removido dos favoritos!');
         } catch (error: any) {

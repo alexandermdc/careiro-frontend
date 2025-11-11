@@ -73,7 +73,6 @@ class AuthService {
 
   async loginVendedor(credentials: VendedorLoginCredentials): Promise<VendedorAuthResponse> {
     try {
-      console.log('🔐 Login de vendedor...');
       
       const response = await api.post('/auth/login/vendedor', {
         id_vendedor: credentials.id_vendedor,
@@ -89,11 +88,9 @@ class AuthService {
         tipo: 'vendedor'
       }));
       
-      console.log('✅ Login de vendedor realizado');
       
       return response.data;
     } catch (error: any) {
-      console.error('❌ Erro no login de vendedor:', error);
       throw new Error(error.response?.data?.error || 'Erro no login do vendedor');
     }
   }
@@ -105,7 +102,6 @@ class AuthService {
         await api.post('/refresh/logout', { refreshToken });
       }
     } catch (error) {
-      console.error('Erro no logout:', error);
     } finally {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');

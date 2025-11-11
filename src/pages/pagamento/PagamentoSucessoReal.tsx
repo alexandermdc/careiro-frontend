@@ -16,18 +16,12 @@ export default function PagamentoSucessoReal() {
     const carregarPedido = async () => {
       const pedidoId = localStorage.getItem('ultimo_pedido_id');
 
-      console.log('🔄 Retorno do Mercado Pago:', {
-        paymentId,
-        status,
-        preferenceId,
-        pedidoId
-      });
 
       if (pedidoId) {
         try {
           const response = await api.get(`/pedido/${pedidoId}`);
           setPedido(response.data);
-          console.log('✅ Pedido carregado:', response.data);
+
 
           // Limpar carrinho e pedido salvo
           localStorage.removeItem('carrinho');

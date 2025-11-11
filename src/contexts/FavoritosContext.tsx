@@ -25,18 +25,14 @@ export const FavoritosProvider = ({ children }: { children: ReactNode }) => {
   // Definir carregarFavoritos antes do useEffect
   const carregarFavoritos = useCallback(async () => {
     if (!user?.cpf) {
-      console.log('⚠️ carregarFavoritos: sem CPF do usuário');
       return;
     }
 
     try {
       setLoading(true);
-      console.log('🔄 Carregando favoritos do cliente:', user.cpf);
       
       const produtosFavoritos = await clienteService.listarFavoritos(user.cpf);
       
-      console.log('📦 Produtos favoritos recebidos:', produtosFavoritos);
-      console.log('📊 Total de favoritos:', produtosFavoritos.length);
       
       setFavoritos(produtosFavoritos);
       
@@ -45,16 +41,12 @@ export const FavoritosProvider = ({ children }: { children: ReactNode }) => {
         produtosFavoritos.map((p: any) => {
           const id = p.id_produto || p.id;
           const normalizedId = String(id);
-          console.log('🆔 ID mapeado:', normalizedId, 'para produto:', p.nome);
           return normalizedId;
         })
       );
       setFavoritosIds(ids);
       
-      console.log('✅ Favoritos carregados:', produtosFavoritos.length);
-      console.log('🆔 IDs dos favoritos (normalizados):', Array.from(ids));
     } catch (error) {
-      console.error('❌ Erro ao carregar favoritos:', error);
     } finally {
       setLoading(false);
     }
@@ -62,21 +54,10 @@ export const FavoritosProvider = ({ children }: { children: ReactNode }) => {
 
   // Carregar favoritos quando o usuário logar
   useEffect(() => {
-    console.log('👤 useEffect FavoritosContext - DISPARADO!');
-    console.log('   user:', user);
-    console.log('   user?.tipo:', user?.tipo);
-    console.log('   user?.cpf:', user?.cpf);
-    console.log('   Condição completa:', user && user.tipo === 'cliente' && user.cpf);
     
     if (user && user.tipo === 'cliente' && user.cpf) {
-      console.log('✅ Usuário válido, chamando carregarFavoritos...');
       carregarFavoritos();
     } else {
-      console.log('❌ Condições não atendidas:');
-      console.log('   - user existe?', !!user);
-      console.log('   - tipo === cliente?', user?.tipo === 'cliente');
-      console.log('   - tem CPF?', !!user?.cpf);
-      console.log('   Limpando favoritos...');
       setFavoritos([]);
       setFavoritosIds(new Set());
     }
@@ -84,25 +65,18 @@ export const FavoritosProvider = ({ children }: { children: ReactNode }) => {
 
   const adicionarFavorito = async (produto_id: string | number) => {
     if (!user?.cpf) {
-      console.error('❌ Tentou adicionar favorito sem usuário autenticado');
       throw new Error('Usuário não autenticado');
     }
 
     try {
-      console.log('⭐ Adicionando favorito:', produto_id);
-      console.log('👤 CPF do usuário:', user.cpf);
       
       await clienteService.adicionarFavorito(user.cpf, String(produto_id));
       
-      console.log('✅ Favorito adicionado no backend, recarregando lista...');
       
       // Atualizar lista local
       await carregarFavoritos();
       
-      console.log('✅ Lista de favoritos recarregada!');
-      console.log('📊 Total de favoritos agora:', favoritos.length);
     } catch (error: any) {
-      console.error('❌ Erro ao adicionar favorito:', error);
       throw error;
     }
   };
@@ -113,16 +87,13 @@ export const FavoritosProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      console.log('Removendo favorito:', produto_id);
       
       await clienteService.removerFavorito(user.cpf, String(produto_id));
       
       // Atualizar lista local
       await carregarFavoritos();
       
-      console.log('✅ Favorito removido com sucesso');
     } catch (error: any) {
-      console.error('❌ Erro ao remover favorito:', error);
       throw error;
     }
   };
@@ -141,8 +112,6 @@ export const FavoritosProvider = ({ children }: { children: ReactNode }) => {
     // Normalizar para string para garantir comparação consistente
     const normalizedId = String(produto_id);
     const resultado = favoritosIds.has(normalizedId);
-    console.log(`🔍 Verificando se produto ${normalizedId} é favorito:`, resultado);
-    console.log('📋 IDs favoritos disponíveis:', Array.from(favoritosIds));
     return resultado;
   };
 

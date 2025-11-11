@@ -11,9 +11,6 @@ export const AssociacoesListSection: React.FC = () => {
   const [error, setError] = useState('');
   const { isAuthenticated, user } = useAuth();
 
-  console.log('🎯 Componente AssociacoesListSection renderizado');
-  console.log('🔐 Usuário autenticado:', isAuthenticated);
-  console.log('👤 Dados do usuário:', user);
 
   useEffect(() => {
     carregarAssociacoes();
@@ -21,16 +18,13 @@ export const AssociacoesListSection: React.FC = () => {
 
   const carregarAssociacoes = async () => {
     try {
-      console.log('🔄 Iniciando carregamento das associações...');
       setLoading(true);
       setError('');
       
       const data = await associacaoService.getAll();
       
-      console.log('✅ Associações carregadas:', data);
       setAssociacoes(data);
     } catch (err: any) {
-      console.error('❌ Erro ao carregar associações:', err);
       setError(err.message || 'Erro ao carregar associações');
     } finally {
       setLoading(false);
@@ -43,16 +37,13 @@ export const AssociacoesListSection: React.FC = () => {
     }
 
     try {
-      console.log('🗑️ Deletando associação:', id);
       
       await associacaoService.delete(id);
       
-      console.log('✅ Associação deletada com sucesso');
       
       // Recarregar a lista
       await carregarAssociacoes();
     } catch (err: any) {
-      console.error('❌ Erro ao deletar associação:', err);
       alert(err.message || 'Erro ao deletar associação');
     }
   };

@@ -38,7 +38,6 @@ export const CarrinhoProvider = ({ children }: { children: ReactNode }) => {
         return JSON.parse(carrinhoSalvo);
       }
     } catch (error) {
-      console.error('Erro ao carregar carrinho do localStorage:', error);
     }
     return [];
   });
@@ -48,7 +47,6 @@ export const CarrinhoProvider = ({ children }: { children: ReactNode }) => {
     try {
       localStorage.setItem(CARRINHO_STORAGE_KEY, JSON.stringify(itens));
     } catch (error) {
-      console.error('Erro ao salvar carrinho no localStorage:', error);
     }
   }, [itens]);
 

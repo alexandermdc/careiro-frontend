@@ -145,7 +145,7 @@
                 const testeId = `pedido-teste-${Date.now()}`;
                 const url = `${backendUrl}/mercado-pago/pagamento`;
 
-                console.log('📦 Enviando requisição:', { url, testeId });
+
 
                 const response = await fetch(url, {
                     method: 'POST',
@@ -158,7 +158,6 @@
 
                 const data = await response.json();
 
-                console.log('✅ Resposta recebida:', data);
 
                 if (response.ok && (data.initPoint || data.init_point)) {
                     resultado.className = 'sucesso';

@@ -47,7 +47,7 @@ export const BuscaProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       setTermoBusca(termo);
-      console.log('🔍 Buscando por:', termo);
+
 
       // Buscar em paralelo em todas as APIs
       const [produtos, associacoes] = await Promise.all([
@@ -82,11 +82,7 @@ export const BuscaProvider = ({ children }: { children: ReactNode }) => {
 
       setResultados(todosResultados);
       
-      console.log('✅ Busca concluída:', {
-        produtos: produtosFiltrados.length,
-        associacoes: associacoesFiltradas.length,
-        total: todosResultados.length,
-      });
+
     } catch (error) {
       console.error('❌ Erro na busca:', error);
       setResultados([]);
