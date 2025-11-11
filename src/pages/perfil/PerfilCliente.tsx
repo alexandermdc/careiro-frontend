@@ -302,7 +302,7 @@ const PerfilCliente: React.FC = () => {
     if (!user?.cpf) return;
     
     try {
-      console.log('🔄 Carregando dados completos do cliente...');
+
       setLoading(true);
       setError('');
       
@@ -310,10 +310,7 @@ const PerfilCliente: React.FC = () => {
       
       setCliente(dadosCompletos.cliente);
       
-      console.log('✅ Dados carregados:', {
-        cliente: dadosCompletos.cliente.nome,
-        favoritos: favoritos.length
-      });
+
       
     } catch (err: any) {
       console.error('❌ Erro ao carregar dados:', err);
@@ -327,14 +324,12 @@ const PerfilCliente: React.FC = () => {
     if (!user?.cpf) return;
     
     try {
-      console.log('💾 Salvando alterações via modal...');
-      console.log('📋 Dados para atualização:', editData);
+
       
       const clienteAtualizado = await clienteService.atualizar(user.cpf, editData);
       
       setCliente(clienteAtualizado);
       
-      console.log('✅ Perfil atualizado com sucesso via modal');
       
       // Notification toast moderna
       const successToast = document.createElement('div');
@@ -657,9 +652,7 @@ const PerfilCliente: React.FC = () => {
             )}
 
             {activeTab === 'favoritos' && (() => {
-              console.log('🎨 Renderizando aba de favoritos');
-              console.log('❤️ Array de favoritos:', favoritos);
-              console.log('📊 Quantidade:', favoritos.length);
+
               
               return (
               <div className="bg-white rounded-lg shadow-sm">
@@ -671,7 +664,6 @@ const PerfilCliente: React.FC = () => {
                     </h3>
                     <button
                       onClick={() => {
-                        console.log('🔄 Botão Recarregar clicado');
                         carregarFavoritos();
                       }}
                       className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"

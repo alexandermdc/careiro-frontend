@@ -25,7 +25,6 @@ export const HeaderSection = (): JSX.Element => {
     try {
       await logout();
     } catch (error) {
-      console.error('Erro no logout:', error);
     }
   };
 

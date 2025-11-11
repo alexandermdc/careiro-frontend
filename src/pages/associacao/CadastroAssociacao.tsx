@@ -7,7 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const CadastroAssociacao: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  useAuth();
   
   const [formData, setFormData] = useState<CreateAssociacaoData>({
     nome: '',
@@ -18,18 +18,14 @@ const CadastroAssociacao: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  console.log('🎯 Componente CadastroAssociacao renderizado');
-  console.log('👤 Usuário atual:', user);
-  console.log('📋 FormData inicial:', formData);
-  
   // Debug: Verificar se backend está online
   React.useEffect(() => {
     const testBackend = async () => {
       try {
-        const response = await fetch('http://localhost:3000/associacao');
-        console.log('🌐 Backend Status:', response.status, response.statusText);
+        await fetch('http://localhost:3000/associacao');
+
       } catch (error) {
-        console.error('❌ Backend offline ou erro:', error);
+
       }
     };
     testBackend();
@@ -37,7 +33,7 @@ const CadastroAssociacao: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    console.log(`📝 Campo alterado - ${name}:`, value);
+
     
     setFormData(prev => ({
       ...prev,
@@ -52,12 +48,10 @@ const CadastroAssociacao: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('🚀 Iniciando cadastro de associação...');
-    console.log('📋 Dados do formulário:', formData);
-    
+
     if (!formData.nome || !formData.descricao) {
       setError('Nome e descrição são obrigatórios');
-      console.log('❌ Erro: Campos obrigatórios não preenchidos');
+
       return;
     }
 
@@ -66,13 +60,10 @@ const CadastroAssociacao: React.FC = () => {
     setSuccess('');
 
     try {
-      console.log('⏳ Enviando dados para o backend...'); 
-      console.log('📊 FormData completo:', JSON.stringify(formData, null, 2));
-      console.log('👤 Usuário logado:', JSON.stringify(user, null, 2));
+
+      await associacaoService.create(formData);
       
-      const result = await associacaoService.create(formData);
-      
-      console.log('✅ Associação criada com sucesso:', result);
+
       
       setSuccess('Associação cadastrada com sucesso!');
       

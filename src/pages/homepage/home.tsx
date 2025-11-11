@@ -31,7 +31,6 @@ export const Homepage = (): React.ReactElement => {
                     <Button
                       className="bg-verde-escuro hover:bg-verde-escuro/90 text-white [font-family:'Montserrat',Helvetica] font-bold text-xl lg:text-2xl px-12 py-6 h-auto transition-all duration-300 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105"
                       onClick={() => {
-                        console.log('Navegando para a loja...');
                       }}
                     >
                       COMPRE AGORA

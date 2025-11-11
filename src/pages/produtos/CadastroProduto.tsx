@@ -69,7 +69,6 @@ const CadastroProduto: React.FC = () => {
         setFormData(prev => ({ ...prev, id_categoria: cats[0].id_categoria }));
       }
     } catch (error) {
-      console.error('Erro ao carregar categorias:', error);
     }
   };
 
@@ -150,27 +149,16 @@ const CadastroProduto: React.FC = () => {
     });
 
     try {
-      console.log('📤 Processando imagem:', {
-        nome: file.name,
-        tamanho_original: `${(file.size / 1024).toFixed(2)} KB`,
-        tipo: file.type
-      });
 
       // Comprimir e redimensionar a imagem
       const compressedBase64 = await compressImage(file);
       
-      console.log('✅ Imagem comprimida:', {
-        tamanho_base64: `${(compressedBase64.length / 1024).toFixed(2)} KB`,
-        primeiros_50_chars: compressedBase64.substring(0, 50)
-      });
-
       // Atualizar preview e formData
       setImagePreview(compressedBase64);
       setFormData(prev => ({ ...prev, image: compressedBase64 }));
       setUploadingImage(false);
 
     } catch (error) {
-      console.error('❌ Erro no upload:', error);
       setErrors(prev => ({ ...prev, image: 'Erro ao fazer upload da imagem' }));
       setUploadingImage(false);
     }
@@ -252,30 +240,14 @@ const CadastroProduto: React.FC = () => {
     });
 
     if (Object.keys(errors).length > 0) {
-      console.log('❌ Formulário com erros:', errors);
+
       return;
     }
 
     try {
       setLoading(true);
       
-      // Verificar token antes de enviar
-      const token = localStorage.getItem('accessToken');
-      console.log('🔑 Token no localStorage:', token ? 'Existe ✅' : 'Não existe ❌');
-      console.log('👤 User:', user);
-      console.log('📤 Enviando produto:', {
-        ...formData,
-        image: formData.image ? `base64... (${formData.image.length} caracteres)` : 'sem imagem'
-      });
-      console.log('🖼️ Tamanho da imagem:', {
-        caracteres: formData.image.length,
-        kb: (formData.image.length / 1024).toFixed(2),
-        eh_base64: formData.image.startsWith('data:image')
-      });
-      
       const produtoCriado = await produtoService.criar(formData);
-      
-      console.log('✅ Produto criado:', produtoCriado);
       
       // Toast de sucesso
       const successToast = document.createElement('div');
@@ -315,7 +287,6 @@ const CadastroProduto: React.FC = () => {
       }, 2000);
       
     } catch (err: any) {
-      console.error('❌ Erro ao cadastrar produto:', err);
       
       // Toast de erro
       const errorToast = document.createElement('div');

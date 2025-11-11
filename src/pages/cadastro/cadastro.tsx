@@ -16,17 +16,13 @@ export default function FormCliente() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    console.log('📝 Iniciando cadastro de cliente...');
-    console.log('📋 Dados do formulário:', { cpf, nome, email, telefone, senha: '[OCULTO]' });
     
     try {
       await clienteService.criar({ cpf, nome, email, telefone, senha });
       
-      console.log('✅ Cliente cadastrado com sucesso!');
       alert('Cliente cadastrado com sucesso!');
       navigate('/login');
     } catch (error: any) {
-      console.error('❌ Erro no cadastro:', error);
       alert(error.message || 'Erro ao cadastrar cliente. Tente novamente.');
     }
   };

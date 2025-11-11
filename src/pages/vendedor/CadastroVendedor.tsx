@@ -35,9 +35,7 @@ const CadastroVendedor: React.FC = () => {
     try {
       const data = await associacaoService.getAll();
       setAssociacoes(data);
-      console.log('✅ Associações carregadas:', data.length);
     } catch (error) {
-      console.error('❌ Erro ao carregar associações:', error);
       // Não é crítico, pode prosseguir sem associação
     }
   };
@@ -140,14 +138,12 @@ const CadastroVendedor: React.FC = () => {
     e.preventDefault();
 
     if (!validarFormulario()) {
-      console.log('❌ Formulário inválido:', errors);
       return;
     }
 
     setLoading(true);
 
     try {
-      console.log('📤 Enviando vendedor:', formData);
       
       // Remover fk_associacao se estiver vazio
       const dadosEnvio = {
@@ -157,7 +153,6 @@ const CadastroVendedor: React.FC = () => {
 
       const result = await vendedorService.criar(dadosEnvio);
       
-      console.log('✅ Vendedor cadastrado:', result);
       
       // Exibir UUID do vendedor
       const uuid = result.id_vendedor || 'N/A';
@@ -175,7 +170,6 @@ const CadastroVendedor: React.FC = () => {
       }, 5000);
       
     } catch (error: any) {
-      console.error('❌ Erro ao cadastrar vendedor:', error);
       alert(`❌ ${error.message}`);
     } finally {
       setLoading(false);

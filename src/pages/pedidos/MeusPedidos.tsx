@@ -21,9 +21,7 @@ export default function MeusPedidos() {
       const dados = await pedidoService.listarPedidos();
       setPedidos(dados);
       
-      console.log('✅ Pedidos carregados:', dados.length);
     } catch (error: any) {
-      console.error('❌ Erro ao buscar pedidos:', error);
       
       if (error.response?.status === 401) {
         setErro('Você precisa estar logado para ver seus pedidos.');

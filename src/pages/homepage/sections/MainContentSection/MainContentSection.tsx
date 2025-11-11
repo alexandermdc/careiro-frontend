@@ -146,9 +146,7 @@ export const MainContentSection = (): JSX.Element => {
       const primeirosProdutos = response.data.slice(0, 4);
       setProdutosDestaque(primeirosProdutos);
       
-      console.log('✅ Produtos em destaque carregados:', primeirosProdutos.length);
     } catch (error) {
-      console.error('❌ Erro ao buscar produtos:', error);
     } finally {
       setCarregandoProdutos(false);
     }

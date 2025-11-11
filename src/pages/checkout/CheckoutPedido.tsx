@@ -44,7 +44,6 @@ export default function CheckoutPedido() {
     setErro(null);
 
     try {
-      console.log('📦 Preparando pedido...');
       
       // Preparar dados do pedido
       const produtos = itens.map(item => ({
@@ -59,19 +58,15 @@ export default function CheckoutPedido() {
         produtos: produtos
       };
 
-      console.log('📤 Enviando pedido para o backend:', dadosPedido);
 
       // 1. Criar pedido no backend
       const pedidoCriado = await pedidoService.criarPedido(dadosPedido);
 
-      console.log('✅ Pedido criado com sucesso:', pedidoCriado);
 
       // 2. Criar preferência de pagamento no Mercado Pago
-      console.log('💳 Criando preferência de pagamento...');
       
       const { initPoint } = await pagamentoService.criarPreferencia(pedidoCriado.pedido_id);
 
-      console.log('✅ Preferência criada, redirecionando para Mercado Pago...');
 
       // 3. Salvar pedido_id para quando retornar do pagamento
       localStorage.setItem('ultimo_pedido_id', pedidoCriado.pedido_id.toString());
@@ -83,7 +78,6 @@ export default function CheckoutPedido() {
       window.location.href = initPoint;
 
     } catch (error: any) {
-      console.error('❌ Erro ao criar pedido:', error);
       
       if (error.response) {
         setErro(error.response.data.error || 'Erro ao criar pedido');
