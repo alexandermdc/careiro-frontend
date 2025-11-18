@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import clienteService from '../../services/clienteService';
 import "../../index.css";
 import { Button } from '../../components/button';
+import { validarCPF, aplicarMascaraCPF, limparCPF } from '../../utils/cpfValidator';
 
 export default function FormCliente() {
   const [nome, setNome] = useState('');
@@ -12,12 +13,33 @@ export default function FormCliente() {
   const [senha, setSenha] = useState('');
   const navigate = useNavigate();
 
+  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const masked = aplicarMascaraCPF(e.target.value);
+    if (masked.length <= 14) {
+      setCPF(masked);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
+    // Limpa e valida CPF antes de enviar
+    const cpfLimpo = limparCPF(cpf);
+    
+    if (!validarCPF(cpfLimpo)) {
+      alert('CPF inválido! Por favor, verifique o CPF digitado.');
+      return;
+    }
     
     try {
-      await clienteService.criar({ cpf, nome, email, telefone, senha });
+      // Envia CPF sem formatação (apenas números)
+      await clienteService.criar({ 
+        cpf: cpfLimpo, 
+        nome, 
+        email, 
+        telefone, 
+        senha 
+      });
       
       alert('Cliente cadastrado com sucesso!');
       navigate('/login');
@@ -95,8 +117,9 @@ export default function FormCliente() {
 
         <input
           value={cpf}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCPF(e.target.value)}
-          placeholder="Informe seu CPF (apenas números)"
+          onChange={handleCPFChange}
+          placeholder="Informe seu CPF (XXX.XXX.XXX-XX)"
+          maxLength={14}
           className="w-full mb-3 p-3 border border-strokes rounded-md focus:outline-none focus:ring-2 focus:ring-verde-claro bg-fundo-claro text-texto"
         />
 
