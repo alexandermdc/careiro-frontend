@@ -47,10 +47,14 @@ export interface User {
 class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
+      console.log('🔵 Enviando login:', { email: credentials.email, senha: credentials.password });
+      
       const response = await api.post('/auth/login', {
         email: credentials.email,
         senha: credentials.password
       });
+      
+      console.log('✅ Resposta do backend:', response.data);
       
       // Backend retorna: token, accessToken, refreshToken, cliente
       const { token, accessToken, refreshToken, cliente } = response.data;
@@ -67,7 +71,10 @@ class AuthService {
       
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Erro no login');
+      console.error('❌ Erro completo:', error);
+      console.error('❌ Resposta do servidor:', error.response?.data);
+      console.error('❌ Status:', error.response?.status);
+      throw new Error(error.response?.data?.message || error.response?.data?.error || 'Erro no login');
     }
   }
 

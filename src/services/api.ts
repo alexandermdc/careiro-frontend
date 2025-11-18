@@ -13,6 +13,14 @@ const api = axios.create({
 // Interceptor para adicionar token automaticamente
 api.interceptors.request.use(
   (config) => {
+    console.log('📤 Requisição:', {
+      url: config.url,
+      baseURL: config.baseURL,
+      method: config.method,
+      data: config.data,
+      headers: config.headers
+    });
+    
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
