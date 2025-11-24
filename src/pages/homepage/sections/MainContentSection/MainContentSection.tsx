@@ -153,134 +153,138 @@ export const MainContentSection = (): JSX.Element => {
   };
 
   return (
-    <section className="flex flex-col w-full items-center gap-16 px-4 md:px-6 py-16">
+    <section className="flex flex-col w-full items-center gap-8 md:gap-12 lg:gap-16 px-4 md:px-6 py-8 md:py-12 lg:py-16">
+      {/* Produtos em Destaque */}
       <div className="w-full">
-        <div className="w-full max-w-[1108px] mx-auto">
-          <h2 className="mb-8 text-left font-t-tulos font-[number:var(--t-tulos-font-weight)] text-verde-escuro text-[length:var(--t-tulos-font-size)] tracking-[var(--t-tulos-letter-spacing)] leading-[var(--t-tulos-line-height)] [font-style:var(--t-tulos-font-style)]">
+        <div className="w-full max-w-[1108px] mx-auto mb-6 md:mb-8">
+          <h2 className="text-left font-bold text-verde-escuro text-xl md:text-2xl lg:text-3xl">
             Produtos e associações em destaque
           </h2>
         </div>
 
-        <div className="w-full max-w-[1108px] mx-auto flex items-center justify-center gap-[19px]">
+        <div className="w-full max-w-[1108px] mx-auto">
           {carregandoProdutos ? (
             // Loading state
-            <div className="text-center py-8">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-verde-escuro"></div>
-              <p className="mt-2 text-gray-600">Carregando produtos...</p>
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-10 w-10 md:h-12 md:w-12 border-b-2 border-verde-escuro"></div>
+              <p className="mt-3 text-sm md:text-base text-gray-600">Carregando produtos...</p>
             </div>
           ) : produtosDestaque.length === 0 ? (
             // Empty state
-            <div className="text-center py-8">
-              <p className="text-gray-600">Nenhum produto disponível no momento.</p>
+            <div className="text-center py-12">
+              <p className="text-sm md:text-base text-gray-600">Nenhum produto disponível no momento.</p>
             </div>
           ) : (
-            // Produtos reais do banco
-            produtosDestaque.map((produto) => {
-              const precoFinal = produto.is_promocao && produto.preco_promocao
-                ? produto.preco_promocao
-                : produto.preco;
-              const temPromocao = produto.is_promocao && produto.preco_promocao;
+            // Grid responsivo de produtos
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+              {produtosDestaque.map((produto) => {
+                const precoFinal = produto.is_promocao && produto.preco_promocao
+                  ? produto.preco_promocao
+                  : produto.preco;
+                const temPromocao = produto.is_promocao && produto.preco_promocao;
 
-              return (
-                <Card
-                  key={produto.id_produto}
-                  className="flex-col min-w-[263px] w-[263px] items-start gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-[25px] overflow-hidden"
-                >
-                  <div className="relative w-full">
-                    <img
-                      className="h-[263px] relative self-stretch w-full object-cover"
-                      alt={produto.nome}
-                      src={produto.image|| 'https://via.placeholder.com/263x263/9cb217/ffffff?text=Produto'}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "https://via.placeholder.com/263x263/9cb217/ffffff?text=" + encodeURIComponent(produto.nome);
-                      }}
-                    />
-                    {temPromocao && (
-                      <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
-                        PROMOÇÃO
-                      </span>
-                    )}
-                  </div>
-                  
-                  <CardContent className="flex flex-col items-start px-4 py-0 relative self-stretch w-full flex-[0_0_auto]">
-                    <div className="w-[231px] h-6 mt-[-1.00px] font-medium text-texto text-base leading-[normal] relative [font-family:'Montserrat',Helvetica] tracking-[0]">
-                      {produto.nome}
-                    </div>
-                    <div className="flex items-center gap-2 relative self-stretch w-full flex-[0_0_auto]">
+                return (
+                  <Card
+                    key={produto.id_produto}
+                    className="flex flex-col w-full items-start gap-3 md:gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-2xl md:rounded-[25px] overflow-hidden hover:shadow-lg transition-shadow"
+                  >
+                    <div className="relative w-full">
+                      <img
+                        className="h-[200px] sm:h-[220px] md:h-[263px] relative self-stretch w-full object-cover"
+                        alt={produto.nome}
+                        src={produto.image|| 'https://via.placeholder.com/263x263/9cb217/ffffff?text=Produto'}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "https://via.placeholder.com/263x263/9cb217/ffffff?text=" + encodeURIComponent(produto.nome);
+                        }}
+                      />
                       {temPromocao && (
-                        <div className="relative w-fit [font-family:'Montserrat',Helvetica] font-normal italic text-[#9f9f9f] text-sm text-center tracking-[0] leading-[normal] line-through">
-                          R$ {produto.preco.toFixed(2)}
-                        </div>
+                        <span className="absolute top-2 right-2 bg-red-500 text-white px-2 md:px-3 py-1 rounded text-xs md:text-sm font-bold">
+                          PROMOÇÃO
+                        </span>
                       )}
-                      <div className="relative w-fit mt-[-1.00px] [font-family:'Montserrat',Helvetica] font-bold text-verde-escuro text-base text-center tracking-[0] leading-[normal]">
-                        R$ {precoFinal.toFixed(2)}
-                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })
+                    
+                    <CardContent className="flex flex-col items-start px-3 md:px-4 py-0 relative self-stretch w-full flex-[0_0_auto]">
+                      <div className="w-full font-medium text-texto text-sm md:text-base leading-tight relative [font-family:'Montserrat',Helvetica] tracking-[0] mb-2">
+                        {produto.nome}
+                      </div>
+                      <div className="flex items-center gap-2 relative self-stretch w-full flex-[0_0_auto]">
+                        {temPromocao && (
+                          <div className="relative w-fit [font-family:'Montserrat',Helvetica] font-normal italic text-[#9f9f9f] text-xs md:text-sm text-center tracking-[0] leading-[normal] line-through">
+                            R$ {produto.preco.toFixed(2)}
+                          </div>
+                        )}
+                        <div className="relative w-fit [font-family:'Montserrat',Helvetica] font-bold text-verde-escuro text-base md:text-lg text-center tracking-[0] leading-[normal]">
+                          R$ {precoFinal.toFixed(2)}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>
 
+      {/* Feiras */}
       <div className="w-full">
-        <div className="w-full max-w-[1108px] mx-auto flex flex-col items-start gap-2 mb-8">
-        <h2 className="mt-[-1.00px] text-left font-t-tulos font-[number:var(--t-tulos-font-weight)] text-verde-escuro text-[length:var(--t-tulos-font-size)] tracking-[var(--t-tulos-letter-spacing)] leading-[var(--t-tulos-line-height)] [font-style:var(--t-tulos-font-style)]">
-          Conheça nossas feiras
-        </h2>
-        <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-base tracking-[0] leading-[normal] text-left">
-          Compre aqui e retire os alimentos fresquinhos nas feiras
-        </p>
+        <div className="w-full max-w-[1108px] mx-auto flex flex-col items-start gap-2 mb-6 md:mb-8">
+          <h2 className="text-left font-bold text-verde-escuro text-xl md:text-2xl lg:text-3xl">
+            Conheça nossas feiras
+          </h2>
+          <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-sm md:text-base tracking-[0] leading-[normal] text-left">
+            Compre aqui e retire os alimentos fresquinhos nas feiras
+          </p>
         </div>
 
-            <div className="w-full max-w-[1108px] mx-auto flex items-center justify-center gap-[19px] pb-4">
-        {fairs.map((fair, index) => (
-          <Card
-            key={index}
-            className={`flex-col min-w-[263px] ${index === 0 ? "w-[263px]" : "w-[283px]"} items-center gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-[25px] overflow-hidden`}
-          >
-            <img
-              className={`${fair.height} relative self-stretch w-full object-cover`}
-              alt={fair.title}
-              src={fair.image}
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = "https://via.placeholder.com/263x244/1d4510/ffffff?text=" + encodeURIComponent(fair.title);
-              }}
-            />
-            <CardContent className="flex flex-col items-start gap-2 px-4 py-0 relative self-stretch w-full flex-[0_0_auto]">
-              <div className="w-[231px] h-6 mt-[-1.00px] font-bold text-texto text-base leading-[normal] relative [font-family:'Montserrat',Helvetica] tracking-[0]">
-                {fair.title}
-              </div>
-              <div className="relative w-[217px] h-[52px]">
-                <div className="absolute w-[219px] h-6 top-0 left-0">
-                  <MapPinIcon className="absolute w-6 h-6 top-0 left-0" />
-                  <div className="absolute w-[185px] h-6 top-0 left-8 font-textos-curtos font-[number:var(--textos-curtos-font-weight)] text-[#5a5a5a] text-[length:var(--textos-curtos-font-size)] tracking-[var(--textos-curtos-letter-spacing)] leading-[var(--textos-curtos-line-height)] [font-style:var(--textos-curtos-font-style)]">
-                    {fair.location}
+        <div className="w-full max-w-[1108px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          {fairs.map((fair, index) => (
+            <Card
+              key={index}
+              className="flex flex-col w-full items-center gap-3 md:gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-2xl md:rounded-[25px] overflow-hidden hover:shadow-lg transition-shadow"
+            >
+              <img
+                className="h-[200px] sm:h-[220px] md:h-[244px] relative self-stretch w-full object-cover"
+                alt={fair.title}
+                src={fair.image}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "https://via.placeholder.com/263x244/1d4510/ffffff?text=" + encodeURIComponent(fair.title);
+                }}
+              />
+              <CardContent className="flex flex-col items-start gap-2 px-3 md:px-4 py-0 relative self-stretch w-full flex-[0_0_auto]">
+                <div className="w-full font-bold text-texto text-sm md:text-base leading-tight relative [font-family:'Montserrat',Helvetica] tracking-[0]">
+                  {fair.title}
+                </div>
+                <div className="relative w-full">
+                  <div className="flex items-center gap-2 mb-2">
+                    <MapPinIcon className="w-4 h-4 md:w-5 md:h-5 text-gray-600 flex-shrink-0" />
+                    <div className="flex-1 text-[#5a5a5a] text-xs md:text-sm font-normal [font-family:'Montserrat',Helvetica]">
+                      {fair.location}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="w-4 h-4 md:w-5 md:h-5 text-gray-600 flex-shrink-0" />
+                    <div className="[font-family:'Montserrat',Helvetica] font-normal text-[#5a5a5a] text-xs md:text-sm tracking-[0] leading-[normal]">
+                      {fair.date}
+                    </div>
                   </div>
                 </div>
-                <div className="absolute w-[122px] h-6 top-7 left-0">
-                  <CalendarIcon className="absolute w-6 h-6 top-0 left-0" />
-                  <div className="absolute w-[88px] h-6 top-0 left-8 [font-family:'Montserrat',Helvetica] font-normal text-[#5a5a5a] text-sm tracking-[0] leading-[normal]">
-                    {fair.date}
-                  </div>
-                </div>
+              </CardContent>
+              <div className="flex justify-center w-full px-3 md:px-4">
+                <Button
+                  className="h-10 md:h-12 w-full inline-flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 bg-fundo-claro rounded-xl md:rounded-2xl overflow-hidden border border-solid border-[#9cb217] hover:bg-verde-claro/10 transition-colors"
+                  variant="outline"
+                >
+                  <span className="font-medium text-verde-claro text-xs md:text-sm text-center whitespace-nowrap">
+                    {fair.buttonText}
+                  </span>
+                </Button>
               </div>
-            </CardContent>
-            <div className="flex justify-center w-full px-4">
-              <Button
-                className="h-12 inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-fundo-claro rounded-2xl overflow-hidden border border-solid border-[#9cb217]"
-                variant="outline"
-              >
-                <span className="font-[number:var(--bot-es-font-weight)] text-verde-claro text-[length:var(--bot-es-font-size)] text-center leading-[var(--bot-es-line-height)] whitespace-nowrap font-bot-es tracking-[var(--bot-es-letter-spacing)] [font-style:var(--bot-es-font-style)]">
-                  {fair.buttonText}
-                </span>
-              </Button>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          ))}
         </div>
       </div>
 

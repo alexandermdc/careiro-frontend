@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=https://projetocareirobackend.onrender.com
     container_name: agriconnect-frontend
     ports:
       - "5173:80"  # Porta 5173 no host (mesma do Vite), 80 no container
