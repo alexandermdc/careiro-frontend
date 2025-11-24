@@ -1,4 +1,5 @@
 import api from './api';
+import logger from '../utils/logger';
 
 export interface LoginCredentials {
   email: string;
@@ -47,14 +48,10 @@ export interface User {
 class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      console.log('🔵 Enviando login:', { email: credentials.email, senha: credentials.password });
-      
       const response = await api.post('/auth/login', {
         email: credentials.email,
         senha: credentials.password
       });
-      
-      console.log('✅ Resposta do backend:', response.data);
       
       // Backend retorna: token, accessToken, refreshToken, cliente
       const { token, accessToken, refreshToken, cliente } = response.data;
@@ -69,18 +66,18 @@ class AuthService {
         tipo: 'cliente'
       }));
       
+      logger.success('Login realizado com sucesso');
+      
       return response.data;
     } catch (error: any) {
-      console.error('❌ Erro completo:', error);
-      console.error('❌ Resposta do servidor:', error.response?.data);
-      console.error('❌ Status:', error.response?.status);
+      // Não logar dados sensíveis em produção
+      logger.error('Erro ao fazer login', error);
       throw new Error(error.response?.data?.message || error.response?.data?.error || 'Erro no login');
     }
   }
 
   async loginVendedor(credentials: VendedorLoginCredentials): Promise<VendedorAuthResponse> {
     try {
-      
       const response = await api.post('/auth/login/vendedor', {
         id_vendedor: credentials.id_vendedor,
         senha: credentials.password
@@ -95,9 +92,11 @@ class AuthService {
         tipo: 'vendedor'
       }));
       
+      logger.success('Login de vendedor realizado com sucesso');
       
       return response.data;
     } catch (error: any) {
+      logger.error('Erro ao fazer login de vendedor', error);
       throw new Error(error.response?.data?.error || 'Erro no login do vendedor');
     }
   }
@@ -108,7 +107,9 @@ class AuthService {
       if (refreshToken) {
         await api.post('/refresh/logout', { refreshToken });
       }
+      logger.info('Logout realizado');
     } catch (error) {
+      logger.warn('Erro ao fazer logout no servidor', error);
     } finally {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
