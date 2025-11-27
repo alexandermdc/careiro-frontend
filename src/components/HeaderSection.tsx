@@ -284,7 +284,7 @@ export const HeaderSection = (): JSX.Element => {
 
       {/* Barra de Navegação - Desktop */}
       <div className="hidden lg:block w-full h-[70px] bg-verde-escuro">
-        <NavigationMenu className="w-full h-full">
+        <NavigationMenu className="w-full h-full max-w-full">
           <NavigationMenuList className="flex items-center justify-center gap-0 w-full h-full">
             {navigationItems.map((item, index) => (
               <NavigationMenuItem key={index}>
