@@ -6,39 +6,21 @@ import { JoinAgriconnectBanner } from '../../../components/JoinAgriconnectBanner
 const associationsData = [
   {
     id: 1,
-    name: "Associação Mamori",
-    image: "https://c.animaapp.com/mfyndft0ii9IQr/img/rectangle-60.png",
+    name: "Associação de Produtores Orgânicos União e Força ",
+    image: "/img/AssociacaoPc.jpg",
     delay: "200ms",
   },
   {
     id: 2,
-    name: "Associação São José",
-    image: "https://c.animaapp.com/mfyndft0ii9IQr/img/rectangle-60-1.png",
+    name: "Grupo Orgânico Mãos que Colhem",
+    image: "/img/feira_empreendedorismo.jpg",
     delay: "400ms",
   },
   {
     id: 3,
-    name: "Associação",
-    image: "https://c.animaapp.com/mfyndft0ii9IQr/img/rectangle-60-2.png",
+    name: "OCS - Unidos Venceremos ",
+    image: "/img/unidosvenceremos.jpg",
     delay: "600ms",
-  },
-  {
-    id: 4,
-    name: "Associação",
-    image: "https://c.animaapp.com/mfyndft0ii9IQr/img/rectangle-60-3.png",
-    delay: "800ms",
-  },
-  {
-    id: 5,
-    name: "Associação",
-    image: "https://c.animaapp.com/mfyndft0ii9IQr/img/rectangle-60-4.png",
-    delay: "1000ms",
-  },
-  {
-    id: 6,
-    name: "Associação",
-    image: "https://c.animaapp.com/mfyndft0ii9IQr/img/rectangle-60-5.png",
-    delay: "1200ms",
   },
 ];
 

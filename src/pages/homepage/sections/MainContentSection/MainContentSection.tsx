@@ -22,34 +22,34 @@ interface ProdutoAPI {
 
 const fairs = [
   {
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/rectangle-57.png",
-    title: "Feira da Matriz",
-    location: "Centro da cidade",
-    date: "Sábados",
+    image: "/img/pc_uniao.jpg",
+    title: "Feira do PC - união e força ",
+    location: "Estrada de Autazes Km 14",
+    date: "Domingos - 08h às 13h",
     buttonText: "Ver produtos",
     height: "h-[244.41px]",
   },
   {
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/rectangle-57-1.png",
-    title: "Feira do Produtor",
-    location: "Praça da Alimentação",
-    date: "Domingos",
+    image: "/img/feira_empreendedorismo.jpg",
+    title: "Feira de Empreendedorismo Rural - Grupo Mãos que Colhem",
+    location: "Ramal São José Km 11",
+    date: "Sábados - 08h às 13h",
     buttonText: "Ver produtos",
-    height: "h-[263px]",
+    height: "h-[244.41px]",
   },
   {
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/rectangle-57-2.png",
-    title: "Feira Orgânica",
-    location: "Parque Municipal",
-    date: "Terças",
+    image: "/img/pc_uniao.jpg",
+    title: "Feira do PC - união e força ",
+    location: "Estrada de Autazes Km 14",
+    date: "Domingos - 08h às 13h",
     buttonText: "Ver produtos",
-    height: "h-[263px]",
+    height: "h-[244.41px]",
   },
   {
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/rectangle-57-3.png",
-    title: "Feira da Agricultura",
-    location: "Mercado Central",
-    date: "Quintas",
+    image: "/img/feira_empreendedorismo.jpg",
+    title: "Feira de Empreendedorismo Rural - Grupo Mãos que Colhem",
+    location: "Ramal São José Km 11",
+    date: "Domingos - 08h às 13h",
     buttonText: "Ver produtos",
     height: "h-[263px]",
   },
@@ -59,38 +59,38 @@ const categories = [
   {
     title: "Legumes",
     backgroundImage:
-      "https://c.animaapp.com/meda5qjaouVHG5/img/card-categorias-2.png",
+      "/img/card-categorias.png",
   },
   {
     title: "Frutas",
     backgroundImage:
-      "https://c.animaapp.com/meda5qjaouVHG5/img/card-categorias-2.png",
+      "/img/card-categorias.png",
   },
   {
     title: "Verduras",
     backgroundImage:
-      "https://c.animaapp.com/meda5qjaouVHG5/img/card-categorias-2.png",
+      "/img/card-categorias.png",
   },
 ];
 
 const subscriptions = [
   {
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/rectangle-56-4.png",
+    image: "/img/semanal.png",
     title: "Assinatura Semanal",
     price: "R$ 45,00",
   },
   {
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/rectangle-56-5.png",
+    image: "/img/quinzenal.png",
     title: "Assinatura Quinzenal",
     price: "R$ 80,00",
   },
   {
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/rectangle-56-6.png",
+    image: "/img/mensal.png",
     title: "Assinatura Mensal",
     price: "R$ 150,00",
   },
   {
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/rectangle-56-7.png",
+    image: "/img/premium.png",
     title: "Assinatura Premium",
     price: "R$ 200,00",
   },
@@ -98,30 +98,27 @@ const subscriptions = [
 
 const howItWorksSteps = [
   {
-    number: "1",
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/image-1.png",
+    image: "/img/produtoresCard.png",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed pretium neque magna. Mauris blandit laoreet ligula, eu luctus neque finibus eget.",
+      "Produtores cadastram sua colheita de forma simples e rápida, direto da roça.",
     imageWidth: "w-[108px]",
     height: "h-[315.8px]",
     gap: "gap-4",
     justify: "justify-center",
   },
   {
-    number: "2",
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/image-2.png",
+    image: "/img/plataformaCard.png",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed pretium neque magna.",
+      "Comércios, feiras e consumidores encontram rapidamente o que precisam pelo app.",
     imageWidth: "w-[77px]",
     height: "h-[316px]",
     gap: "gap-[30px]",
     justify: "",
   },
   {
-    number: "3",
-    image: "https://c.animaapp.com/meda5qjaouVHG5/img/image-3.png",
+    image: "/img/Legumes.png",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed pretium neque magna. Mauris blandit laoreet ligula, eu luctus neque finibus eget.",
+      "O comprador recebe produtos frescos direto da origem, reduzindo custos e fortalecendo a economia local.",
     imageWidth: "w-[236.83px] ml-[-1.92px] mr-[-1.92px]",
     height: "h-[315.8px]",
     gap: "gap-4",
@@ -375,15 +372,13 @@ export const MainContentSection = (): JSX.Element => {
           >
             <CardContent className="flex flex-col items-center gap-4 p-0">
               <div className="relative self-stretch mt-[-1.00px] [font-family:'Montserrat',Helvetica] font-bold text-verde-escuro text-2xl text-center tracking-[0] leading-[normal]">
-                {step.number}
               </div>
               <img
                 className={`${step.imageWidth} object-cover relative h-[121.8px]`}
-                alt={`Passo ${step.number}`}
                 src={step.image}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.src = "https://via.placeholder.com/120x120/9cb217/ffffff?text=" + step.number;
+                  target.src = "https://via.placeholder.com/120x120/9cb217/ffffff?text="
                 }}
               />
               <div className="relative self-stretch [font-family:'Montserrat',Helvetica] font-normal text-texto text-sm text-center tracking-[0] leading-[normal]">
