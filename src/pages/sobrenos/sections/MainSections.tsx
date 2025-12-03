@@ -17,13 +17,13 @@ const contentSections = [
 const participantTypes = [
   {
     title: "Produtores",
-    image: "https://c.animaapp.com/mfh1vpp1e8a9vm/img/image-4.png",
+    image: "/img/feirante.jpg",
     description:
       "Os produtores, dentro do Agriconnect, podem incluir dados sobre as suas produções e disponibilizar os produtos colhidos para serem vendidos, facilitando o processo de registro e acompanhamento da quantidade colhida, vendida e em estoque.",
   },
   {
     title: "Associações",
-    image: "https://c.animaapp.com/mfh1vpp1e8a9vm/img/image-5.png",
+    image: "/img/pc_uniao.jpg",
     description:
       "A Associação de Produtores Orgânicos União e Força, fundada em 2022, é a principal associação vinculada ao Agriconnect. Os seus produtores, localizados na estrada de Autazes (km 14), comercializam produtos na Feira da Agricultura Familiar na sede do município de Careiro e na Feira Orgânica do Comercial PC, também na estrada de Autazes. Produzem e vendem, principalmente, hortaliças, frutas, farinhas e temperos.\n\nA Associação Unidos Venceremos da região do Mamori, Careiro, foi fundada em 2019 e está localizada na BR-319, Km 28, Ramal do Mamori. Atualmente conta com 18 produtores agroecológicos que trabalham no sistema orgânico. Produzem e vendem principalmente hortaliças, frutas e tubérculos.\n\nAssociação São José, localiza-se também na BR-319, no Km 68, Ramal do São José, possui mais de 10 anos de atuação. Atualmente, possui a Feira de Empreendedorismo Rural realizada todos os domingos no Km 11 do ramal onde são comercializados produtos regionais de produtores da região.\n\nNo Agriconnect, as associações podem visualizar dados sobre o desempenho da organização e resumos sobre o rendimento dos produtos, produtores e feiras. Na plataforma, é possível visualizar todos os âmbitos gerenciados por uma associação e adicionar os produtores afiliados, adicionando-os ao sistema de maneira vinculada à associação.",
   },
