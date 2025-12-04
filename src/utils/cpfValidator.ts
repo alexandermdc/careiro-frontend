@@ -17,6 +17,13 @@ export function validarCPF(cpf: string): boolean {
     return false;
   }
 
+  // Em desenvolvimento, aceita qualquer CPF com 11 dígitos que não seja repetido
+  // Isso permite usar CPFs de teste como 12345678910
+  if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
+    return true;
+  }
+
+  // Em produção, valida os dígitos verificadores
   // Validação do primeiro dígito verificador
   let soma = 0;
   for (let i = 0; i < 9; i++) {

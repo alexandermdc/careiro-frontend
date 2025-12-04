@@ -65,15 +65,16 @@ class ClienteService {
   // Buscar cliente por CPF
   async buscarPorCpf(cpf: string): Promise<Cliente> {
     try {
-      
+
       const response = await api.get(`/clientes/${cpf}`);
-      
+
       return response.data;
     } catch (error: any) {
 
       
       throw new Error(
         error.response?.data?.message || 
+        error.response?.data?.error ||
         'Erro ao buscar cliente'
       );
     }
@@ -187,7 +188,7 @@ class ClienteService {
   // Listar produtos favoritos (requer autenticação)
   async listarFavoritos(clienteCpf: string): Promise<Produto[]> {
     try {
-   
+
       
       const response = await api.get(`/clientes/${clienteCpf}/favoritos`);
       
