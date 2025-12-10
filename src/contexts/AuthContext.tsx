@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import authService from '../services/authService';
+import type { UserType } from '../services/authService';
 
-// Tipo unificado para cliente ou vendedor
+// Tipo unificado para cliente, vendedor ou admin
 interface AppUser {
-  tipo?: 'cliente' | 'vendedor';
+  tipo: UserType;
   nome: string;
-  email?: string;
+  email: string;
   cpf?: string;
   id_vendedor?: string;
   telefone?: string;
@@ -19,6 +20,10 @@ interface AuthContextData {
   user: AppUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  userType: UserType | null;
+  isAdmin: boolean;
+  isVendedor: boolean;
+  isCliente: boolean;
   login: (email: string, password: string) => Promise<void>;
   loginVendedor: (id_vendedor: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -47,7 +52,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       const response = await authService.login({ email, password });
-      setUser({ ...response.cliente, tipo: 'cliente' } as AppUser);
+      
+      // Detectar automaticamente se é cliente, vendedor ou admin
+      const userData = response.cliente || response.vendedor;
+      if (userData) {
+        setUser(userData as AppUser);
+      }
     } catch (error) {
       throw error;
     } finally {
@@ -55,16 +65,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  /**
+   * @deprecated Use login() ao invés disso - agora é unificado
+   */
   const loginVendedor = async (id_vendedor: string, password: string): Promise<void> => {
-    try {
-      setIsLoading(true);
-      const response = await authService.loginVendedor({ id_vendedor, password });
-      setUser({ ...response.vendedor, tipo: 'vendedor' } as AppUser);
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    // Por compatibilidade, redireciona para login unificado
+    return login(id_vendedor, password);
   };
 
   const logout = async (): Promise<void> => {
@@ -73,12 +79,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await authService.logout();
       setUser(null);
     } catch (error) {
+      console.error('Erro ao fazer logout:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const isAuthenticated = !!user && authService.isAuthenticated();
+  const userType = authService.getUserType();
+  const isAdmin = authService.isAdmin();
+  const isVendedor = authService.isVendedor();
+  const isCliente = authService.isCliente();
 
   return (
     <AuthContext.Provider
@@ -86,6 +97,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user,
         isAuthenticated,
         isLoading,
+        userType,
+        isAdmin,
+        isVendedor,
+        isCliente,
         login,
         loginVendedor,
         logout,

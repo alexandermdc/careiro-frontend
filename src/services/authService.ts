@@ -6,27 +6,25 @@ export interface LoginCredentials {
   password: string;
 }
 
-export interface VendedorLoginCredentials {
-  id_vendedor: string;
-  password: string;
-}
+// Tipo de usuário retornado pelo backend
+export type UserType = 'CLIENTE' | 'VENDEDOR' | 'ADMIN';
 
 export interface AuthResponse {
+  token?: string;
   accessToken: string;
   refreshToken: string;
-  cliente: {
+  expiresIn: string;
+  cliente?: {
+    cpf: string;
     nome: string;
     email: string;
-    cpf: string;
+    telefone: string;
+    tipo: UserType;
   };
-}
-
-export interface VendedorAuthResponse {
-  accessToken: string;
-  refreshToken: string;
-  vendedor: {
+  vendedor?: {
     id_vendedor: string;
     nome: string;
+    email: string;
     telefone: string;
     endereco_venda: string;
     tipo_vendedor: 'PF' | 'PJ';
@@ -36,16 +34,23 @@ export interface VendedorAuthResponse {
       id_associacao: string;
       nome: string;
     } | null;
+    tipo: UserType;
   };
 }
 
 export interface User {
   nome: string;
   email: string;
-  cpf: string;
+  cpf?: string;
+  id_vendedor?: string;
+  tipo: UserType;
 }
 
 class AuthService {
+  /**
+   * Login unificado - funciona para Cliente, Vendedor e Admin
+   * O backend detecta automaticamente o tipo de usuário
+   */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
       const response = await api.post('/auth/login', {
@@ -53,52 +58,48 @@ class AuthService {
         senha: credentials.password
       });
       
-      // Backend retorna: token, accessToken, refreshToken, cliente
-      const { token, accessToken, refreshToken, cliente } = response.data;
+      const { token, accessToken, refreshToken, cliente, vendedor } = response.data;
       
-      // Usar 'token' como principal, 'accessToken' como fallback
+      // Usar 'token' ou 'accessToken'
       const finalToken = token || accessToken;
       
+      // Determinar tipo de usuário
+      const userType = cliente?.tipo || vendedor?.tipo;
+      const userData = cliente || vendedor;
+      
+      if (!userData || !userType) {
+        throw new Error('Resposta de login inválida');
+      }
+      
+      // Salvar tokens e dados do usuário
       localStorage.setItem('accessToken', finalToken);
       localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify({
-        ...cliente,
-        tipo: 'cliente'
-      }));
+      localStorage.setItem('userType', userType);
+      localStorage.setItem('user', JSON.stringify(userData));
       
-      logger.success('Login realizado com sucesso');
+      logger.success(`Login realizado com sucesso como ${userType}`);
       
       return response.data;
     } catch (error: any) {
-      // Não logar dados sensíveis em produção
       logger.error('Erro ao fazer login', error);
-      throw new Error(error.response?.data?.message || error.response?.data?.error || 'Erro no login');
+      throw new Error(
+        error.response?.data?.message || 
+        error.response?.data?.error || 
+        'Erro no login'
+      );
     }
   }
 
-  async loginVendedor(credentials: VendedorLoginCredentials): Promise<VendedorAuthResponse> {
-    try {
-      const response = await api.post('/auth/login/vendedor', {
-        id_vendedor: credentials.id_vendedor,
-        senha: credentials.password
-      });
-      
-      const { accessToken, refreshToken, vendedor } = response.data;
-      
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify({
-        ...vendedor,
-        tipo: 'vendedor'
-      }));
-      
-      logger.success('Login de vendedor realizado com sucesso');
-      
-      return response.data;
-    } catch (error: any) {
-      logger.error('Erro ao fazer login de vendedor', error);
-      throw new Error(error.response?.data?.error || 'Erro no login do vendedor');
-    }
+  /**
+   * @deprecated Use login() ao invés disso - agora é unificado
+   */
+  async loginVendedor(credentials: { id_vendedor: string; password: string }): Promise<AuthResponse> {
+    logger.warn('loginVendedor está deprecated, use login()');
+    // Por compatibilidade, redireciona para login unificado
+    return this.login({
+      email: credentials.id_vendedor,
+      password: credentials.password
+    });
   }
 
   async logout(): Promise<void> {
@@ -114,6 +115,7 @@ class AuthService {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('userType');
       window.location.href = '/login';
     }
   }
@@ -133,14 +135,24 @@ class AuthService {
     return localStorage.getItem('accessToken');
   }
 
+  getUserType(): UserType | null {
+    const userType = localStorage.getItem('userType');
+    return userType as UserType | null;
+  }
+
   isVendedor(): boolean {
-    const user = this.getCurrentUser();
-    return user?.tipo === 'vendedor';
+    const userType = this.getUserType();
+    return userType === 'VENDEDOR';
   }
 
   isCliente(): boolean {
-    const user = this.getCurrentUser();
-    return user?.tipo === 'cliente';
+    const userType = this.getUserType();
+    return userType === 'CLIENTE';
+  }
+
+  isAdmin(): boolean {
+    const userType = this.getUserType();
+    return userType === 'ADMIN';
   }
 }
 

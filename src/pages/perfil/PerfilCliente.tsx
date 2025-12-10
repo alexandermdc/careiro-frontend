@@ -20,8 +20,10 @@ import { useFavoritos } from '../../contexts/FavoritosContext';
 import { useCarrinho } from '../../contexts/CarrinhoContext';
 import clienteService from '../../services/clienteService';
 import pedidoService from '../../services/pedidoService';
+import vendedorService from '../../services/vendedorService';
 import type { Cliente, UpdateClienteData } from '../../services/clienteService';
 import type { Pedido } from '../../services/pedidoService';
+import type { Vendedor, UpdateVendedorData } from '../../services/vendedorService';
 
 // Componente Modal de Detalhes do Pedido
 const PedidoModal: React.FC<{
@@ -498,8 +500,234 @@ const EditModal: React.FC<{
   );
 };
 
+// Componente Modal de Edição de Vendedor
+const EditVendedorModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  vendedor: Vendedor | null;
+  onSave: (data: UpdateVendedorData) => Promise<void>;
+}> = ({ isOpen, onClose, vendedor, onSave }) => {
+  const [editData, setEditData] = useState<UpdateVendedorData>({});
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+
+  useEffect(() => {
+    if (vendedor && isOpen) {
+      setEditData({
+        nome: vendedor.nome,
+        telefone: vendedor.telefone,
+        endereco_venda: vendedor.endereco_venda
+      });
+      setErrors({});
+    }
+  }, [vendedor, isOpen]);
+
+  const validateField = (field: string, value: string) => {
+    const newErrors = { ...errors };
+    
+    switch (field) {
+      case 'nome':
+        if (!value.trim()) {
+          newErrors.nome = 'Nome é obrigatório';
+        } else {
+          delete newErrors.nome;
+        }
+        break;
+      case 'telefone':
+        if (!value.trim()) {
+          newErrors.telefone = 'Telefone é obrigatório';
+        } else {
+          delete newErrors.telefone;
+        }
+        break;
+      case 'endereco_venda':
+        if (!value.trim()) {
+          newErrors.endereco_venda = 'Endereço é obrigatório';
+        } else {
+          delete newErrors.endereco_venda;
+        }
+        break;
+    }
+    
+    setErrors(newErrors);
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    if (field === 'telefone') {
+      let formattedValue = value.replace(/\D/g, '');
+      if (formattedValue.length >= 11) {
+        formattedValue = formattedValue.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+      } else if (formattedValue.length >= 7) {
+        formattedValue = formattedValue.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+      } else if (formattedValue.length >= 3) {
+        formattedValue = formattedValue.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+      }
+      setEditData(prev => ({ ...prev, [field]: formattedValue }));
+      validateField(field, formattedValue);
+    } else {
+      setEditData(prev => ({ ...prev, [field]: value }));
+      validateField(field, value);
+    }
+  };
+
+  const handleSave = async () => {
+    const fieldsToValidate = ['nome', 'telefone', 'endereco_venda'];
+    fieldsToValidate.forEach(field => {
+      validateField(field, editData[field as keyof UpdateVendedorData] || '');
+    });
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await onSave(editData);
+      onClose();
+    } catch (error) {
+      console.error('Erro no modal:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isFormValid = () => {
+    return editData.nome?.trim() && 
+           editData.telefone?.trim() && 
+           editData.endereco_venda?.trim() &&
+           Object.keys(errors).length === 0;
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden">
+        {/* Header do Modal */}
+        <div className="bg-gradient-to-r from-green-500 to-green-700 p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 p-2 rounded-full">
+                <Edit3 className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold">Editar Perfil</h2>
+                <p className="text-white/80 text-sm">Atualize suas informações</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors"
+              disabled={loading}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Conteúdo do Modal */}
+        <div className="p-6 space-y-6">
+          {/* Nome */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <User className="w-4 h-4 inline mr-2" />
+              Nome Completo *
+            </label>
+            <input
+              type="text"
+              value={editData.nome || ''}
+              onChange={(e) => handleInputChange('nome', e.target.value)}
+              placeholder="Digite seu nome completo"
+              className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all ${
+                errors.nome ? 'border-red-300 bg-red-50' : 'border-gray-200'
+              }`}
+              disabled={loading}
+            />
+            {errors.nome && (
+              <p className="text-red-600 text-sm mt-1">⚠️ {errors.nome}</p>
+            )}
+          </div>
+
+          {/* Telefone */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <Phone className="w-4 h-4 inline mr-2" />
+              Telefone *
+            </label>
+            <input
+              type="tel"
+              value={editData.telefone || ''}
+              onChange={(e) => handleInputChange('telefone', e.target.value)}
+              placeholder="(84) 99999-9999"
+              maxLength={15}
+              className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all ${
+                errors.telefone ? 'border-red-300 bg-red-50' : 'border-gray-200'
+              }`}
+              disabled={loading}
+            />
+            {errors.telefone && (
+              <p className="text-red-600 text-sm mt-1">⚠️ {errors.telefone}</p>
+            )}
+          </div>
+
+          {/* Endereço de Venda */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <ShoppingBag className="w-4 h-4 inline mr-2" />
+              Endereço de Venda *
+            </label>
+            <textarea
+              value={editData.endereco_venda || ''}
+              onChange={(e) => handleInputChange('endereco_venda', e.target.value)}
+              placeholder="Digite o endereço onde você vende"
+              rows={3}
+              className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all resize-none ${
+                errors.endereco_venda ? 'border-red-300 bg-red-50' : 'border-gray-200'
+              }`}
+              disabled={loading}
+            />
+            {errors.endereco_venda && (
+              <p className="text-red-600 text-sm mt-1">⚠️ {errors.endereco_venda}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Footer do Modal */}
+        <div className="bg-gray-50 px-6 py-4 border-t">
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              disabled={loading}
+              className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-medium disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={loading || !isFormValid()}
+              className="flex-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white rounded-xl hover:from-green-600 hover:to-green-800 transition-all font-semibold shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Salvar Alterações
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const PerfilCliente: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, userType } = useAuth();
   const { favoritos, removerFavorito, carregarFavoritos } = useFavoritos();
   const { adicionarAoCarrinho } = useCarrinho();
   
@@ -515,11 +743,17 @@ const PerfilCliente: React.FC = () => {
 
 
   useEffect(() => {
+    // Para vendedores, apenas mostrar informações básicas sem carregar dados de cliente
+    if (userType === 'VENDEDOR') {
+      setLoading(false);
+      return;
+    }
+    
     if (user?.cpf) {
       carregarDadosCompletos();
       carregarPedidos();
     }
-  }, [user]);
+  }, [user, userType]);
 
   const carregarPedidos = async () => {
     if (!user?.cpf) {
@@ -679,6 +913,70 @@ const PerfilCliente: React.FC = () => {
     }
   };
 
+  // Função para salvar edições do vendedor
+  const handleSaveVendedorEdit = async (editData: UpdateVendedorData) => {
+    if (!user?.id_vendedor) return;
+    
+    try {
+      await vendedorService.atualizar(user.id_vendedor, editData);
+      
+      // Mostrar toast de sucesso
+      const successToast = document.createElement('div');
+      successToast.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50 transform translate-x-full transition-transform duration-300';
+      successToast.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="bg-white/20 p-1 rounded-full">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div>
+            <p class="font-semibold">Perfil atualizado!</p>
+            <p class="text-sm opacity-90">Suas informações foram salvas com sucesso</p>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(successToast);
+      setTimeout(() => successToast.classList.remove('translate-x-full'), 100);
+      setTimeout(() => {
+        successToast.classList.add('translate-x-full');
+        setTimeout(() => document.body.removeChild(successToast), 300);
+      }, 4000);
+      
+      // Recarregar página para atualizar dados
+      setTimeout(() => window.location.reload(), 1000);
+      
+    } catch (err: any) {
+      console.error('❌ Erro ao atualizar perfil do vendedor:', err);
+      
+      const errorToast = document.createElement('div');
+      errorToast.className = 'fixed top-4 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50 transform translate-x-full transition-transform duration-300';
+      errorToast.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="bg-white/20 p-1 rounded-full">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div>
+            <p class="font-semibold">Erro ao salvar</p>
+            <p class="text-sm opacity-90">${err.message || 'Tente novamente'}</p>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(errorToast);
+      setTimeout(() => errorToast.classList.remove('translate-x-full'), 100);
+      setTimeout(() => {
+        errorToast.classList.add('translate-x-full');
+        setTimeout(() => document.body.removeChild(errorToast), 300);
+      }, 5000);
+      
+      throw err;
+    }
+  };
+
   const handleLogout = () => {
     if (window.confirm('Tem certeza que deseja sair?')) {
       logout();
@@ -732,6 +1030,145 @@ const PerfilCliente: React.FC = () => {
           </div>
         </div>
       </div>
+    );
+  }
+
+  // Renderização especial para VENDEDORES
+  if (userType === 'VENDEDOR') {
+    // Criar objeto vendedor a partir dos dados do user
+    const vendedorData: Vendedor = {
+      id_vendedor: user.id_vendedor || '',
+      nome: user.nome || '',
+      telefone: user.telefone || '',
+      endereco_venda: user.endereco_venda || '',
+      tipo_vendedor: 'PF',
+      tipo_documento: 'CPF',
+      numero_documento: ''
+    };
+
+    return (
+      <>
+        {/* Modal de Edição */}
+        <EditVendedorModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          vendedor={vendedorData}
+          onSave={handleSaveVendedorEdit}
+        />
+
+        <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <Link 
+                to="/" 
+                className="flex items-center gap-2 text-green-500 hover:text-green-700 font-medium"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                Início
+              </Link>
+              
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => setShowEditModal(true)}
+                  className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-700 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <Edit3 className="w-4 h-4" />
+                  Editar Perfil
+                </button>
+                
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-red-600 hover:text-red-700 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sair
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Conteúdo do Perfil Vendedor */}
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          {/* Card de Perfil */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                {user?.nome?.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{user?.nome}</h1>
+                <p className="text-green-600 font-medium">👨‍🌾 Vendedor</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600 mb-1 flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  Email
+                </p>
+                <p className="font-medium text-gray-900">{user?.email || 'Não informado'}</p>
+              </div>
+              
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600 mb-1 flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  Telefone
+                </p>
+                <p className="font-medium text-gray-900">{user?.telefone || 'Não informado'}</p>
+              </div>
+              
+              <div className="p-4 bg-gray-50 rounded-lg md:col-span-2">
+                <p className="text-sm text-gray-600 mb-1 flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4" />
+                  Endereço de Venda
+                </p>
+                <p className="font-medium text-gray-900">{user?.endereco_venda || 'Não informado'}</p>
+              </div>
+              
+              <div className="p-4 bg-blue-50 rounded-lg md:col-span-2">
+                <p className="text-sm text-blue-600 mb-1 flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  ID do Vendedor
+                </p>
+                <p className="font-medium text-gray-900 text-xs break-all">{user?.id_vendedor || 'Não disponível'}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Ações Rápidas */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Ações Rápidas</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Link
+                to="/produtos/cadastro"
+                className="flex items-center gap-3 p-4 bg-green-50 border-2 border-green-200 rounded-lg hover:bg-green-100 hover:border-green-300 transition-all"
+              >
+                <Package className="w-8 h-8 text-green-600" />
+                <div>
+                  <h3 className="font-semibold text-gray-900">Cadastrar Produto</h3>
+                  <p className="text-sm text-gray-600">Adicione novos produtos</p>
+                </div>
+              </Link>
+
+              <Link
+                to="/produtos"
+                className="flex items-center gap-3 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-all"
+              >
+                <ShoppingBag className="w-8 h-8 text-blue-600" />
+                <div>
+                  <h3 className="font-semibold text-gray-900">Meus Produtos</h3>
+                  <p className="text-sm text-gray-600">Gerencie seus produtos</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+        </div>
+      </>
     );
   }
 

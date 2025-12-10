@@ -55,7 +55,7 @@ export const FavoritosProvider = ({ children }: { children: ReactNode }) => {
   // Carregar favoritos quando o usuário logar
   useEffect(() => {
     
-    if (user && user.tipo === 'cliente' && user.cpf) {
+    if (user && user.tipo === 'CLIENTE' && user.cpf) {
       carregarFavoritos();
     } else {
       setFavoritos([]);

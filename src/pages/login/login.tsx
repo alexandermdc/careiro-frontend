@@ -127,15 +127,6 @@ const Login = () => {
                             </p>
                             
                             <div className="pt-4 border-t border-gray-200">
-                                <p className="text-sm text-texto mb-3">
-                                    É vendedor?{' '}
-                                    <Link to="/login/vendedor" className="text-green-600 hover:text-green-700 font-medium">
-                                        Fazer login como vendedor
-                                    </Link>
-                                </p>
-                            </div>
-                            
-                            <div className="pt-4 border-t border-gray-200">
                                 <p className="text-sm text-texto mb-3">Ou explore sem cadastro:</p>
                                 <Link 
                                     to="/" 

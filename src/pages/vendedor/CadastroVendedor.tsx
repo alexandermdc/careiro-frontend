@@ -5,9 +5,11 @@ import vendedorService from '../../services/vendedorService';
 import associacaoService from '../../services/associacaoService';
 import type { CreateVendedorData } from '../../services/vendedorService';
 import type { Associacao } from '../../services/associacaoService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const CadastroVendedor: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [loading, setLoading] = useState(false);
   const [associacoes, setAssociacoes] = useState<Associacao[]>([]);
@@ -15,6 +17,7 @@ const CadastroVendedor: React.FC = () => {
   
   const [formData, setFormData] = useState<CreateVendedorData>({
     nome: '',
+    email: '',
     telefone: '',
     endereco_venda: '',
     tipo_vendedor: 'PF',
@@ -25,6 +28,21 @@ const CadastroVendedor: React.FC = () => {
   });
 
   const [confirmarSenha, setConfirmarSenha] = useState('');
+
+  // Verificar se é admin
+  useEffect(() => {
+    if (!user) {
+      alert('⚠️ Você precisa estar logado como administrador para cadastrar vendedores!');
+      navigate('/login');
+      return;
+    }
+    
+    if (user.tipo !== 'ADMIN') {
+      alert('⚠️ Apenas administradores podem cadastrar vendedores!');
+      navigate('/');
+      return;
+    }
+  }, [user, navigate]);
 
   // Carregar associações
   useEffect(() => {
@@ -100,6 +118,12 @@ const CadastroVendedor: React.FC = () => {
       novosErros.nome = 'Nome é obrigatório';
     }
 
+    if (!formData.email.trim()) {
+      novosErros.email = 'Email é obrigatório';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      novosErros.email = 'Email inválido';
+    }
+
     const telefone = formData.telefone.replace(/\D/g, '');
     if (!telefone) {
       novosErros.telefone = 'Telefone é obrigatório';
@@ -164,9 +188,9 @@ const CadastroVendedor: React.FC = () => {
         `Você será redirecionado para a página de login em 5 segundos...`
       );
       
-      // Aguardar 5 segundos e redirecionar para login de vendedor
+      // Aguardar 5 segundos e redirecionar para login
       setTimeout(() => {
-        navigate('/login/vendedor');
+        navigate('/login');
       }, 5000);
       
     } catch (error: any) {
@@ -245,6 +269,25 @@ const CadastroVendedor: React.FC = () => {
               placeholder="Digite o nome completo"
             />
             {errors.nome && <p className="text-red-500 text-sm mt-1">{errors.nome}</p>}
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <User className="inline mr-2" size={16} />
+              Email *
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Digite o email"
+            />
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
 
           {/* Documento */}

@@ -18,7 +18,7 @@ export interface Produto {
 export interface CreateProdutoData {
   nome: string;
   descricao: string;
-  image: string;
+  image: File | string; // Pode ser File (upload) ou string (URL)
   is_promocao: boolean;
   preco: number;
   preco_promocao?: number;
@@ -77,11 +77,42 @@ class ProdutoService {
   // Criar novo produto (requer autenticação)
   async criar(data: CreateProdutoData): Promise<Produto> {
     try {
+      // Criar FormData para enviar arquivo
+      const formData = new FormData();
+
       
-      const response = await api.post('/produto/cadastro', data);
+      formData.append('nome', data.nome);
+      formData.append('descricao', data.descricao);
+      formData.append('preco', data.preco.toString());
+      formData.append('is_promocao', data.is_promocao.toString());
+      formData.append('disponivel', data.disponivel.toString());
+      formData.append('fk_vendedor', data.fk_vendedor);
+      formData.append('id_categoria', data.id_categoria);
+      
+      if (data.preco_promocao !== undefined) {
+        formData.append('preco_promocao', data.preco_promocao.toString());
+      }
+      
+      // Adicionar arquivo de imagem
+      if (data.image instanceof File) {
+
+        formData.append('image', data.image);
+      } else {
+        console.error('❌ Imagem não é um File:', typeof data.image, data.image);
+      }
+      
+
+      
+      const response = await api.post('/produto/cadastro', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       
       return response.data;
     } catch (error: any) {
+      console.error('❌ Erro ao criar produto:', error.response?.data || error.message);
       
       throw new Error(
         error.response?.data?.message || 

@@ -37,6 +37,14 @@ export const MainContentSection = (): React.ReactElement => {
 
   return (
     <main className="flex flex-col w-full max-w-[1112px] mx-auto items-start gap-11 px-4 py-8">
+      {/* Header com Título e Botões de Cadastro */}
+      <div className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Nossas Feiras</h1>
+          <p className="text-gray-600 mt-1">Conheça as feiras da região</p>
+        </div>
+      </div>
+
       {/* Breadcrumb Navigation */}
       <div>
         <Breadcrumb>
