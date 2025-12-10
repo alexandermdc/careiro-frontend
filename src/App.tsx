@@ -10,12 +10,12 @@ import CadastroAssociacao from './pages/associacao/CadastroAssociacao';
 import { Associacoes } from './pages/associacoes/Associacoes';
 import { Produtores } from './pages/produtores/Produtores';
 import { Feiras } from './pages/feiras/feiras';
+import CadastrarFeira from './pages/feiras/CadastrarFeira';
 import { Produtos } from './pages/produtos/Produtos';
 import CadastroProduto from './pages/produtos/CadastroProduto';
 import CadastroVendedor from './pages/vendedor/CadastroVendedor';
 import FormCliente from './pages/cadastro/cadastro';
 import Login from './pages/login/login';
-import LoginVendedor from './pages/login/LoginVendedor';
 import Dashboard from './pages/dashboard/Dashboard';
 import PerfilCliente from './pages/perfil/PerfilCliente';
 import CarrinhoPage from './pages/carrinho/CarrinhoPage';
@@ -26,6 +26,7 @@ import PagamentoFalhaReal from './pages/pagamento/PagamentoFalhaReal';
 import MeusPedidos from './pages/pedidos/MeusPedidos';
 import Favoritos from './pages/favoritos/Favoritos';
 import BuscaResultados from './pages/busca/BuscaResultados';
+import PainelAdmin from './pages/admin/PainelAdmin';
 
 
 function App() {
@@ -39,7 +40,6 @@ function App() {
         <Route path="/sobrenos" element={<SobreNos />} />
         <Route path="/cadastro" element={<FormCliente />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/login/vendedor" element={<LoginVendedor />} />
         <Route path="/associacao" element={<Associacao />} />
         <Route path="/associacoes" element={<Associacoes />} />
         <Route path="/produtores" element={<Produtores />} />
@@ -74,10 +74,26 @@ function App() {
           } 
         />
         <Route 
+          path="/admin" 
+          element={
+            <ProtectedRoute>
+              <PainelAdmin />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/associacao/cadastro" 
           element={
             <ProtectedRoute>
               <CadastroAssociacao />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/feiras/cadastro" 
+          element={
+            <ProtectedRoute>
+              <CadastrarFeira />
             </ProtectedRoute>
           } 
         />

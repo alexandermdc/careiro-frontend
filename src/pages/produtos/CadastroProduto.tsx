@@ -31,11 +31,11 @@ const CadastroProduto: React.FC = () => {
   useEffect(() => {
     if (!user) {
       alert('⚠️ Você precisa estar logado como vendedor para cadastrar produtos!');
-      navigate('/login/vendedor');
+      navigate('/login');
       return;
     }
     
-    if (user.tipo !== 'vendedor' || !user.id_vendedor) {
+    if (user.tipo !== 'VENDEDOR' || !user.id_vendedor) {
       alert('⚠️ Apenas vendedores podem cadastrar produtos!');
       navigate('/');
       return;
@@ -77,14 +77,14 @@ const CadastroProduto: React.FC = () => {
     
     switch (field) {
       case 'nome':
-        if (!value.trim()) {
+        if (!value || (typeof value === 'string' && !value.trim())) {
           newErrors.nome = 'Nome é obrigatório';
         } else {
           delete newErrors.nome;
         }
         break;
       case 'descricao':
-        if (!value.trim()) {
+        if (!value || (typeof value === 'string' && !value.trim())) {
           newErrors.descricao = 'Descrição é obrigatória';
         } else {
           delete newErrors.descricao;
@@ -107,8 +107,9 @@ const CadastroProduto: React.FC = () => {
         }
         break;
       case 'image':
-        if (!value.trim()) {
-          newErrors.image = 'URL da imagem é obrigatória';
+        // Verificar se é File ou string vazia
+        if (!value || (typeof value === 'string' && !value.trim()) || (value instanceof File && !value.name)) {
+          newErrors.image = 'Imagem do produto é obrigatória';
         } else {
           delete newErrors.image;
         }
@@ -149,76 +150,21 @@ const CadastroProduto: React.FC = () => {
     });
 
     try {
-
-      // Comprimir e redimensionar a imagem
-      const compressedBase64 = await compressImage(file);
+      // Criar preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
       
-      // Atualizar preview e formData
-      setImagePreview(compressedBase64);
-      setFormData(prev => ({ ...prev, image: compressedBase64 }));
+      // Atualizar formData com o arquivo
+      setFormData(prev => ({ ...prev, image: file }));
       setUploadingImage(false);
 
     } catch (error) {
       setErrors(prev => ({ ...prev, image: 'Erro ao fazer upload da imagem' }));
       setUploadingImage(false);
     }
-  };
-
-  // Função para comprimir imagem
-  const compressImage = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          // Criar canvas para redimensionar
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          
-          if (!ctx) {
-            reject(new Error('Erro ao criar canvas'));
-            return;
-          }
-
-          // Definir tamanho máximo (400x400 - bem menor)
-          const MAX_WIDTH = 400;
-          const MAX_HEIGHT = 400;
-          
-          let width = img.width;
-          let height = img.height;
-
-          // Redimensionar proporcionalmente
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height = (height * MAX_WIDTH) / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width = (width * MAX_HEIGHT) / height;
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-
-          // Desenhar imagem redimensionada
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // Converter para base64 com qualidade 0.4 (40% - alta compressão)
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.4);
-          resolve(compressedBase64);
-        };
-
-        img.onerror = () => reject(new Error('Erro ao carregar imagem'));
-        img.src = e.target?.result as string;
-      };
-
-      reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
-      reader.readAsDataURL(file);
-    });
   };
 
   // Função para remover imagem
@@ -234,13 +180,35 @@ const CadastroProduto: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validar todos os campos
-    Object.keys(formData).forEach(field => {
-      validateField(field, formData[field as keyof CreateProdutoData]);
-    });
-
-    if (Object.keys(errors).length > 0) {
-
+    // Verificar se a imagem foi enviada
+    if (!formData.image || (typeof formData.image === 'string' && !formData.image.trim())) {
+      setErrors(prev => ({ ...prev, image: 'Imagem do produto é obrigatória' }));
+      return;
+    }
+    
+    // Validar campos de texto
+    if (!formData.nome.trim()) {
+      setErrors(prev => ({ ...prev, nome: 'Nome é obrigatório' }));
+      return;
+    }
+    
+    if (!formData.descricao.trim()) {
+      setErrors(prev => ({ ...prev, descricao: 'Descrição é obrigatória' }));
+      return;
+    }
+    
+    if (formData.preco <= 0) {
+      setErrors(prev => ({ ...prev, preco: 'Preço deve ser maior que zero' }));
+      return;
+    }
+    
+    if (formData.is_promocao && (!formData.preco_promocao || formData.preco_promocao <= 0)) {
+      setErrors(prev => ({ ...prev, preco_promocao: 'Preço promocional é obrigatório quando em promoção' }));
+      return;
+    }
+    
+    if (formData.is_promocao && formData.preco_promocao && formData.preco_promocao >= formData.preco) {
+      setErrors(prev => ({ ...prev, preco_promocao: 'Preço promocional deve ser menor que o preço normal' }));
       return;
     }
 
@@ -328,7 +296,7 @@ const CadastroProduto: React.FC = () => {
   const isFormValid = () => {
     return formData.nome.trim() && 
            formData.descricao.trim() && 
-           formData.image.trim() &&
+           (formData.image instanceof File || (typeof formData.image === 'string' && formData.image.trim())) &&
            formData.preco > 0 &&
            formData.id_categoria &&
            Object.keys(errors).length === 0;

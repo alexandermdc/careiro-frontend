@@ -4,9 +4,11 @@ import { useState } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import pedidoService from '../../services/pedidoService';
 import pagamentoService from '../../services/pagamentoService';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function CarrinhoPage() {
   const { itens, removerDoCarrinho, atualizarQuantidade, valorTotal } = useCarrinho();
+  const { user, isCliente } = useAuth();
   const navigate = useNavigate();
   const [processando, setProcessando] = useState(false);
 
@@ -22,6 +24,13 @@ export default function CarrinhoPage() {
     const token = localStorage.getItem('accessToken');
     if (!token) {
       alert('⚠️ Você precisa estar logado para finalizar a compra!\n\nRedirecionando para login...');
+      navigate('/login');
+      return;
+    }
+    
+    // Verificar se é cliente
+    if (!user || !isCliente || user.tipo !== 'CLIENTE') {
+      alert('⚠️ Apenas clientes podem fazer pedidos!\n\nVocê está logado como ' + (user?.tipo || 'usuário desconhecido') + '.\n\nPor favor, faça login com uma conta de cliente.');
       navigate('/login');
       return;
     }
@@ -56,13 +65,20 @@ export default function CarrinhoPage() {
     } catch (error: any) {
       console.error('❌ Erro ao processar compra:', error);
 
+      // Tratamento de erro de permissão
+      if (error.response?.status === 403) {
+        alert('⚠️ Acesso negado!\n\nApenas clientes podem fazer pedidos.\nVocê está logado como ' + (user?.tipo || 'usuário desconhecido') + '.\n\nFaça login com uma conta de cliente.');
+        navigate('/login');
+        return;
+      }
+
       // Tratamento de erro de sessão expirada
-      if (error.message.includes('Sessão expirada') || error.message.includes('401')) {
+      if (error.message.includes('Sessão expirada') || error.response?.status === 401) {
         alert('⚠️ Sessão expirada! Faça login novamente.');
         localStorage.removeItem('accessToken');
         navigate('/login');
       } else {
-        alert(`Erro ao processar compra:\n${error.message}`);
+        alert(`Erro ao processar compra:\n${error.response?.data?.error || error.message}`);
       }
     } finally {
       setProcessando(false);

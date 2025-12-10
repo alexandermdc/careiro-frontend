@@ -1,4 +1,4 @@
-import { SearchIcon, ShoppingBagIcon, UserIcon, LogOutIcon, MenuIcon, XIcon } from "lucide-react";
+import { SearchIcon, ShoppingBagIcon, UserIcon, LogOutIcon, MenuIcon, XIcon, Shield } from "lucide-react";
 import { type JSX, useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "./button";
@@ -16,7 +16,7 @@ const navigationItems = [
 ];
 
 export const HeaderSection = (): JSX.Element => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, isAdmin } = useAuth();
   const { buscar } = useBusca();
   const navigate = useNavigate();
   const [termoBusca, setTermoBusca] = useState('');
@@ -101,6 +101,14 @@ export const HeaderSection = (): JSX.Element => {
                 <span className="text-verde-escuro font-medium text-sm">
                   Olá, {user?.nome}
                 </span>
+                {isAdmin && (
+                  <Button asChild variant="outline" size="default" className="h-12 inline-flex items-center justify-center gap-2 px-4 rounded-2xl border-verde-escuro bg-verde-escuro/5">
+                    <Link to="/admin" className="inline-flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-verde-escuro" />
+                      <span className="font-medium text-verde-escuro text-sm">Painel Admin</span>
+                    </Link>
+                  </Button>
+                )}
                 <Button asChild variant="outline" size="default" className="h-12 inline-flex items-center justify-center gap-2 px-4 rounded-2xl border-verde-claro">
                   <Link to="/perfil" className="inline-flex items-center gap-2">
                     <span className="font-medium text-verde-claro text-sm">Meu Perfil</span>
@@ -232,6 +240,16 @@ export const HeaderSection = (): JSX.Element => {
                   </p>
                   {isAuthenticated ? (
                     <>
+                        {isAdmin && (
+                        <Link
+                          to="/admin"
+                          onClick={fecharMenu}
+                          className="flex items-center gap-3 px-4 py-3.5 text-base font-medium text-verde-escuro hover:bg-verde-claro/10 transition-colors touch-manipulation bg-verde-escuro/5"
+                        >
+                          <Shield className="w-5 h-5 flex-shrink-0" />
+                          <span>Painel Admin</span>
+                        </Link>
+                      )}
                       <Link
                         to="/perfil"
                         onClick={fecharMenu}

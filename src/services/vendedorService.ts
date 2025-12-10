@@ -13,6 +13,7 @@ export interface Vendedor {
 
 export interface CreateVendedorData {
   nome: string;
+  email: string;
   telefone: string;
   endereco_venda: string;
   tipo_vendedor: 'PF' | 'PJ';
@@ -24,6 +25,7 @@ export interface CreateVendedorData {
 
 export interface UpdateVendedorData {
   nome?: string;
+  email?: string;
   telefone?: string;
   endereco_venda?: string;
   tipo_vendedor?: 'PF' | 'PJ';
