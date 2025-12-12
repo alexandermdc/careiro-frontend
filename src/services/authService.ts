@@ -76,9 +76,6 @@ class AuthService {
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('userType', userType);
       localStorage.setItem('user', JSON.stringify(userData));
-      
-      logger.success(`Login realizado com sucesso como ${userType}`);
-      
       return response.data;
     } catch (error: any) {
       logger.error('Erro ao fazer login', error);
@@ -152,6 +149,7 @@ class AuthService {
 
   isAdmin(): boolean {
     const userType = this.getUserType();
+    console.log('🔍 isAdmin check - UserType:', userType);
     return userType === 'ADMIN';
   }
 }
