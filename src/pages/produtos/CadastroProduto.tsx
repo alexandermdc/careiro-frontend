@@ -35,7 +35,8 @@ const CadastroProduto: React.FC = () => {
       return;
     }
     
-    if (user.tipo !== 'VENDEDOR' || !user.id_vendedor) {
+    // Verifica se o usuário TEM o papel de vendedor (não apenas se está ativo)
+    if (!user.papeis?.includes('VENDEDOR') || !user.vendedor?.id_vendedor) {
       alert('⚠️ Apenas vendedores podem cadastrar produtos!');
       navigate('/');
       return;
@@ -49,7 +50,7 @@ const CadastroProduto: React.FC = () => {
     is_promocao: false,
     preco: 0,
     preco_promocao: undefined,
-    fk_vendedor: user?.id_vendedor || '', // UUID do vendedor logado
+    fk_vendedor: user?.vendedor?.id_vendedor || '', // UUID do vendedor logado
     id_categoria: '',
     disponivel: true, // Por padrão, o produto é cadastrado como disponível
 

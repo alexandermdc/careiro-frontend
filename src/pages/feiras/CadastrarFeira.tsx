@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Store } from 'lucide-react';
 import feiraService, { type CreateFeiraData } from '../../services/feiraService';
 import { useAuth } from '../../contexts/AuthContext';
+import ImageUpload from '../../components/ImageUpload';
 
 const CadastrarFeira: React.FC = () => {
   const navigate = useNavigate();
@@ -28,10 +29,13 @@ const CadastrarFeira: React.FC = () => {
 
   const [formData, setFormData] = useState<CreateFeiraData>({
     nome: '',
-    endereco: ''
+    image: '',
+    data_hora: '',
+    descricao: ''
   });
 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [imagePreview, setImagePreview] = useState<string>('');
 
   const validateField = (field: string, value: string) => {
     const newErrors = { ...errors };
@@ -46,13 +50,11 @@ const CadastrarFeira: React.FC = () => {
           delete newErrors.nome;
         }
         break;
-      case 'endereco':
-        if (!value.trim()) {
-          newErrors.endereco = 'Endereço é obrigatório';
-        } else if (value.trim().length < 5) {
-          newErrors.endereco = 'Endereço deve ter no mínimo 5 caracteres';
+      case 'data_hora':
+        if (value && new Date(value) < new Date()) {
+          newErrors.data_hora = 'A data não pode ser no passado';
         } else {
-          delete newErrors.endereco;
+          delete newErrors.data_hora;
         }
         break;
     }
@@ -60,21 +62,29 @@ const CadastrarFeira: React.FC = () => {
     setErrors(newErrors);
   };
 
-  const handleInputChange = (field: keyof CreateFeiraData, value: string) => {
+  const handleInputChange = (field: keyof CreateFeiraData, value: string | File) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    validateField(field, value);
+    if (typeof value === 'string') {
+      validateField(field, value);
+    }
     setErro(''); // Limpa erro geral ao digitar
+  };
+
+  const handleImageError = (error: string) => {
+    setErrors(prev => ({ ...prev, image: error }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validar todos os campos
+    // Validar todos os campos obrigatórios
     validateField('nome', formData.nome);
-    validateField('endereco', formData.endereco);
+    if (formData.data_hora) {
+      validateField('data_hora', formData.data_hora);
+    }
     
     // Verificar se há erros
-    if (Object.keys(errors).length > 0 || !formData.nome.trim() || !formData.endereco.trim()) {
+    if (Object.keys(errors).length > 0 || !formData.nome.trim()) {
       setErro('Por favor, corrija os erros no formulário');
       return;
     }
@@ -84,6 +94,13 @@ const CadastrarFeira: React.FC = () => {
     setSucesso(false);
     
     try {
+      console.log('📋 Dados do formulário:', {
+        nome: formData.nome,
+        data_hora: formData.data_hora,
+        descricao: formData.descricao,
+        image: formData.image instanceof File ? `File: ${formData.image.name}` : formData.image
+      });
+      
       await feiraService.criar(formData);
       
       setSucesso(true);
@@ -172,26 +189,52 @@ const CadastrarFeira: React.FC = () => {
                 )}
               </div>
 
-              {/* Endereço */}
+              {/* Data e Hora */}
               <div>
-                <label htmlFor="endereco" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Endereço <span className="text-red-500">*</span>
+                <label htmlFor="data_hora" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Data e Hora
                 </label>
-                <textarea
-                  id="endereco"
-                  value={formData.endereco}
-                  onChange={(e) => handleInputChange('endereco', e.target.value)}
-                  onBlur={(e) => validateField('endereco', e.target.value)}
-                  rows={3}
-                  className={`w-full px-4 py-3 border ${
-                    errors.endereco ? 'border-red-300' : 'border-gray-300'
-                  } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none`}
-                  placeholder="Ex: Rua Principal, Centro - Careiro da Várzea, AM"
+                <input
+                  type="text"
+                  id="data_hora"
+                  value={formData.data_hora}
+                  onChange={(e) => handleInputChange('data_hora', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  placeholder="Ex: Sábado, 10/01/2026 às 06:00"
                   disabled={loading || sucesso}
                 />
-                {errors.endereco && (
-                  <p className="mt-2 text-sm text-red-600">{errors.endereco}</p>
-                )}
+              </div>
+
+              {/* Upload de Imagem */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Imagem da Feira
+                </label>
+                <ImageUpload
+                  value={formData.image || ''}
+                  onChange={(file) => handleInputChange('image', file)}
+                  onError={handleImageError}
+                  preview={imagePreview}
+                  onPreviewChange={setImagePreview}
+                  disabled={loading || sucesso}
+                  error={errors.image}
+                />
+              </div>
+
+              {/* Descrição */}
+              <div>
+                <label htmlFor="descricao" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Descrição
+                </label>
+                <textarea
+                  id="descricao"
+                  value={formData.descricao}
+                  onChange={(e) => handleInputChange('descricao', e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none"
+                  placeholder="Descreva a feira, produtos disponíveis, horários, etc."
+                  disabled={loading || sucesso}
+                />
               </div>
             </div>
 
@@ -229,10 +272,10 @@ const CadastrarFeira: React.FC = () => {
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="font-semibold text-blue-900 mb-2">ℹ️ Informações Importantes</h3>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Todos os campos marcados com <span className="text-red-500">*</span> são obrigatórios</li>
-            <li>• O nome da feira deve ser único e descritivo</li>
-            <li>• Forneça um endereço completo e preciso para facilitar a localização</li>
-            <li>• Após o cadastro, a feira estará disponível para visualização</li>
+            <li>• Apenas o <span className="font-semibold">Nome</span> é obrigatório</li>
+            <li>• A <span className="font-semibold">Data/Hora</span> é um campo de texto livre</li>
+            <li>• A <span className="font-semibold">Imagem</span> será enviada direto para o servidor (máx 2MB)</li>
+            <li>• A <span className="font-semibold">Descrição</span> ajuda os clientes a conhecerem melhor a feira</li>
           </ul>
         </div>
       </div>

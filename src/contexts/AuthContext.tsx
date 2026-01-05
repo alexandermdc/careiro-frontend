@@ -1,19 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import authService from '../services/authService';
-import type { UserType } from '../services/authService';
+import type { UserType, Cliente, Vendedor } from '../services/authService';
 
-// Tipo unificado para cliente, vendedor ou admin
+// Interface para dados do usuário no contexto
 interface AppUser {
-  tipo: UserType;
+  tipo: UserType; // Papel ativo
+  papeis: UserType[]; // Todos os papéis
   nome: string;
   email: string;
-  cpf?: string;
-  id_vendedor?: string;
-  telefone?: string;
-  tipo_vendedor?: 'PF' | 'PJ';
-  endereco_venda?: string;
-  numero_documento?: string;
+  // Dados específicos por papel
+  cliente?: Cliente;
+  vendedor?: Vendedor;
 }
 
 interface AuthContextData {
@@ -25,6 +23,7 @@ interface AuthContextData {
   isVendedor: boolean;
   isCliente: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginAsVendedor: (email: string, password: string) => Promise<void>;
   loginVendedor: (id_vendedor: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -41,9 +40,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // Verifica se há um usuário logado ao inicializar
-    const currentUser = authService.getCurrentUser();
-    if (currentUser && authService.isAuthenticated()) {
-      setUser(currentUser);
+    const usuario = authService.getCurrentUser();
+    if (usuario && authService.isAuthenticated()) {
+      const papelAtivo = authService.getPapelAtivo() || usuario.papeis[0];
+      
+      console.log('🔐 AuthContext - Inicializando com usuário:', {
+        email: usuario.email,
+        papeis: usuario.papeis,
+        papelAtivo: papelAtivo
+      });
+      
+      setUser({
+        tipo: papelAtivo,
+        papeis: usuario.papeis,
+        nome: usuario.cliente?.nome || usuario.vendedor?.nome || '',
+        email: usuario.email,
+        cliente: usuario.cliente,
+        vendedor: usuario.vendedor
+      });
     }
     setIsLoading(false);
   }, []);
@@ -53,10 +67,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       const response = await authService.login({ email, password });
       
-      // Detectar automaticamente se é cliente, vendedor ou admin
-      const userData = response.cliente || response.vendedor;
-      if (userData) {
-        setUser(userData as AppUser);
+      // Nova estrutura com usuario.papeis
+      const { usuario } = response;
+      if (usuario) {
+        const papelAtivo = authService.getPapelAtivo() || usuario.papeis[0];
+        
+        console.log('🔐 AuthContext - Login realizado:', {
+          email: usuario.email,
+          papeis: usuario.papeis,
+          papelAtivo: papelAtivo,
+          isAdmin: papelAtivo === 'ADMIN'
+        });
+        
+        setUser({
+          tipo: papelAtivo,
+          papeis: usuario.papeis,
+          nome: usuario.cliente?.nome || usuario.vendedor?.nome || '',
+          email: usuario.email,
+          cliente: usuario.cliente,
+          vendedor: usuario.vendedor
+        });
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginAsVendedor = async (email: string, password: string): Promise<void> => {
+    try {
+      setIsLoading(true);
+      const response = await authService.loginAsVendedor({ email, password });
+      
+      const { usuario } = response;
+      if (usuario) {
+        console.log('🏪 AuthContext - Login de vendedor realizado:', {
+          email: usuario.email,
+          papeis: usuario.papeis,
+          papelAtivo: 'VENDEDOR'
+        });
+        
+        setUser({
+          tipo: 'VENDEDOR',
+          papeis: ['VENDEDOR'],
+          nome: usuario.vendedor?.nome || '',
+          email: usuario.email,
+          vendedor: usuario.vendedor
+        });
       }
     } catch (error) {
       throw error;
@@ -66,11 +124,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   /**
-   * @deprecated Use login() ao invés disso - agora é unificado
+   * @deprecated Use loginAsVendedor() ao invés disso
    */
   const loginVendedor = async (id_vendedor: string, password: string): Promise<void> => {
-    // Por compatibilidade, redireciona para login unificado
-    return login(id_vendedor, password);
+    return loginAsVendedor(id_vendedor, password);
   };
 
   const logout = async (): Promise<void> => {
@@ -91,6 +148,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const isVendedor = authService.isVendedor();
   const isCliente = authService.isCliente();
 
+  // Debug logs
+  if (user) {
+    console.log('🎯 AuthContext - Estado atual:', {
+      userType,
+      isAdmin,
+      isVendedor,
+      isCliente,
+      papeis: user.papeis,
+      papelAtivo: user.tipo
+    });
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -102,6 +171,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isVendedor,
         isCliente,
         login,
+        loginAsVendedor,
         loginVendedor,
         logout,
       }}

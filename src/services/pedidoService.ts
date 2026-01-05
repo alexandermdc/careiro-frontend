@@ -10,6 +10,7 @@ export interface CriarPedidoDTO {
   data_pedido: string;
   fk_feira: number | null;
   produtos: ItemPedido[];
+  cpf_cliente?: string; // Obrigatório quando vendedor faz pedido
 }
 
 export interface Pedido {
@@ -85,7 +86,7 @@ class PedidoService {
    */
   async listarTodos(): Promise<Pedido[]> {
     try {
-      const response = await api.get('/pedidos'); // Note o plural
+      const response = await api.get('/pedido');
       return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('❌ Erro ao buscar todos pedidos:', error);

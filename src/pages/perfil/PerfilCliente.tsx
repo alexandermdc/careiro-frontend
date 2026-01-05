@@ -749,14 +749,14 @@ const PerfilCliente: React.FC = () => {
       return;
     }
     
-    if (user?.cpf) {
+    if (user?.cliente?.cpf) {
       carregarDadosCompletos();
       carregarPedidos();
     }
   }, [user, userType]);
 
   const carregarPedidos = async () => {
-    if (!user?.cpf) {
+    if (!user?.cliente?.cpf) {
       console.warn('⚠️ CPF do usuário não disponível');
       return;
     }
@@ -764,29 +764,8 @@ const PerfilCliente: React.FC = () => {
     try {
       setLoadingPedidos(true);
       
-      // Tenta a rota padrão primeiro
-
+      // Tenta a rota padrão primeiro (requer autenticação)
       let pedidosData = await pedidoService.listarPedidos();
-      
-      // Se não retornou pedidos válidos, tenta por CPF
-      if (!pedidosData || pedidosData.length === 0) {
-
-        try {
-          pedidosData = await pedidoService.listarPorCliente(user.cpf);
-        } catch (err) {
-
-        }
-      }
-      
-      // Se ainda não tem pedidos, tenta listar todos e filtrar
-      if (!pedidosData || pedidosData.length === 0) {
-   
-        try {
-          const todosPedidos = await pedidoService.listarTodos();
-          pedidosData = todosPedidos.filter(p => p.fk_cliente === user.cpf);
-        } catch (err) {
-        }
-      }
       
       setPedidos(pedidosData || []);
 
@@ -808,14 +787,14 @@ const PerfilCliente: React.FC = () => {
   };
 
   const carregarDadosCompletos = async () => {
-    if (!user?.cpf) return;
+    if (!user?.cliente?.cpf) return;
     
     try {
 
       setLoading(true);
       setError('');
       
-      const dadosCompletos = await clienteService.buscarPerfilCompleto(user.cpf);
+      const dadosCompletos = await clienteService.buscarPerfilCompleto(user.cliente.cpf);
       
       setCliente(dadosCompletos.cliente);
       
@@ -830,12 +809,12 @@ const PerfilCliente: React.FC = () => {
   };
 
   const handleSaveEdit = async (editData: UpdateClienteData) => {
-    if (!user?.cpf) return;
+    if (!user?.cliente?.cpf) return;
     
     try {
 
       
-      const clienteAtualizado = await clienteService.atualizar(user.cpf, editData);
+      const clienteAtualizado = await clienteService.atualizar(user.cliente.cpf, editData);
       
       setCliente(clienteAtualizado);
       
@@ -915,10 +894,10 @@ const PerfilCliente: React.FC = () => {
 
   // Função para salvar edições do vendedor
   const handleSaveVendedorEdit = async (editData: UpdateVendedorData) => {
-    if (!user?.id_vendedor) return;
+    if (!user?.vendedor?.id_vendedor) return;
     
     try {
-      await vendedorService.atualizar(user.id_vendedor, editData);
+      await vendedorService.atualizar(user.vendedor.id_vendedor, editData);
       
       // Mostrar toast de sucesso
       const successToast = document.createElement('div');
@@ -1037,10 +1016,10 @@ const PerfilCliente: React.FC = () => {
   if (userType === 'VENDEDOR') {
     // Criar objeto vendedor a partir dos dados do user
     const vendedorData: Vendedor = {
-      id_vendedor: user.id_vendedor || '',
+      id_vendedor: user.vendedor?.id_vendedor || '',
       nome: user.nome || '',
-      telefone: user.telefone || '',
-      endereco_venda: user.endereco_venda || '',
+      telefone: user.vendedor?.telefone || '',
+      endereco_venda: user.vendedor?.endereco_venda || '',
       tipo_vendedor: 'PF',
       tipo_documento: 'CPF',
       numero_documento: ''
@@ -1118,7 +1097,7 @@ const PerfilCliente: React.FC = () => {
                   <Phone className="w-4 h-4" />
                   Telefone
                 </p>
-                <p className="font-medium text-gray-900">{user?.telefone || 'Não informado'}</p>
+                <p className="font-medium text-gray-900">{user?.vendedor?.telefone || 'Não informado'}</p>
               </div>
               
               <div className="p-4 bg-gray-50 rounded-lg md:col-span-2">
@@ -1126,7 +1105,7 @@ const PerfilCliente: React.FC = () => {
                   <ShoppingBag className="w-4 h-4" />
                   Endereço de Venda
                 </p>
-                <p className="font-medium text-gray-900">{user?.endereco_venda || 'Não informado'}</p>
+                <p className="font-medium text-gray-900">{user?.vendedor?.endereco_venda || 'Não informado'}</p>
               </div>
               
               <div className="p-4 bg-blue-50 rounded-lg md:col-span-2">
@@ -1134,7 +1113,7 @@ const PerfilCliente: React.FC = () => {
                   <User className="w-4 h-4" />
                   ID do Vendedor
                 </p>
-                <p className="font-medium text-gray-900 text-xs break-all">{user?.id_vendedor || 'Não disponível'}</p>
+                <p className="font-medium text-gray-900 text-xs break-all">{user?.vendedor?.id_vendedor || 'Não disponível'}</p>
               </div>
             </div>
           </div>
@@ -1341,6 +1320,21 @@ const PerfilCliente: React.FC = () => {
                   <Star className="w-5 h-5" />
                   Assinaturas
                 </button>
+
+                {/* Aba de Vendedor - só aparece se o usuário tem papel de vendedor */}
+                {user?.papeis?.includes('VENDEDOR') && (
+                  <button
+                    onClick={() => setActiveTab('vendedor')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                      activeTab === 'vendedor' 
+                        ? 'bg-green-500 text-white' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <ShoppingBag className="w-5 h-5" />
+                    Área do Vendedor
+                  </button>
+                )}
               </nav>
             </div>
           </div>
@@ -1599,6 +1593,126 @@ const PerfilCliente: React.FC = () => {
                 >
                   Ver Planos
                 </Link>
+              </div>
+            )}
+
+            {activeTab === 'vendedor' && user?.papeis?.includes('VENDEDOR') && (
+              <div className="bg-white rounded-lg shadow-sm">
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      <ShoppingBag className="w-6 h-6 text-green-500" />
+                      Área do Vendedor
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="p-6 space-y-6">
+                  {/* Informações do Vendedor */}
+                  <div className="bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-200 rounded-xl p-6">
+                    <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <User className="w-5 h-5 text-green-600" />
+                      Dados do Vendedor
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-600">Nome</p>
+                        <p className="font-semibold text-gray-900">{user?.vendedor?.nome || user.nome}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Telefone</p>
+                        <p className="font-semibold text-gray-900">{user?.vendedor?.telefone || 'Não informado'}</p>
+                      </div>
+                      <div className="md:col-span-2">
+                        <p className="text-sm text-gray-600">Endereço de Venda</p>
+                        <p className="font-semibold text-gray-900">{user?.vendedor?.endereco_venda || 'Não informado'}</p>
+                      </div>
+                      <div className="md:col-span-2">
+                        <button
+                          onClick={() => setShowEditModal(true)}
+                          className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                          Editar Dados do Vendedor
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Ações Rápidas */}
+                  <div>
+                    <h4 className="font-bold text-gray-900 mb-4 text-lg">Ações Rápidas</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Link
+                        to="/produtos/cadastro"
+                        className="flex items-center gap-4 p-5 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-200 rounded-xl hover:border-green-300 hover:shadow-lg transition-all group"
+                      >
+                        <div className="bg-green-500 p-3 rounded-lg group-hover:scale-110 transition-transform">
+                          <Package className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h5 className="font-bold text-gray-900">Cadastrar Produto</h5>
+                          <p className="text-sm text-gray-600">Adicione novos produtos ao catálogo</p>
+                        </div>
+                      </Link>
+
+                      <Link
+                        to="/produtos"
+                        className="flex items-center gap-4 p-5 bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl hover:border-blue-300 hover:shadow-lg transition-all group"
+                      >
+                        <div className="bg-blue-500 p-3 rounded-lg group-hover:scale-110 transition-transform">
+                          <ShoppingBag className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h5 className="font-bold text-gray-900">Meus Produtos</h5>
+                          <p className="text-sm text-gray-600">Gerencie seus produtos cadastrados</p>
+                        </div>
+                      </Link>
+
+                      <Link
+                        to="/vendedor/vendas"
+                        className="flex items-center gap-4 p-5 bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-200 rounded-xl hover:border-purple-300 hover:shadow-lg transition-all group"
+                      >
+                        <div className="bg-purple-500 p-3 rounded-lg group-hover:scale-110 transition-transform">
+                          <Package className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h5 className="font-bold text-gray-900">Minhas Vendas</h5>
+                          <p className="text-sm text-gray-600">Acompanhe pedidos dos seus produtos</p>
+                        </div>
+                      </Link>
+
+                      <Link
+                        to="/vendedor/estatisticas"
+                        className="flex items-center gap-4 p-5 bg-gradient-to-r from-orange-50 to-orange-100 border-2 border-orange-200 rounded-xl hover:border-orange-300 hover:shadow-lg transition-all group"
+                      >
+                        <div className="bg-orange-500 p-3 rounded-lg group-hover:scale-110 transition-transform">
+                          <Star className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h5 className="font-bold text-gray-900">Estatísticas</h5>
+                          <p className="text-sm text-gray-600">Veja o desempenho das suas vendas</p>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Dicas */}
+                  <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="text-2xl">💡</div>
+                      <div>
+                        <h5 className="font-bold text-blue-900 mb-1">Dicas para Vendedores</h5>
+                        <ul className="text-sm text-blue-800 space-y-1">
+                          <li>• Mantenha seus produtos sempre atualizados com fotos de qualidade</li>
+                          <li>• Responda rapidamente às dúvidas dos clientes</li>
+                          <li>• Atualize regularmente o estoque dos seus produtos</li>
+                          <li>• Cadastre-se em feiras para aumentar sua visibilidade</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
