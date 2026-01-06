@@ -12,11 +12,14 @@ import {
   X,
   Store,
   FileText,
-  Building2
+  Building2,
+  Plus
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import vendedorService from '../../services/vendedorService';
 import type { Vendedor, UpdateVendedorData } from '../../services/vendedorService';
+import { HeaderSection } from '../../components/HeaderSection';
+import { FooterSection } from '../../components/FooterSection';
 
 // Componente Modal de Edição
 const EditVendedorModal: React.FC<{
@@ -61,11 +64,11 @@ const EditVendedorModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="bg-gradient-to-r from-verde-escuro to-verde-claro p-6 text-white sticky top-0 z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-gradient-to-r from-verde-escuro to-verde-claro p-6 text-white sticky top-0 z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
               <Edit3 className="w-6 h-6" />
               <h2 className="text-2xl font-bold">Editar Perfil de Vendedor</h2>
             </div>
@@ -236,7 +239,9 @@ const PerfilVendedor: React.FC = () => {
   const vendedorAtual = vendedor || user?.vendedor;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
+    <>
+      <HeaderSection />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
@@ -352,9 +357,22 @@ const PerfilVendedor: React.FC = () => {
         </div>
 
         {/* Ações Rápidas */}
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
             to="/produtos/cadastro"
+            className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-4 group"
+          >
+            <div className="bg-green-500/10 p-3 rounded-lg group-hover:bg-green-500/20 transition-colors">
+              <Plus className="w-6 h-6 text-green-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-900">Cadastrar Produto</h3>
+              <p className="text-sm text-gray-600">Adicionar novo produto</p>
+            </div>
+          </Link>
+
+          <Link
+            to="/produtos/gerenciar"
             className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-4 group"
           >
             <div className="bg-verde-claro/10 p-3 rounded-lg group-hover:bg-verde-claro/20 transition-colors">
@@ -401,7 +419,9 @@ const PerfilVendedor: React.FC = () => {
         vendedor={vendedorAtual || null}
         onSave={handleSaveEdit}
       />
-    </div>
+      </div>
+      <FooterSection />
+    </>
   );
 };
 

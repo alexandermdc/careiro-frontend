@@ -13,6 +13,7 @@ import { Feiras } from './pages/feiras/feiras';
 import CadastrarFeira from './pages/feiras/CadastrarFeira';
 import { Produtos } from './pages/produtos/Produtos';
 import CadastroProduto from './pages/produtos/CadastroProduto';
+import GerenciarProdutos from './pages/produtos/GerenciarProdutos';
 import CadastroVendedor from './pages/vendedor/CadastroVendedor';
 import FormCliente from './pages/cadastro/cadastro';
 import Login from './pages/login/login';
@@ -114,6 +115,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CadastroProduto />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/produtos/gerenciar" 
+          element={
+            <ProtectedRoute>
+              <GerenciarProdutos />
             </ProtectedRoute>
           } 
         />

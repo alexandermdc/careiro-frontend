@@ -1,8 +1,11 @@
 import { type JSX } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../../../components/button";
 import { Card, CardContent } from "../../../components/cards";
 
 export const AboutSectionSobreNos = (): JSX.Element => {
+  const navigate = useNavigate();
+
   return (
     <section className="w-full bg-gradient-to-br from-verde-claro/10 to-verde-escuro/5 py-20">
       <div className="flex items-center justify-center px-4">
@@ -23,13 +26,11 @@ export const AboutSectionSobreNos = (): JSX.Element => {
                   Conectando os melhores agricultores até você
                 </h2>
 
-                <Button 
-                  className="bg-verde-escuro hover:bg-verde-escuro/90 text-white [font-family:'Montserrat',Helvetica] font-bold text-xl lg:text-2xl px-12 py-6 h-auto transition-all duration-300 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105"
-                  onClick={() => {
-                    // Adicionar lógica de navegação aqui
-                  }}
-                >
-                  COMPRE AGORA
+                <Button
+                      className="bg-verde-escuro hover:bg-verde-escuro/90 text-white [font-family:'Montserrat',Helvetica] font-bold text-base sm:text-lg md:text-xl lg:text-2xl px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 h-auto transition-all duration-300 rounded-lg md:rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto"
+                      onClick={() => navigate("/produtos")}
+                    >
+                      COMPRE AGORA
                 </Button>
               </CardContent>
             </Card>

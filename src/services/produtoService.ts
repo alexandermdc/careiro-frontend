@@ -74,6 +74,19 @@ class ProdutoService {
     }
   }
 
+  // Buscar produtos por vendedor
+  async buscarPorVendedor(idVendedor: string): Promise<Produto[]> {
+    try {
+      const response = await api.get(`/produto/vendedor/${idVendedor}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 
+        'Erro ao buscar produtos do vendedor'
+      );
+    }
+  }
+
   // Criar novo produto (requer autenticação)
   async criar(data: CreateProdutoData): Promise<Produto> {
     try {

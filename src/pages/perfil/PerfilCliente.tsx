@@ -24,6 +24,8 @@ import vendedorService from '../../services/vendedorService';
 import type { Cliente, UpdateClienteData } from '../../services/clienteService';
 import type { Pedido } from '../../services/pedidoService';
 import type { Vendedor, UpdateVendedorData } from '../../services/vendedorService';
+import { HeaderSection } from '../../components';
+import { FooterSection } from '../../components';
 
 // Componente Modal de Detalhes do Pedido
 const PedidoModal: React.FC<{
@@ -1027,6 +1029,7 @@ const PerfilCliente: React.FC = () => {
 
     return (
       <>
+        <HeaderSection />
         {/* Modal de Edição */}
         <EditVendedorModal
           isOpen={showEditModal}
@@ -1152,9 +1155,11 @@ const PerfilCliente: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+    <>
+      <HeaderSection />
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link 
@@ -1164,24 +1169,6 @@ const PerfilCliente: React.FC = () => {
               <ArrowLeft className="w-5 h-5" />
               Início
             </Link>
-            
-            <div className="flex items-center gap-4">
-                            <button 
-                onClick={() => setShowEditModal(true)}
-                className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-700 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                <Edit3 className="w-4 h-4" />
-                Editar Perfil
-              </button>
-              
-              <button 
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-red-600 hover:text-red-700 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                Sair
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -1191,180 +1178,151 @@ const PerfilCliente: React.FC = () => {
           
           {/* Sidebar - Dados Pessoais */}
           <div className="lg:col-span-1">
-            {/* Estatísticas */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-              <h3 className="font-semibold text-gray-900 text-lg mb-4">
-                Estatísticas
-              </h3>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-green-500">{pedidos.length}</div>
-                  <div className="text-sm text-gray-600">Pedidos</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-green-500">{favoritos.length}</div>
-                  <div className="text-sm text-gray-600">Favoritos</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-green-500">0</div>
-                  <div className="text-sm text-gray-600">Assinaturas</div>
-                </div>
+            {/* Box da Foto de Perfil */}
+            <div className="mb-6 flex justify-center">
+              <div className="w-[167px] h-[167px] bg-gradient-to-br from-green-500 to-green-700 rounded-full overflow-hidden flex items-center justify-center">
+                <User className="w-20 h-20 text-white" />
               </div>
             </div>
-
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="text-center mb-6">
-                <div className="relative inline-block">
-                                    <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-green-700 rounded-full overflow-hidden mx-auto mb-4 flex items-center justify-center">
-                    <User className="w-12 h-12 text-white" />
-                  </div>
-                </div>
-                
-                <h2 className="text-xl font-bold text-gray-900 mb-1">
-                  {cliente?.nome || user.nome}
-                </h2>
-                <p className="text-gray-600">Cliente Agriconect</p>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900 text-lg mb-4">
+            
+            {/* Box de Dados Pessoais */}
+            <div className="rounded-[25px] shadow-sm p-4 mb-6" style={{ background: 'rgba(251, 252, 250, 1)', border: '1px solid rgba(156, 178, 23, 1)' }}>
+                {/* Título */}
+                <h3 className="font-bold text-gray-900 mb-3" style={{ fontFamily: 'Montserrat, sans-serif', fontSize: '16px', lineHeight: '100%', fontWeight: 700 }}>
                   Dados pessoais
                 </h3>
                 
-                {/* Nome */}
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <User className="w-5 h-5 text-gray-400" />
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Nome
-                    </label>
-                    <p className="text-gray-900 font-medium">{cliente?.nome}</p>
+                {/* Dados Pessoais */}
+                <div className="space-y-2 text-sm mb-4">
+                  <div>
+                    <span className="font-bold" style={{ fontFamily: 'Montserrat, sans-serif', color: 'rgba(0, 0, 0, 0.8)' }}>Nome: </span>
+                    <span style={{ fontFamily: 'Montserrat, sans-serif', color: 'rgba(0, 0, 0, 0.7)' }}>{cliente?.nome || user.nome}</span>
+                  </div>
+                  
+                  <div>
+                    <span className="font-bold" style={{ fontFamily: 'Montserrat, sans-serif', color: 'rgba(0, 0, 0, 0.8)' }}>Email: </span>
+                    <span style={{ fontFamily: 'Montserrat, sans-serif', color: 'rgba(0, 0, 0, 0.7)' }}>{cliente?.email || user.email}</span>
+                  </div>
+                  
+                  <div>
+                    <span className="font-bold" style={{ fontFamily: 'Montserrat, sans-serif', color: 'rgba(0, 0, 0, 0.8)' }}>Telefone: </span>
+                    <span style={{ fontFamily: 'Montserrat, sans-serif', color: 'rgba(0, 0, 0, 0.7)' }}>{cliente?.telefone || 'Não informado'}</span>
                   </div>
                 </div>
-
-                {/* Email */}
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Mail className="w-5 h-5 text-gray-400" />
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Email
-                    </label>
-                    <p className="text-gray-900 font-medium">{cliente?.email}</p>
-                  </div>
-                </div>
-
-                {/* Telefone */}
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Phone className="w-5 h-5 text-gray-400" />
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Telefone
-                    </label>
-                    <p className="text-gray-900 font-medium">{cliente?.telefone}</p>
-                  </div>
-                </div>
-
-                {/* CPF (oculto por segurança) */}
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <User className="w-5 h-5 text-gray-400" />
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700">
-                      CPF
-                    </label>
-                    <p className="text-gray-900 font-medium">
-                      {cliente?.cpf ? `***.***.***-${cliente.cpf.slice(-2)}` : '***.***.***-**'}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      🔒 Oculto por segurança
-                    </p>
-                  </div>
-                </div>
-              </div>
+                
+                {/* Botão Alterar Dados */}
+                <button 
+                  onClick={() => setShowEditModal(true)}
+                  className="w-full px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  style={{ 
+                    fontFamily: 'Montserrat, sans-serif',
+                    fontWeight: 700,
+                    fontSize: '16px',
+                    lineHeight: '24px',
+                    letterSpacing: '0%',
+                    textAlign: 'center',
+                    background: 'rgba(255, 255, 255, 1)',
+                    border: '1px solid rgba(146, 169, 22, 1)',
+                    color: 'rgba(146, 169, 22, 1)'
+                  }}
+                >
+                  Alterar dados
+                  <Edit3 className="w-4 h-4" style={{ color: 'rgba(146, 169, 22, 1)' }} />
+                </button>
             </div>
 
             {/* Menu Lateral */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
-              <nav className="space-y-2">
-                <button
-                  onClick={() => setActiveTab('pedidos')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                    activeTab === 'pedidos' 
-                      ? 'bg-green-500 text-white' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <Package className="w-5 h-5" />
-                  Pedidos
-                </button>
-                
-                <button
-                  onClick={() => setActiveTab('favoritos')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                    activeTab === 'favoritos' 
-                      ? 'bg-green-500 text-white' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <Heart className="w-5 h-5" />
-                  Favoritos ({favoritos.length})
-                </button>
+            <div className="flex flex-col space-y-4">
+              <button
+                onClick={() => setActiveTab('pedidos')}
+                className={`block text-left transition-colors focus:outline-none ${
+                  activeTab === 'pedidos' 
+                    ? 'font-bold' 
+                    : 'font-normal hover:text-gray-700'
+                }`}
+                style={{ 
+                  fontFamily: 'Montserrat, sans-serif',
+                  fontSize: '14px',
+                  color: activeTab === 'pedidos' ? 'rgba(28, 90, 22, 1)' : 'rgba(107, 114, 128, 1)',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  display: 'block',
+                  width: '100%'
+                }}
+              >
+                Pedidos
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('favoritos')}
+                className={`block text-left transition-colors focus:outline-none ${
+                  activeTab === 'favoritos' 
+                    ? 'font-bold' 
+                    : 'font-normal hover:text-gray-700'
+                }`}
+                style={{ 
+                  fontFamily: 'Montserrat, sans-serif',
+                  fontSize: '14px',
+                  color: activeTab === 'favoritos' ? 'rgba(28, 90, 22, 1)' : 'rgba(107, 114, 128, 1)',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  display: 'block',
+                  width: '100%'
+                }}
+              >
+                Favoritos
+              </button>
 
-                <button
-                  onClick={() => setActiveTab('assinaturas')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                    activeTab === 'assinaturas' 
-                      ? 'bg-green-500 text-white' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <Star className="w-5 h-5" />
-                  Assinaturas
-                </button>
+              <button
+                onClick={() => setActiveTab('assinaturas')}
+                className={`block text-left transition-colors focus:outline-none ${
+                  activeTab === 'assinaturas' 
+                    ? 'font-bold' 
+                    : 'font-normal hover:text-gray-700'
+                }`}
+                style={{ 
+                  fontFamily: 'Montserrat, sans-serif',
+                  fontSize: '14px',
+                  color: activeTab === 'assinaturas' ? 'rgba(28, 90, 22, 1)' : 'rgba(107, 114, 128, 1)',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  display: 'block',
+                  width: '100%'
+                }}
+              >
+                Assinaturas
+              </button>
 
-                {/* Aba de Vendedor - só aparece se o usuário tem papel de vendedor */}
-                {user?.papeis?.includes('VENDEDOR') && (
-                  <button
-                    onClick={() => setActiveTab('vendedor')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                      activeTab === 'vendedor' 
-                        ? 'bg-green-500 text-white' 
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <ShoppingBag className="w-5 h-5" />
-                    Área do Vendedor
-                  </button>
-                )}
-              </nav>
+              <button
+                onClick={handleLogout}
+                className="block text-left font-normal transition-colors focus:outline-none hover:text-gray-700"
+                style={{ 
+                  fontFamily: 'Montserrat, sans-serif',
+                  fontSize: '14px',
+                  color: 'rgba(107, 114, 128, 1)',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  display: 'block',
+                  width: '100%'
+                }}
+              >
+                Sair
+              </button>
             </div>
           </div>
 
           {/* Conteúdo Principal */}
           <div className="lg:col-span-2">
             {activeTab === 'pedidos' && (
-              <div className="bg-white rounded-lg shadow-sm">
-                <div className="p-6 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                      <Package className="w-6 h-6 text-green-500" />
-                      Meus Pedidos ({pedidos.length})
-                    </h3>
-                    <button
-                      onClick={carregarPedidos}
-                      disabled={loadingPedidos}
-                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm disabled:opacity-50 flex items-center gap-2"
-                    >
-                      {loadingPedidos ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                          Carregando...
-                        </>
-                      ) : (
-                        <>🔄 Atualizar</>
-                      )}
-                    </button>
-                  </div>
-                </div>
+              <div className="w-full">
+                {/* Título */}
+                <h3 className="text-2xl font-bold text-gray-900 mb-6" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                  Pedidos
+                </h3>
 
                 {loadingPedidos ? (
                   <div className="p-8 text-center">
@@ -1386,85 +1344,68 @@ const PerfilCliente: React.FC = () => {
                     </Link>
                   </div>
                 ) : (
-                  <div className="p-6">
-                    <div className="space-y-4">
-                      {pedidos.map((pedido) => (
-                        <div 
-                          key={pedido.pedido_id} 
-                          className="border-2 border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all hover:border-green-300 bg-white"
-                        >
-                          <div className="flex items-center justify-between">
-                            {/* Info do Pedido */}
-                            <div className="flex items-center gap-4">
-                              <div className="bg-green-100 p-3 rounded-lg">
-                                <Package className="w-6 h-6 text-green-600" />
-                              </div>
-                              <div>
-                                <h4 className="font-bold text-gray-900 text-lg">
-                                  Pedido #{pedido.pedido_id}
-                                </h4>
-                                <p className="text-sm text-gray-600">
-                                  📅 {new Date(pedido.data_pedido).toLocaleDateString('pt-BR', {
-                                    day: '2-digit',
-                                    month: 'short',
-                                    year: 'numeric',
-                                  })} • {new Date(pedido.data_pedido).toLocaleTimeString('pt-BR', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
-                                </p>
-                                {pedido.produtos_no_pedido && pedido.produtos_no_pedido.length > 0 && (
-                                  <p className="text-sm text-gray-500 mt-1">
-                                    🛒 {pedido.produtos_no_pedido.length} {pedido.produtos_no_pedido.length === 1 ? 'produto' : 'produtos'}
-                                  </p>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {pedidos.map((pedido) => (
+                      <div 
+                        key={pedido.pedido_id} 
+                        className="bg-white rounded-[20px] p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all"
+                      >
+                        <div className="flex flex-col h-full justify-between">
+                          {/* Header do Pedido */}
+                          <div>
+                            <div className="flex items-start gap-4 mb-4">
+                              {/* Imagem do Produto (placeholder cinza se não tiver) */}
+                              <div className="flex-shrink-0">
+                                {pedido.produtos_no_pedido && pedido.produtos_no_pedido.length > 0 && pedido.produtos_no_pedido[0].produto?.image ? (
+                                  <img 
+                                    src={pedido.produtos_no_pedido[0].produto.image} 
+                                    alt="Produto"
+                                    className="w-20 h-20 object-cover rounded-lg"
+                                  />
+                                ) : (
+                                  <div className="w-20 h-20 bg-gray-200 rounded-lg"></div>
                                 )}
                               </div>
-                            </div>
-
-                            {/* Ações */}
-                            <div className="flex items-center gap-4">
-                              {/* Total */}
-                              {pedido.produtos_no_pedido && pedido.produtos_no_pedido.length > 0 && (
-                                <div className="text-right">
-                                  <p className="text-sm text-gray-600">Total</p>
-                                  <p className="text-2xl font-bold text-green-600">
+                              
+                              <div className="flex-1">
+                                <h4 className="font-bold text-gray-900 text-lg mb-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                                  Pedido #{pedido.pedido_id}
+                                </h4>
+                                
+                                {pedido.produtos_no_pedido && pedido.produtos_no_pedido.length > 0 && (
+                                  <p className="text-2xl font-bold mb-2" style={{ color: 'rgba(146, 169, 22, 1)', fontFamily: 'Montserrat, sans-serif' }}>
                                     R$ {pedido.produtos_no_pedido.reduce((total: number, item: any) => {
                                       return total + (item.produto?.preco || 0) * item.quantidade;
                                     }, 0).toFixed(2)}
                                   </p>
-                                </div>
-                              )}
-
-                              {/* Botão Ver Detalhes */}
-                              <button
-                                onClick={() => {
-                                  setPedidoSelecionado(pedido);
-                                  setShowPedidoModal(true);
-                                }}
-                                className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center gap-2 shadow-md hover:shadow-lg"
-                              >
-                                Ver Detalhes
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                              </button>
+                                )}
+                                
+                                <p className="text-sm text-gray-600">
+                                  Status: <span className="text-gray-900">Retirada realizada</span>
+                                </p>
+                              </div>
                             </div>
                           </div>
 
-                          {/* Badge de Status */}
-                          <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
-                            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                              ✓ Confirmado
-                            </span>
-                            {pedido.feira && (
-                              <p className="text-sm text-gray-600">
-                                🏪 {pedido.feira.nome || `Feira #${pedido.fk_feira}`}
-                              </p>
-                            )}
-                          </div>
+                          {/* Botão Ver Detalhes */}
+                          <button
+                            onClick={() => {
+                              setPedidoSelecionado(pedido);
+                              setShowPedidoModal(true);
+                            }}
+                            className="w-full px-4 py-2 rounded-lg transition-colors font-semibold text-sm"
+                            style={{
+                              fontFamily: 'Montserrat, sans-serif',
+                              background: 'rgba(146, 169, 22, 1)',
+                              color: '#ffffff',
+                              border: 'none'
+                            }}
+                          >
+                            Ver detalhes
+                          </button>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -1736,7 +1677,9 @@ const PerfilCliente: React.FC = () => {
         cliente={cliente}
         onSave={handleSaveEdit}
       />
-    </div>
+      </div>
+      <FooterSection />
+    </>
   );
 };
 
