@@ -9,7 +9,6 @@ import {
   MapPin,
   ArrowLeft,
   Save,
-  X,
   Store,
   FileText,
   Building2,
@@ -20,6 +19,7 @@ import vendedorService from '../../services/vendedorService';
 import type { Vendedor, UpdateVendedorData } from '../../services/vendedorService';
 import { HeaderSection } from '../../components/HeaderSection';
 import { FooterSection } from '../../components/FooterSection';
+import Modal from '../../components/Modal';
 
 // Componente Modal de Edição
 const EditVendedorModal: React.FC<{
@@ -64,24 +64,42 @@ const EditVendedorModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-          <div className="bg-gradient-to-r from-verde-escuro to-verde-claro p-6 text-white sticky top-0 z-10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-              <Edit3 className="w-6 h-6" />
-              <h2 className="text-2xl font-bold">Editar Perfil de Vendedor</h2>
-            </div>
-            <button
-              onClick={onClose}
-              className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Editar Perfil de Vendedor"
+      footerContent={
+        <div className="flex gap-3 w-full">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+            disabled={isSaving}
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            form="edit-vendedor-form"
+            className="flex-1 px-6 py-3 bg-verde-escuro text-white rounded-lg hover:bg-verde-claro transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Save className="w-5 h-5" />
+                Salvar Alterações
+              </>
+            )}
+          </button>
         </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+      }
+    >
+      <form id="edit-vendedor-form" onSubmit={handleSubmit} className="space-y-6">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
               {error}
@@ -128,37 +146,8 @@ const EditVendedorModal: React.FC<{
               required
             />
           </div>
-
-          <div className="flex gap-3 pt-4 border-t">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-              disabled={isSaving}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-6 py-3 bg-verde-escuro text-white rounded-lg hover:bg-verde-claro transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5" />
-                  Salvar Alterações
-                </>
-              )}
-            </button>
-          </div>
         </form>
-      </div>
-    </div>
+      </Modal>
   );
 };
 

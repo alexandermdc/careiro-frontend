@@ -226,32 +226,37 @@ class AuthService {
     try {
       console.log('🏪 Login como VENDEDOR com:', { email: credentials.email });
       
-      // Tenta endpoint específico de vendedor (se existir no backend)
-      let response;
-      try {
-        response = await api.post('/auth/login/vendedor', {
-          email: credentials.email,
-          senha: credentials.password
-        });
-        console.log('✅ Endpoint específico /auth/login/vendedor usado');
-      } catch (error: any) {
-        // Se não existir, usa endpoint padrão
-        if (error.response?.status === 404) {
-          console.log('⚠️ Endpoint /auth/login/vendedor não existe, usando /auth/login');
-          response = await api.post('/auth/login', {
-            email: credentials.email,
-            senha: credentials.password
-          });
-        } else {
-          throw error;
-        }
-      }
+      // Usar endpoint específico de vendedor
+      const response = await api.post('/auth/login/vendedor', {
+        email: credentials.email,
+        senha: credentials.password
+      });
       
       console.log('📦 Resposta do backend (vendedor):', response.data);
       
       const { token, accessToken, refreshToken, cliente } = response.data;
       const finalToken = token || accessToken;
       let { vendedor } = response.data;
+      
+      // Decodificar o token para verificar o tipo
+      try {
+        const tokenParts = finalToken.split('.');
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(atob(tokenParts[1]));
+          console.log('🔑 Token decodificado:', {
+            tipo: payload.tipo,
+            id_vendedor: payload.id_vendedor,
+            email: payload.email,
+            exp: new Date(payload.exp * 1000).toLocaleString()
+          });
+          
+          if (payload.tipo !== 'VENDEDOR') {
+            console.error('⚠️ AVISO: Token não está marcado como VENDEDOR! Tipo:', payload.tipo);
+          }
+        }
+      } catch (e) {
+        console.warn('⚠️ Não foi possível decodificar token:', e);
+      }
       
       // SOLUÇÃO TEMPORÁRIA: Se não retornou vendedor, tentar buscar
       if (!vendedor && cliente) {
@@ -311,6 +316,11 @@ class AuthService {
     } catch (error: any) {
       console.error('❌ Erro no login de vendedor:', error);
       logger.error('Erro ao fazer login como vendedor', error);
+      
+      // Tratamento específico de erros
+      if (error.code === 'ERR_NETWORK') {
+        throw new Error('Não foi possível conectar ao servidor. Verifique se o backend está rodando.');
+      }
       
       if (error.response?.status === 401) {
         throw new Error('Email ou senha incorretos');

@@ -5,18 +5,46 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'; //
 // Configuração base do Axios
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // NÃO definir Content-Type aqui - deixar o axios definir automaticamente
+  // Isso permite que FormData use multipart/form-data com boundary correto
 });
 
 // Interceptor para adicionar token automaticamente
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
+    const papelAtivo = localStorage.getItem('papelAtivo');
+    
+    // Garantir que o header existe
+    if (!config.headers) {
+      config.headers = {} as any;
+    }
+    
+    // Adicionar Content-Type apenas se não for FormData
+    if (!(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      
+      // Adicionar papel ativo como header para o backend saber qual contexto usar
+      if (papelAtivo) {
+        config.headers['x-user-role'] = papelAtivo;
+      }
     }
+    
+    // Log detalhado para requisições com FormData
+    if (config.data instanceof FormData) {
+      console.log('📤 Requisição FormData:', {
+        url: config.url,
+        method: config.method,
+        contentType: config.headers['Content-Type'],
+        hasAuth: !!config.headers.Authorization,
+        userRole: config.headers['x-user-role']
+      });
+    }
+    
     return config;
   },
   (error) => Promise.reject(error)

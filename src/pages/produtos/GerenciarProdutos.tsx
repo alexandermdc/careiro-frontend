@@ -8,11 +8,15 @@ import {
   Eye,
   DollarSign,
   Tag,
-  AlertCircle
+  AlertCircle,
+  Edit,
+  Save,
+  Upload
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import produtoService from '../../services/produtoService';
 import type { Produto } from '../../services/produtoService';
+import Modal from '../../components/Modal';
 
 const GerenciarProdutos: React.FC = () => {
   const { user } = useAuth();
@@ -21,7 +25,13 @@ const GerenciarProdutos: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [error, setError] = useState('');
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | number | null>(null);
+  const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
+  const [modoEdicao, setModoEdicao] = useState(false);
+  const [formEdicao, setFormEdicao] = useState<any>({});
+  const [salvando, setSalvando] = useState(false);
+  const [novaImagem, setNovaImagem] = useState<File | null>(null);
+  const [previewImagem, setPreviewImagem] = useState<string>('');
   
   // Verificar se é vendedor
   useEffect(() => {
@@ -46,6 +56,8 @@ const GerenciarProdutos: React.FC = () => {
       setLoading(true);
       setError('');
       const data = await produtoService.buscarPorVendedor(user.vendedor.id_vendedor.toString());
+      console.log('📦 Produtos carregados:', data);
+      console.log('🔍 Primeiro produto:', data[0]);
       setProdutos(data);
     } catch (err: any) {
       console.error('Erro ao carregar produtos:', err);
@@ -55,7 +67,12 @@ const GerenciarProdutos: React.FC = () => {
     }
   };
   
-  const handleDelete = async (id: number, nome: string) => {
+  const handleDelete = async (id: string | number | undefined, nome: string) => {
+    if (!id) {
+      alert('ID do produto inválido');
+      return;
+    }
+    
     if (!confirm(`Tem certeza que deseja excluir o produto "${nome}"?`)) {
       return;
     }
@@ -65,7 +82,7 @@ const GerenciarProdutos: React.FC = () => {
       await produtoService.deletar(id.toString());
       
       // Atualizar lista removendo o produto deletado
-      setProdutos(produtos.filter(p => p.id !== id));
+      setProdutos(produtos.filter(p => (p.id_produto || p.id) !== id));
       
       // Mostrar notificação de sucesso
       const successToast = document.createElement('div');
@@ -86,6 +103,108 @@ const GerenciarProdutos: React.FC = () => {
       alert(`Erro ao excluir produto: ${err.message}`);
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const iniciarEdicao = (produto: Produto) => {
+    setFormEdicao({
+      nome: produto.nome,
+      descricao: produto.descricao,
+      preco: produto.preco,
+      preco_promocao: produto.preco_promocao || '',
+      is_promocao: produto.is_promocao || false,
+      disponivel: produto.disponivel
+    });
+    setPreviewImagem(produto.image || '');
+    setModoEdicao(true);
+  };
+
+  const cancelarEdicao = () => {
+    setModoEdicao(false);
+    setFormEdicao({});
+    setNovaImagem(null);
+    setPreviewImagem('');
+  };
+
+  const handleImagemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor, selecione uma imagem válida');
+      return;
+    }
+
+    setNovaImagem(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewImagem(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const salvarEdicao = async () => {
+    if (!produtoSelecionado) return;
+
+    try {
+      setSalvando(true);
+      
+      const formData = new FormData();
+      formData.append('nome', formEdicao.nome);
+      formData.append('descricao', formEdicao.descricao);
+      formData.append('preco', formEdicao.preco.toString());
+      // Converter booleanos para 1/0 para compatibilidade com backend
+      formData.append('disponivel', formEdicao.disponivel ? '1' : '0');
+      formData.append('is_promocao', formEdicao.is_promocao ? '1' : '0');
+      
+      if (formEdicao.preco_promocao) {
+        formData.append('preco_promocao', formEdicao.preco_promocao.toString());
+      }
+      
+      if (novaImagem) {
+        formData.append('image', novaImagem);
+      }
+
+      console.log('📋 Dados sendo enviados para atualização:');
+      for (const [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(`  ${key}: [File] ${value.name}`);
+        } else {
+          console.log(`  ${key}: ${value}`);
+        }
+      }
+
+      const produtoAtualizado = await produtoService.atualizar(produtoSelecionado.id_produto || produtoSelecionado.id!.toString(), formData);
+      
+      console.log('✅ Produto atualizado:', produtoAtualizado);
+      
+      // Recarregar produtos
+      await carregarProdutos();
+      
+      // Fechar modal
+      setProdutoSelecionado(null);
+      setModoEdicao(false);
+      setNovaImagem(null);
+      
+      // Mostrar sucesso
+      const successToast = document.createElement('div');
+      successToast.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50';
+      successToast.innerHTML = `
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <span class="font-medium">Produto atualizado com sucesso!</span>
+        </div>
+      `;
+      document.body.appendChild(successToast);
+      setTimeout(() => successToast.remove(), 3000);
+      
+    } catch (err: any) {
+      console.error('Erro ao atualizar produto:', err);
+      alert(`Erro ao atualizar produto: ${err.message}`);
+    } finally {
+      setSalvando(false);
     }
   };
   
@@ -234,20 +353,20 @@ const GerenciarProdutos: React.FC = () => {
 
                   {/* Botões de Ação */}
                   <div className="flex gap-2 pt-4 border-t">
-                    <Link
-                      to={`/produtos/${produto.id}`}
+                    <button
+                      onClick={() => setProdutoSelecionado(produto)}
                       className="flex-1 flex items-center justify-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
                     >
                       <Eye className="w-4 h-4" />
-                      Ver
-                    </Link>
+                      Ver Detalhes
+                    </button>
                     
                     <button
-                      onClick={() => handleDelete(produto.id, produto.nome)}
-                      disabled={deletingId === produto.id}
+                      onClick={() => handleDelete(produto.id_produto || produto.id, produto.nome)}
+                      disabled={deletingId === (produto.id_produto || produto.id)}
                       className="flex-1 flex items-center justify-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors text-sm font-medium disabled:opacity-50"
                     >
-                      {deletingId === produto.id ? (
+                      {deletingId === (produto.id_produto || produto.id) ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                           Excluindo...
@@ -266,6 +385,270 @@ const GerenciarProdutos: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de Detalhes/Edição do Produto */}
+      <Modal
+        isOpen={!!produtoSelecionado}
+        onClose={() => {
+          setProdutoSelecionado(null);
+          setModoEdicao(false);
+          setNovaImagem(null);
+        }}
+        title={modoEdicao ? "Editar Produto" : "Detalhes do Produto"}
+        footerContent={
+          modoEdicao ? (
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={cancelarEdicao}
+                className="flex-1 px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                disabled={salvando}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={salvarEdicao}
+                className="flex-1 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2"
+                disabled={salvando}
+              >
+                {salvando ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Salvar Alterações
+                  </>
+                )}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => iniciarEdicao(produtoSelecionado!)}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+            >
+              <Edit className="w-4 h-4" />
+              Editar Produto
+            </button>
+          )
+        }
+      >
+        {produtoSelecionado && (
+          <div className="space-y-6">
+            {modoEdicao ? (
+              // MODO EDIÇÃO
+              <>
+                {/* Upload de Imagem */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Imagem do Produto
+                  </label>
+                  <div className="flex items-center gap-4">
+                    {previewImagem && (
+                      <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden">
+                        <img
+                          src={previewImagem}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <label className="flex-1 cursor-pointer">
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-green-500 transition-colors">
+                        <div className="flex flex-col items-center gap-2">
+                          <Upload className="w-8 h-8 text-gray-400" />
+                          <span className="text-sm text-gray-600">
+                            {novaImagem ? novaImagem.name : 'Clique para alterar a imagem'}
+                          </span>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImagemChange}
+                          className="hidden"
+                        />
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Nome */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nome do Produto
+                  </label>
+                  <input
+                    type="text"
+                    value={formEdicao.nome}
+                    onChange={(e) => setFormEdicao({ ...formEdicao, nome: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Descrição */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Descrição
+                  </label>
+                  <textarea
+                    value={formEdicao.descricao}
+                    onChange={(e) => setFormEdicao({ ...formEdicao, descricao: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    rows={4}
+                    required
+                  />
+                </div>
+
+                {/* Preços */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Preço Normal (R$)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formEdicao.preco}
+                      onChange={(e) => setFormEdicao({ ...formEdicao, preco: parseFloat(e.target.value) })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Preço Promocional (R$)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formEdicao.preco_promocao}
+                      onChange={(e) => setFormEdicao({ ...formEdicao, preco_promocao: parseFloat(e.target.value) || '' })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      disabled={!formEdicao.is_promocao}
+                    />
+                  </div>
+                </div>
+
+                {/* Checkboxes */}
+                <div className="flex gap-6">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formEdicao.is_promocao}
+                      onChange={(e) => setFormEdicao({ ...formEdicao, is_promocao: e.target.checked })}
+                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Produto em promoção</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formEdicao.disponivel}
+                      onChange={(e) => setFormEdicao({ ...formEdicao, disponivel: e.target.checked })}
+                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Disponível para venda</span>
+                  </label>
+                </div>
+              </>
+            ) : (
+              // MODO VISUALIZAÇÃO
+              <>
+            {/* Imagem */}
+            {produtoSelecionado.image && (
+              <div className="w-full h-64 bg-gray-100 rounded-xl overflow-hidden">
+                <img
+                  src={produtoSelecionado.image}
+                  alt={produtoSelecionado.nome}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            {/* Nome e Categoria */}
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                {produtoSelecionado.nome}
+              </h3>
+              {produtoSelecionado.categoria && (
+                <span className="inline-block bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">
+                  {produtoSelecionado.categoria.nome}
+                </span>
+              )}
+            </div>
+
+            {/* Preços */}
+            <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Preço</p>
+                  <p className={`text-2xl font-bold ${produtoSelecionado.is_promocao ? 'line-through text-gray-400' : 'text-green-600'}`}>
+                    R$ {produtoSelecionado.preco.toFixed(2)}
+                  </p>
+                </div>
+                {produtoSelecionado.is_promocao && produtoSelecionado.preco_promocao && (
+                  <div>
+                    <p className="text-sm text-red-600 mb-1">Promoção</p>
+                    <p className="text-3xl font-bold text-red-600">
+                      R$ {produtoSelecionado.preco_promocao.toFixed(2)}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Descrição */}
+            <div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">Descrição</h4>
+              <p className="text-gray-700 leading-relaxed">
+                {produtoSelecionado.descricao}
+              </p>
+            </div>
+
+            {/* Informações Adicionais */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-gray-50 p-4 rounded-xl">
+                <p className="text-sm text-gray-600 mb-1">Disponibilidade</p>
+                <p className={`font-semibold ${produtoSelecionado.disponivel ? 'text-green-600' : 'text-red-600'}`}>
+                  {produtoSelecionado.disponivel ? '✓ Disponível' : '✗ Indisponível'}
+                </p>
+              </div>
+              
+              {produtoSelecionado.quantidade_estoque !== undefined && (
+                <div className="bg-gray-50 p-4 rounded-xl">
+                  <p className="text-sm text-gray-600 mb-1">Estoque</p>
+                  <p className="font-semibold text-gray-900">
+                    {produtoSelecionado.quantidade_estoque} unidades
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Vendedor */}
+            {produtoSelecionado.vendedor && (
+              <div className="bg-green-50 p-4 rounded-xl">
+                <p className="text-sm text-gray-600 mb-1">Vendedor</p>
+                <p className="font-semibold text-gray-900">
+                  {produtoSelecionado.vendedor.nome}
+                </p>
+                {produtoSelecionado.vendedor.email && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    {produtoSelecionado.vendedor.email}
+                  </p>
+                )}
+              </div>
+            )}
+          </>
+            )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
