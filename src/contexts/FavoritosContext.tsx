@@ -24,14 +24,14 @@ export const FavoritosProvider = ({ children }: { children: ReactNode }) => {
 
   // Definir carregarFavoritos antes do useEffect
   const carregarFavoritos = useCallback(async () => {
-    if (!user?.cpf) {
+    if (!user?.cliente?.cpf) {
       return;
     }
 
     try {
       setLoading(true);
       
-      const produtosFavoritos = await clienteService.listarFavoritos(user.cpf);
+      const produtosFavoritos = await clienteService.listarFavoritos(user.cliente.cpf);
       
       
       setFavoritos(produtosFavoritos);
@@ -50,27 +50,27 @@ export const FavoritosProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setLoading(false);
     }
-  }, [user?.cpf]); // Apenas CPF como dependência
+  }, [user?.cliente?.cpf]); // Apenas CPF como dependência
 
   // Carregar favoritos quando o usuário logar
   useEffect(() => {
     
-    if (user && user.tipo === 'CLIENTE' && user.cpf) {
+    if (user && user.tipo === 'CLIENTE' && user.cliente?.cpf) {
       carregarFavoritos();
     } else {
       setFavoritos([]);
       setFavoritosIds(new Set());
     }
-  }, [user?.cpf, user?.tipo, carregarFavoritos]); // Incluir carregarFavoritos
+  }, [user?.cliente?.cpf, user?.tipo, carregarFavoritos]); // Incluir carregarFavoritos
 
   const adicionarFavorito = async (produto_id: string | number) => {
-    if (!user?.cpf) {
+    if (!user?.cliente?.cpf) {
       throw new Error('Usuário não autenticado');
     }
 
     try {
       
-      await clienteService.adicionarFavorito(user.cpf, String(produto_id));
+      await clienteService.adicionarFavorito(user.cliente.cpf, String(produto_id));
       
       
       // Atualizar lista local
@@ -82,13 +82,13 @@ export const FavoritosProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const removerFavorito = async (produto_id: string | number) => {
-    if (!user?.cpf) {
+    if (!user?.cliente?.cpf) {
       throw new Error('Usuário não autenticado');
     }
 
     try {
       
-      await clienteService.removerFavorito(user.cpf, String(produto_id));
+      await clienteService.removerFavorito(user.cliente.cpf, String(produto_id));
       
       // Atualizar lista local
       await carregarFavoritos();

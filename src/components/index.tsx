@@ -9,6 +9,8 @@ export { Button } from './button';
 export { Input } from './inputs';
 export { Badge } from './badge';
 export { Card, CardContent } from './cards';
+export { default as ImageUpload } from './ImageUpload';
+export { default as Modal } from './Modal';
 export {
   Breadcrumb,
   BreadcrumbItem,

@@ -6,6 +6,7 @@ import { Input } from "./inputs";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList, NavigationMenuLink } from "./navigate_menu";
 import { useAuth } from "../contexts/AuthContext";
 import { useBusca } from "../contexts/BuscaContext";
+import { SeletorPapel } from "./SeletorPapel";
 
 const navigationItems = [
   { label: "Início", href: "/" },
@@ -101,6 +102,10 @@ export const HeaderSection = (): JSX.Element => {
                 <span className="text-verde-escuro font-medium text-sm">
                   Olá, {user?.nome}
                 </span>
+                
+                {/* Seletor de Papel - apenas se tiver múltiplos */}
+                <SeletorPapel />
+                
                 {isAdmin && (
                   <Button asChild variant="outline" size="default" className="h-12 inline-flex items-center justify-center gap-2 px-4 rounded-2xl border-verde-escuro bg-verde-escuro/5">
                     <Link to="/admin" className="inline-flex items-center gap-2">

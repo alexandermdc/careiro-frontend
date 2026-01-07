@@ -1,10 +1,13 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { PageLayout } from "../../components/PageLayout";
 import { MainContentSection } from "./sections/MainContentSection/MainContentSection";
 import { Card, CardContent } from "../../components/cards";
 import { Button } from "../../components/button";
 
 export const Homepage = (): React.ReactElement => {
+  const navigate = useNavigate();
+
   return (
     <PageLayout>
       <div className="bg-fundo-claro w-full flex flex-col items-center">
@@ -36,8 +39,7 @@ export const Homepage = (): React.ReactElement => {
 
                     <Button
                       className="bg-verde-escuro hover:bg-verde-escuro/90 text-white [font-family:'Montserrat',Helvetica] font-bold text-base sm:text-lg md:text-xl lg:text-2xl px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 h-auto transition-all duration-300 rounded-lg md:rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto"
-                      onClick={() => {
-                      }}
+                      onClick={() => navigate("/produtos")}
                     >
                       COMPRE AGORA
                     </Button>

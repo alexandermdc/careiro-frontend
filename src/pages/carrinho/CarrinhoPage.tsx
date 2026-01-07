@@ -8,7 +8,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 export default function CarrinhoPage() {
   const { itens, removerDoCarrinho, atualizarQuantidade, valorTotal } = useCarrinho();
-  const { user, isCliente } = useAuth();
+  const { user, isCliente, isVendedor } = useAuth();
   const navigate = useNavigate();
   const [processando, setProcessando] = useState(false);
 
@@ -28,9 +28,9 @@ export default function CarrinhoPage() {
       return;
     }
     
-    // Verificar se é cliente
-    if (!user || !isCliente || user.tipo !== 'CLIENTE') {
-      alert('⚠️ Apenas clientes podem fazer pedidos!\n\nVocê está logado como ' + (user?.tipo || 'usuário desconhecido') + '.\n\nPor favor, faça login com uma conta de cliente.');
+    // Verificar se é cliente OU vendedor
+    if (!user || (!isCliente && !isVendedor)) {
+      alert('⚠️ Apenas clientes e vendedores podem fazer pedidos!\n\nVocê está logado como ' + (user?.tipo || 'usuário desconhecido') + '.\n\nPor favor, faça login novamente.');
       navigate('/login');
       return;
     }
@@ -39,17 +39,22 @@ export default function CarrinhoPage() {
 
     try {
       // 1. Criar pedido no banco de dados
-
-      
-      const pedido = await pedidoService.criarPedido({
+      const dadosPedido: any = {
         data_pedido: new Date().toISOString(),
-        fk_feira: null, // Pode ser null se não for vinculado a feira específica
+        fk_feira: null,
         produtos: itens.map(item => ({
           produto_id: String(item.id),
           quantidade: item.quantidade,
-          id_vendedor: item.id_vendedor || '', // Pegar do item se disponível
+          id_vendedor: item.id_vendedor || '',
         }))
-      });
+      };
+
+      // Se for vendedor, precisa informar CPF do cliente (pode ser vendedor comprando para si)
+      if (isVendedor && user?.cliente?.cpf) {
+        dadosPedido.cpf_cliente = user.cliente.cpf;
+      }
+      
+      const pedido = await pedidoService.criarPedido(dadosPedido);
 
 
 
@@ -67,7 +72,7 @@ export default function CarrinhoPage() {
 
       // Tratamento de erro de permissão
       if (error.response?.status === 403) {
-        alert('⚠️ Acesso negado!\n\nApenas clientes podem fazer pedidos.\nVocê está logado como ' + (user?.tipo || 'usuário desconhecido') + '.\n\nFaça login com uma conta de cliente.');
+        alert('⚠️ Acesso negado!\n\nApenas clientes e vendedores podem fazer pedidos.\nVocê está logado como ' + (user?.tipo || 'usuário desconhecido') + '.\n\nFaça login novamente.');
         navigate('/login');
         return;
       }

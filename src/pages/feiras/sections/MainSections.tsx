@@ -1,8 +1,9 @@
 import {
   Calendar1Icon,
   ChevronRightIcon,
+  Calendar,
 } from "lucide-react";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,9 +13,31 @@ import {
 } from "../../../components/bradcrumb";
 import { Button } from "../../../components/button";
 import { JoinAgriconnectBanner } from "../../../components/JoinAgriconnectBanner";
+import feiraService from "../../../services/feiraService";
+import type { Feira } from "../../../services/feiraService";
 
 export const MainContentSection = (): React.ReactElement => {
-      const producers = [
+  const [feiras, setFeiras] = useState<Feira[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    carregarFeiras();
+  }, []);
+
+  const carregarFeiras = async () => {
+    try {
+      setLoading(true);
+      const data = await feiraService.listarTodas();
+      setFeiras(data);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao carregar feiras');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const producers = [
     {
       image: "img/AssociaMamori.png",
       name: "Associaçao Amuri",
@@ -32,8 +55,65 @@ export const MainContentSection = (): React.ReactElement => {
       name: "Fernando Santos",
     },
   ];
-  // Data for subscription cards
-  // Data for category filters
+
+  if (loading) {
+    return (
+      <main className="flex flex-col w-full max-w-[1112px] mx-auto items-center justify-center gap-11 px-4 py-8 min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-verde-escuro"></div>
+          <p className="text-texto">Carregando feiras...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="flex flex-col w-full max-w-[1112px] mx-auto items-center justify-center gap-11 px-4 py-8 min-h-[400px]">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center max-w-md">
+          <p className="text-red-700 mb-4">{error}</p>
+          <button 
+            onClick={carregarFeiras}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Tentar Novamente
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // Pegando a primeira feira do banco para exibir (ou você pode fazer um sistema de seleção)
+  const feiraAtual = feiras.length > 0 ? feiras[0] : null;
+
+  // Função para processar URLs de imagem e usar proxy quando necessário
+  const getImageSrc = (image: string | null | undefined): string | null => {
+    if (!image) return null;
+    
+    // Se já for base64, retorna como está
+    if (image.startsWith('data:image') || image.startsWith('data:')) return image;
+    
+    // Se for URL do Supabase, usar proxy para evitar CORS
+    if (image.includes('supabase.co/storage')) {
+      return `http://localhost:3000/image-proxy?url=${encodeURIComponent(image)}`;
+    }
+    
+    // Se for HTTP/HTTPS (outras URLs), usar proxy também por segurança
+    if (image.startsWith('http://') || image.startsWith('https://')) {
+      return `http://localhost:3000/image-proxy?url=${encodeURIComponent(image)}`;
+    }
+    
+    // Se começar com /, é caminho local
+    if (image.startsWith('/')) return image;
+    
+    // Se parece ser base64 sem prefixo
+    if (image.startsWith('/9j/') || image.startsWith('iVBOR') || image.length > 100) {
+      const mimeType = image.startsWith('iVBOR') ? 'png' : 'jpeg';
+      return `data:image/${mimeType};base64,${image}`;
+    }
+    
+    return image;
+  };
 
   return (
     <main className="flex flex-col w-full max-w-[1112px] mx-auto items-start gap-11 px-4 py-8">
@@ -86,55 +166,87 @@ export const MainContentSection = (): React.ReactElement => {
 
       {/* Association Profile Section */}
       <section className="relative w-full">
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-5">
-          <img
-            className="w-full lg:w-[357px] h-[357px] object-cover rounded-lg"
-            alt="Feira da Matriz"
-            src="/img/Feira.png"
-          />
+        {feiraAtual ? (
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-5">
+            {(() => {
+              const imageSrc = getImageSrc(feiraAtual.image);
+              console.log('🖼️ Feira imagem original:', feiraAtual.image);
+              console.log('🖼️ Feira imagem processada:', imageSrc);
+              
+              if (!imageSrc) {
+                return (
+                  <div className="w-full lg:w-[357px] h-[357px] bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center rounded-lg">
+                    <Calendar className="w-32 h-32 text-verde-escuro opacity-50" />
+                  </div>
+                );
+              }
+              
+              return (
+                <img
+                  className="w-full lg:w-[357px] h-[357px] object-cover rounded-lg"
+                  alt={feiraAtual.nome}
+                  src={imageSrc}
+                  onError={(e) => {
+                    console.error('❌ Erro ao carregar imagem da feira');
+                    console.error('   URL original:', feiraAtual.image);
+                    console.error('   URL processada:', imageSrc);
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement!.innerHTML = `
+                      <div class="w-full lg:w-[357px] h-[357px] bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center rounded-lg">
+                        <svg class="w-32 h-32 text-verde-escuro opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                      </div>
+                    `;
+                  }}
+                />
+              );
+            })()}
 
-          <div className="flex flex-col justify-center gap-6 flex-1">
-            <h1 className="[font-family:'Inter',Helvetica] font-bold text-texto text-2xl">
-              Feira da Matriz
-            </h1>
-            <h1 className="[font-family:'montserrat'] text-texto text-1xl">
-              Toda Quinta-Feira, 08h às 20h
-            </h1>
-            <div className="flex items-center gap-2">
-              <img
-                src="/img/Associacao.png"
-                alt="Associação Mamori"
-                className="w-8 h-8 rounded-full object-cover"
-              />
-              <h1 className="[font-family:'montserrat'] text-texto text-1xl">
-                Associação Mamori
+            <div className="flex flex-col justify-center gap-6 flex-1">
+              <h1 className="[font-family:'Inter',Helvetica] font-bold text-texto text-2xl">
+                {feiraAtual.nome}
               </h1>
+              {feiraAtual.data_hora && (
+                <h2 className="[font-family:'montserrat'] text-texto text-lg">
+                  {feiraAtual.data_hora}
+                </h2>
+              )}
+              <Button
+                variant="outline"
+                className="h-auto w-fit bg-fundo-claro border-[#9cb217] text-verde-claro hover:bg-verde-claro hover:text-fundo-claro transition-colors px-6 py-2.5 rounded-2xl"
+              >
+                <span className="font-[number:var(--bot-es-font-weight)] text-[length:var(--bot-es-font-size)] font-bot-es">
+                  Marcar ao calendário
+                </span>
+                <Calendar1Icon className="w-6 h-6 ml-2" />
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              className="h-auto w-fit bg-fundo-claro border-[#9cb217] text-verde-claro hover:bg-verde-claro hover:text-fundo-claro transition-colors px-6 py-2.5 rounded-2xl"
-            >
-              <span className="font-[number:var(--bot-es-font-weight)] text-[length:var(--bot-es-font-size)] font-bot-es">
-                Marcar ao calendário
-              </span>
-              <Calendar1Icon className="w-6 h-6 ml-2" />
-            </Button>
           </div>
-        </div>
+        ) : (
+          <div className="text-center py-12">
+            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Nenhuma feira encontrada
+            </h3>
+            <p className="text-gray-600">
+              Ainda não há feiras cadastradas no sistema.
+            </p>
+          </div>
+        )}
       </section>
 
       {/* Subscriptions Section */}
-      <section className="flex flex-col w-full items-start gap-4">
-        <h2 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-2xl">
-          Conheça mais a Feira da Matriz
-        </h2>
-        <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-base leading-relaxed max-w-4xl">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed pretium neque magna. Mauris blandit laoreet ligula, eu luctus neque finibus eget. Maecenas vel est ac risus viverra sagittis vitae vitae nulla. Vivamus et interdum ex. Fusce porttitor odio ut ornare consequat. Etiam tempus elementum urna non vulputate. Sed ullamcorper sapien ultricies accumsan scelerisque. Donec placerat tellus id pharetra tempus.
-        </p>
-        <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-base leading-relaxed max-w-4xl">
-          Integer et finibus enim. Pellentesque id odio sed ipsum bibendum luctus ut eget nibh. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Maecenas risus mauris, hendrerit eget ligula ut, egestas porttitor neque. Vestibulum in nisl ex.
-        </p>
-      </section>
+      {feiraAtual && feiraAtual.descricao && (
+        <section className="flex flex-col w-full items-start gap-4">
+          <h2 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-2xl">
+            Conheça mais a {feiraAtual.nome}
+          </h2>
+          <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-base leading-relaxed max-w-4xl">
+            {feiraAtual.descricao}
+          </p>
+        </section>
+      )}
       {/* Associated Producers Section */}
       <section className="flex flex-col w-full max-w-[467px] items-start gap-2 ">
         <h2 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-2xl">

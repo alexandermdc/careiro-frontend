@@ -13,16 +13,19 @@ import { Feiras } from './pages/feiras/feiras';
 import CadastrarFeira from './pages/feiras/CadastrarFeira';
 import { Produtos } from './pages/produtos/Produtos';
 import CadastroProduto from './pages/produtos/CadastroProduto';
+import GerenciarProdutos from './pages/produtos/GerenciarProdutos';
 import CadastroVendedor from './pages/vendedor/CadastroVendedor';
 import FormCliente from './pages/cadastro/cadastro';
 import Login from './pages/login/login';
+import LoginVendedor from './pages/login/LoginVendedor';
 import Dashboard from './pages/dashboard/Dashboard';
-import PerfilCliente from './pages/perfil/PerfilCliente';
+import Perfil from './pages/perfil/Perfil';
 import CarrinhoPage from './pages/carrinho/CarrinhoPage';
 import PagamentoRetorno from './pages/pagamento/PagamentoRetorno';
 import CheckoutPedido from './pages/checkout/CheckoutPedido';
 import PagamentoSucessoReal from './pages/pagamento/PagamentoSucessoReal';
 import PagamentoFalhaReal from './pages/pagamento/PagamentoFalhaReal';
+import PagamentoPendenteReal from './pages/pagamento/PagamentoPendenteReal';
 import MeusPedidos from './pages/pedidos/MeusPedidos';
 import Favoritos from './pages/favoritos/Favoritos';
 import BuscaResultados from './pages/busca/BuscaResultados';
@@ -40,6 +43,7 @@ function App() {
         <Route path="/sobrenos" element={<SobreNos />} />
         <Route path="/cadastro" element={<FormCliente />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/login/vendedor" element={<LoginVendedor />} />
         <Route path="/associacao" element={<Associacao />} />
         <Route path="/associacoes" element={<Associacoes />} />
         <Route path="/produtores" element={<Produtores />} />
@@ -53,6 +57,7 @@ function App() {
         {/* Rotas de Pagamento Real - Mercado Pago */}
         <Route path="/pagamento/sucesso" element={<PagamentoSucessoReal />} />
         <Route path="/pagamento/falha" element={<PagamentoFalhaReal />} />
+        <Route path="/pagamento/pendente" element={<PagamentoPendenteReal />} />
         
         {/* Rotas de Pedidos */}
         <Route path="/checkout-pedido" element={<CheckoutPedido />} />
@@ -84,7 +89,7 @@ function App() {
         <Route 
           path="/associacao/cadastro" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireRole="ADMIN">
               <CadastroAssociacao />
             </ProtectedRoute>
           } 
@@ -101,7 +106,7 @@ function App() {
           path="/perfil" 
           element={
             <ProtectedRoute>
-              <PerfilCliente />
+              <Perfil />
             </ProtectedRoute>
           } 
         />
@@ -110,6 +115,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CadastroProduto />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/produtos/gerenciar" 
+          element={
+            <ProtectedRoute>
+              <GerenciarProdutos />
             </ProtectedRoute>
           } 
         />

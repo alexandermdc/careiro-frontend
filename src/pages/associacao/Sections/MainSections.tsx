@@ -1,10 +1,11 @@
 import {
   ChevronRightIcon,
   MessageCircleIcon,
-  ShoppingBagIcon,
+  Building2,
 } from "lucide-react";
-import React from "react";
-import { Badge } from "../../../components/badge";
+import React, { useState, useEffect } from "react";
+import associacaoService from "../../../services/associacaoService";
+import type { Associacao } from "../../../services/associacaoService";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,84 +14,87 @@ import {
   BreadcrumbSeparator,
 } from "../../../components/bradcrumb";
 import { Button } from "../../../components/button";
-import { Card, CardContent } from "../../../components/cards";
 import { JoinAgriconnectBanner } from "../../../components/JoinAgriconnectBanner";
 
 export const MainContentSection = (): React.ReactElement => {
-  // Data for subscription cards
-  const subscriptionCards = [
-    {
-      image: "https://c.animaapp.com/mfyaim5kgxckXx/img/rectangle-56.png",
-      title: "Text",
-      price: "R$ XX,XX",
-    },
-    {
-      image: "https://c.animaapp.com/mfyaim5kgxckXx/img/rectangle-56-1.png",
-      title: "Text",
-      price: "R$ XX,XX",
-    },
-    {
-      image: "https://c.animaapp.com/mfyaim5kgxckXx/img/rectangle-56-2.png",
-      title: "Text",
-      price: "R$ XX,XX",
-    },
-    {
-      image: "https://c.animaapp.com/mfyaim5kgxckXx/img/rectangle-56-3.png",
-      title: "Text",
-      price: "R$ XX,XX",
-    },
-  ];
+  const [associacoes, setAssociacoes] = useState<Associacao[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Data for producers
-  const producers = [
-    {
-      image: "https://c.animaapp.com/mfyaim5kgxckXx/img/ellipse-6.png",
-      name: "Marcelo Amuri",
-    },
-    {
-      image: "https://c.animaapp.com/mfyaim5kgxckXx/img/ellipse-6-1.png",
-      name: "Maria Núbia",
-    },
-    {
-      image: "https://c.animaapp.com/mfyaim5kgxckXx/img/ellipse-6-2.png",
-      name: "Adriano Garra",
-    },
-    {
-      image: "https://c.animaapp.com/mfyaim5kgxckXx/img/ellipse-6-3.png",
-      name: "Fernando Santos",
-    },
-  ];
+  useEffect(() => {
+    carregarAssociacoes();
+  }, []);
 
-  // Data for products
-  const products = [
-    {
-      image: "https://c.animaapp.com/mfyaim5kgxckXx/img/rectangle-10.png",
-      name: "Abóbora (kg)",
-      price: "R$8,55",
-    },
-    {
-      image: "https://c.animaapp.com/mfyaim5kgxckXx/img/rectangle-10-1.png",
-      name: "Banana Prata (kg)",
-      price: "R$8,70",
-    },
-    {
-      image: "https://c.animaapp.com/mfyaim5kgxckXx/img/rectangle-10-2.png",
-      name: "Limão Tahiti (kg)",
-      price: "R$8,00",
-    },
-    {
-      image: "https://c.animaapp.com/mfyaim5kgxckXx/img/rectangle-10-3.png",
-      name: "Maçã verde (unid)",
-      price: "R$2,60",
-    },
-  ];
+  const carregarAssociacoes = async () => {
+    try {
+      setLoading(true);
+      const data = await associacaoService.getAll();
+      setAssociacoes(data);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao carregar associações');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Data for category filters
-  const categories = [
-    { name: "Legumes", active: true },
-    { name: "Frutas", active: false },
-    { name: "Verduras", active: false },
-  ];
+  // Função para processar URLs de imagem
+  const getImageSrc = (image: string | null | undefined): string | null => {
+    if (!image) return null;
+    if (image.startsWith('data:image') || image.startsWith('data:')) return image;
+    if (image.startsWith('/9j/') || image.startsWith('iVBOR') || image.length > 100) {
+      const mimeType = image.startsWith('iVBOR') ? 'png' : 'jpeg';
+      return `data:image/${mimeType};base64,${image}`;
+    }
+    return image;
+  };
+
+  // Pegando a primeira associação do banco
+  const associacaoAtual = associacoes.length > 0 ? associacoes[0] : null;
+
+  if (loading) {
+    return (
+      <main className="flex flex-col w-full max-w-[1112px] mx-auto items-center justify-center gap-11 px-4 py-8 min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-verde-escuro"></div>
+          <p className="text-texto">Carregando associações...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="flex flex-col w-full max-w-[1112px] mx-auto items-center justify-center gap-11 px-4 py-8 min-h-[400px]">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center max-w-md">
+          <p className="text-red-700 mb-4">{error}</p>
+          <button 
+            onClick={carregarAssociacoes}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Tentar Novamente
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (!associacaoAtual) {
+    return (
+      <main className="flex flex-col w-full max-w-[1112px] mx-auto items-center justify-center gap-11 px-4 py-8 min-h-[400px]">
+        <div className="text-center">
+          <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            Nenhuma associação encontrada
+          </h3>
+        </div>
+      </main>
+    );
+  }
+
+  // Vendedores da associação
+  const vendedores = associacaoAtual?.vendedor || [];
+
+  // Produtos não disponíveis no schema atual
 
   return (
     <main className="flex flex-col w-full max-w-[1112px] mx-auto items-start gap-11 px-4 py-8">
@@ -136,15 +140,21 @@ export const MainContentSection = (): React.ReactElement => {
       {/* Association Profile Section */}
       <section className="relative w-full">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-5">
-          <img
-            className="w-full lg:w-[357px] h-[357px] object-cover rounded-lg"
-            alt="Rectangle"
-            src="https://c.animaapp.com/mfyaim5kgxckXx/img/rectangle-59.png"
-          />
+          {getImageSrc(associacaoAtual.image) ? (
+            <img
+              className="w-full lg:w-[357px] h-[357px] object-cover rounded-lg"
+              alt={associacaoAtual.nome}
+              src={getImageSrc(associacaoAtual.image)!}
+            />
+          ) : (
+            <div className="w-full lg:w-[357px] h-[357px] bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center rounded-lg">
+              <Building2 className="w-32 h-32 text-verde-escuro opacity-50" />
+            </div>
+          )}
 
           <div className="flex flex-col gap-6 flex-1">
             <h1 className="[font-family:'Inter',Helvetica] font-bold text-texto text-2xl">
-              Associação Mamori
+              {associacaoAtual.nome}
             </h1>
 
             <Button
@@ -157,155 +167,65 @@ export const MainContentSection = (): React.ReactElement => {
               <MessageCircleIcon className="w-6 h-6 ml-2" />
             </Button>
 
-            <div className="flex flex-col gap-2">
-              <h2 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-base">
-                Descrição
-              </h2>
-              <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-sm leading-normal">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-                pretium neque magna. Mauris blandit laoreet ligula, eu luctus
-                neque finibus eget. Maecenas vel est ac risus viverra sagittis
-                vitae vitae nulla. Vivamus et interdum ex. Fusce porttitor odio
-                ut ornare consequat. Etiam tempus elementum urna non vulputate.
-                Sed ullamcorper sapien ultricies accumsan scelerisque. Donec
-                placerat tellus id pharetra tempus.
-              </p>
-            </div>
+            {associacaoAtual.descricao && (
+              <div className="flex flex-col gap-2">
+                <h2 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-base">
+                  Descrição
+                </h2>
+                <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-sm leading-normal">
+                  {associacaoAtual.descricao}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </section>
-
-      {/* Subscriptions Section */}
-      <section className="flex flex-col w-full max-w-[467px] items-start gap-2 ">
-        <h2 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-2xl">
-          Assinaturas
-        </h2>
-        <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-base">
-          Os melhores produtos sempre na sua casa
-        </p>
-      </section>
-
-      {/* Subscription Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full ">
-        {subscriptionCards.map((card, index) => (
-          <Card
-            key={`subscription-${index}`}
-            className="w-full bg-fundo-claro rounded-[25px] border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] overflow-hidden"
-          >
-            <CardContent className="p-0">
-              <img
-                className="w-full h-[263px] object-cover"
-                alt="Rectangle"
-                src={card.image}
-              />
-              <div className="flex flex-col items-start px-4 py-4 gap-2">
-                <h3 className="[font-family:'Montserrat',Helvetica] font-medium text-texto text-base">
-                  {card.title}
-                </h3>
-                <p className="[font-family:'Montserrat',Helvetica] font-bold text-verde-escuro text-base">
-                  {card.price}
-                </p>
-                <div className="flex justify-center w-full pt-2">
-                  <Button
-                    variant="outline"
-                    className="h-auto bg-fundo-claro border-[#9cb217] text-verde-claro hover:bg-verde-claro hover:text-fundo-claro transition-colors px-6 py-2.5 rounded-2xl"
-                  >
-                    <span className="font-[number:var(--bot-es-font-weight)] text-[length:var(--bot-es-font-size)] font-bot-es">
-                      Ver mais
-                    </span>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
 
       {/* Associated Producers Section */}
       <section className="flex flex-col w-full max-w-[467px] items-start gap-2 ">
         <h2 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-2xl">
-          Produtores associados
+          Vendedores associados
         </h2>
         <p className="[font-family:'Montserrat',Helvetica] font-normal text-texto text-base">
-          Conheça os nossos produtores
+          {vendedores.length} vendedor(es) cadastrado(s)
         </p>
       </section>
 
       {/* Producers Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full ">
-        {producers.map((producer, index) => (
-          <div
-            key={`producer-${index}`}
-            className="flex flex-col items-center gap-4"
-          >
-            <img
-              className="w-full h-[263px] object-cover rounded-full"
-              alt="Ellipse"
-              src={producer.image}
-            />
-            <h3 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-2xl text-center">
-              {producer.name}
-            </h3>
-          </div>
-        ))}
-      </div>
-
-      {/* Products Section Title */}
-      <h2 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-2xl w-full ">
-        Produtos da Mamori
-      </h2>
-
-      {/* Category Filters and Product Count */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full ">
-        <div className="flex flex-wrap items-center gap-2">
-          {categories.map((category, index) => (
-            <Badge
-              key={`category-${index}`}
-              variant={category.active ? "default" : "outline"}
-              className={`h-12 px-6 py-[3px] rounded-2xl text-sm font-bold [font-family:'Montserrat',Helvetica] ${
-                category.active
-                  ? "bg-[#92a916] text-fundo-claro border-[#fafcf9] hover:bg-[#92a916]"
-                  : "bg-fundo-claro text-[#92a916] border-[#92a916] hover:bg-[#92a916] hover:text-fundo-claro"
-              } transition-colors cursor-pointer`}
+      {vendedores.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full ">
+          {vendedores.map((vendedor) => (
+            <div
+              key={`vendedor-${vendedor.id_vendedor}`}
+              className="flex flex-col items-center gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm"
             >
-              {category.name}
-            </Badge>
+              <div className="w-full h-[200px] bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
+                <span className="text-6xl font-bold text-verde-escuro">
+                  {vendedor.nome.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <h3 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-lg text-center">
+                {vendedor.nome}
+              </h3>
+              <p className="text-sm text-gray-600">{vendedor.telefone}</p>
+              <div className="flex gap-2 flex-wrap justify-center">
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {vendedor.tipo_vendedor}
+                </span>
+                {vendedor.tipo_documento && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    {vendedor.tipo_documento}
+                  </span>
+                )}
+              </div>
+            </div>
           ))}
         </div>
-        <p className="[font-family:'Inter',Helvetica] font-normal text-verde-escuro text-sm">
-          8 produtos
-        </p>
-      </div>
-
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-[53px] gap-y-11 w-full ">
-        {products.map((product, index) => (
-          <div key={`product-${index}`} className="flex gap-4">
-            <img
-              className="w-[263px] h-[270px] object-cover rounded-lg flex-shrink-0"
-              alt="Rectangle"
-              src={product.image}
-            />
-            <div className="flex flex-col gap-4 pt-6">
-              <h3 className="[font-family:'Inter',Helvetica] font-bold text-texto text-base">
-                {product.name}
-              </h3>
-              <p className="[font-family:'Inter',Helvetica] font-bold text-verde-escuro text-base">
-                {product.price}
-              </p>
-              <Button
-                variant="outline"
-                className="h-auto w-fit bg-fundo-claro border-[#9cb217] text-verde-claro hover:bg-verde-claro hover:text-fundo-claro transition-colors px-6 py-2.5 rounded-2xl"
-              >
-                <span className="font-[number:var(--bot-es-font-weight)] text-[length:var(--bot-es-font-size)] font-bot-es">
-                  Adicionar
-                </span>
-                <ShoppingBagIcon className="w-6 h-6 ml-2" />
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
+      ) : (
+        <div className="text-center w-full py-8 text-gray-500">
+          Nenhum vendedor cadastrado nesta associação
+        </div>
+      )}
 
       {/* Call to Action Banner */}
       <JoinAgriconnectBanner />

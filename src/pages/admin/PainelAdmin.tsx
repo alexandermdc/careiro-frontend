@@ -3,6 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { PageLayout } from '../../components/PageLayout';
 import categoriaService from '../../services/categoriaService';
+import vendedorService from '../../services/vendedorService';
+import feiraService from '../../services/feiraService';
+import produtoService from '../../services/produtoService';
+import pedidoService from '../../services/pedidoService';
 import type { CreateCategoriaData } from '../../services/categoriaService';
 import type { LucideIcon } from 'lucide-react';
 import { 
@@ -16,7 +20,8 @@ import {
   Shield,
   Tag,
   X,
-  Save
+  Save,
+  Building2
 } from 'lucide-react';
 
 interface AdminCard {
@@ -37,6 +42,13 @@ const PainelAdmin: React.FC = () => {
   const [nomeCategoria, setNomeCategoria] = useState('');
   const [loadingCategoria, setLoadingCategoria] = useState(false);
   const [errorCategoria, setErrorCategoria] = useState('');
+  
+  // Estados para totais
+  const [totalVendedores, setTotalVendedores] = useState<number>(0);
+  const [totalFeiras, setTotalFeiras] = useState<number>(0);
+  const [totalProdutos, setTotalProdutos] = useState<number>(0);
+  const [totalPedidos, setTotalPedidos] = useState<number>(0);
+  const [loadingStats, setLoadingStats] = useState(true);
 
   // Verificar se é admin
   useEffect(() => {
@@ -51,6 +63,47 @@ const PainelAdmin: React.FC = () => {
       return;
     }
   }, [user, isAdmin, navigate]);
+
+  // Carregar estatísticas
+  useEffect(() => {
+    const carregarEstatisticas = async () => {
+      try {
+        setLoadingStats(true);
+        
+        // Carregar dados com tratamento de erro individual
+        const resultados = await Promise.allSettled([
+          vendedorService.listarTodos(),
+          feiraService.listarTodas(),
+          produtoService.listarTodos(),
+          pedidoService.listarTodos()
+        ]);
+        
+        // Processar resultados com fallback para 0 em caso de erro
+        const vendedores = resultados[0].status === 'fulfilled' ? resultados[0].value : [];
+        const feiras = resultados[1].status === 'fulfilled' ? resultados[1].value : [];
+        const produtos = resultados[2].status === 'fulfilled' ? resultados[2].value : [];
+        const pedidos = resultados[3].status === 'fulfilled' ? resultados[3].value : [];
+        
+        setTotalVendedores(vendedores.length);
+        setTotalFeiras(feiras.length);
+        setTotalProdutos(produtos.length);
+        setTotalPedidos(pedidos.length);
+        
+        // Log de avisos para erros
+        if (resultados[1].status === 'rejected') {
+          console.warn('⚠️ Não foi possível carregar feiras (backend retornou erro 500)');
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar estatísticas:', error);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
+    if (isAdmin) {
+      carregarEstatisticas();
+    }
+  }, [isAdmin]);
 
   const handleCriarCategoria = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,6 +187,15 @@ const PainelAdmin: React.FC = () => {
       badge: 'Cadastro'
     },
     {
+      title: 'Gerenciar Associações',
+      description: 'Visualize, cadastre e edite associações',
+      icon: Building2,
+      link: '/associacao',
+      color: 'bg-teal-50 hover:bg-teal-100 border-teal-200',
+      iconColor: 'text-teal-600',
+      badge: 'Gestão'
+    },
+    {
       title: 'Gerenciar Produtos',
       description: 'Visualize e administre produtos cadastrados',
       icon: Package,
@@ -172,10 +234,30 @@ const PainelAdmin: React.FC = () => {
   ];
 
   const statsCards = [
-    { label: 'Total de Vendedores', value: '-', icon: UserPlus, color: 'bg-verde-escuro' },
-    { label: 'Total de Feiras', value: '-', icon: Store, color: 'bg-blue-600' },
-    { label: 'Total de Produtos', value: '-', icon: Package, color: 'bg-purple-600' },
-    { label: 'Total de Pedidos', value: '-', icon: ShoppingCart, color: 'bg-orange-600' },
+    { 
+      label: 'Total de Vendedores', 
+      value: loadingStats ? '...' : totalVendedores.toString(), 
+      icon: UserPlus, 
+      color: 'bg-verde-escuro' 
+    },
+    { 
+      label: 'Total de Feiras', 
+      value: loadingStats ? '...' : totalFeiras.toString(), 
+      icon: Store, 
+      color: 'bg-blue-600' 
+    },
+    { 
+      label: 'Total de Produtos', 
+      value: loadingStats ? '...' : totalProdutos.toString(), 
+      icon: Package, 
+      color: 'bg-purple-600' 
+    },
+    { 
+      label: 'Total de Pedidos', 
+      value: loadingStats ? '...' : totalPedidos.toString(), 
+      icon: ShoppingCart, 
+      color: 'bg-orange-600' 
+    },
   ];
 
   return (

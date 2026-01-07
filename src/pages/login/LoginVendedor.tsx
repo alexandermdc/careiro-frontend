@@ -5,12 +5,12 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const LoginVendedor: React.FC = () => {
   const navigate = useNavigate();
-  const { loginVendedor } = useAuth();
+  const { loginAsVendedor } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
   const [formData, setFormData] = useState({
-    id_vendedor: '',
+    email: '',
     password: ''
   });
 
@@ -23,7 +23,7 @@ const LoginVendedor: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.id_vendedor || !formData.password) {
+    if (!formData.email || !formData.password) {
       setError('Todos os campos são obrigatórios');
       return;
     }
@@ -32,11 +32,11 @@ const LoginVendedor: React.FC = () => {
     setError('');
 
     try {
-      await loginVendedor(formData.id_vendedor, formData.password);
-      navigate('/produtos/cadastro');
+      await loginAsVendedor(formData.email, formData.password);
+      navigate('/perfil');
       
     } catch (err: any) {
-      setError(err.message || 'Erro ao fazer login');
+      setError(err.message || 'Erro ao fazer login como vendedor');
     } finally {
       setLoading(false);
     }
@@ -61,22 +61,19 @@ const LoginVendedor: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                ID do Vendedor *
+                Email *
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
-                  type="text"
-                  name="id_vendedor"
-                  value={formData.id_vendedor}
+                  type="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="UUID do vendedor"
+                  placeholder="seu@email.com"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                O ID foi enviado quando você se cadastrou
-              </p>
             </div>
 
             <div>
