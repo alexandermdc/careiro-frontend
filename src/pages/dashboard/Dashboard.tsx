@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
                 <div className="space-y-2 text-sm">
                   <p><strong>Nome:</strong> {user?.nome}</p>
                   <p><strong>Email:</strong> {user?.email}</p>
-                  <p><strong>CPF:</strong> {user?.cpf}</p>
+                  <p><strong>Tipo:</strong> {user?.tipo}</p>
                 </div>
               </div>
 
