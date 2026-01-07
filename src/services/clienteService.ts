@@ -6,6 +6,7 @@ export interface Cliente {
   email: string;
   telefone: string;
   senha?: string;     // Opcional para não retornar em GETs
+  foto_perfil?: string; // URL/base64 da foto de perfil
 }
 
 export interface CreateClienteData {
@@ -123,6 +124,31 @@ class ClienteService {
       throw new Error(
         error.response?.data?.message || 
         'Erro ao atualizar cliente'
+      );
+    }
+  }
+
+  // Atualizar foto de perfil do cliente
+  async atualizarFotoPerfil(
+    cpf: string,
+    fotoUrl: string
+  ): Promise<Cliente> {
+    try {
+      if (!fotoUrl || !fotoUrl.trim()) {
+        throw new Error('URL da foto é obrigatória');
+      }
+
+      const response = await api.patch(`/clientes/${cpf}/foto-perfil`, {
+        foto_perfil: fotoUrl,
+      });
+
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Erro ao atualizar foto de perfil:', error);
+      throw new Error(
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Erro ao atualizar foto de perfil'
       );
     }
   }

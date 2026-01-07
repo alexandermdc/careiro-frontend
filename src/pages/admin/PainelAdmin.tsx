@@ -20,7 +20,8 @@ import {
   Shield,
   Tag,
   X,
-  Save
+  Save,
+  Building2
 } from 'lucide-react';
 
 interface AdminCard {
@@ -184,6 +185,15 @@ const PainelAdmin: React.FC = () => {
       color: 'bg-yellow-50 hover:bg-yellow-100 border-yellow-200',
       iconColor: 'text-yellow-600',
       badge: 'Cadastro'
+    },
+    {
+      title: 'Gerenciar Associações',
+      description: 'Visualize, cadastre e edite associações',
+      icon: Building2,
+      link: '/associacao',
+      color: 'bg-teal-50 hover:bg-teal-100 border-teal-200',
+      iconColor: 'text-teal-600',
+      badge: 'Gestão'
     },
     {
       title: 'Gerenciar Produtos',

@@ -1,12 +1,12 @@
 import React from "react";
 import { PageLayout } from "../../components/PageLayout";
-import { AssociacoesListSection } from "./Sections/AssociacoesListSection";
+import { MainContentSection } from "./Sections/MainSections";
 
 export const Associacao = (): React.ReactElement => {
   
   return (
     <PageLayout>
-      <AssociacoesListSection />
+      <MainContentSection />
     </PageLayout>
   );
 };

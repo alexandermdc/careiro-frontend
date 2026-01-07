@@ -26,6 +26,7 @@ import type { Pedido } from '../../services/pedidoService';
 import type { Vendedor, UpdateVendedorData } from '../../services/vendedorService';
 import { HeaderSection } from '../../components';
 import { FooterSection } from '../../components';
+import Modal from '../../components/Modal';
 
 // Componente Modal de Detalhes do Pedido
 const PedidoModal: React.FC<{
@@ -33,217 +34,199 @@ const PedidoModal: React.FC<{
   onClose: () => void;
   pedido: Pedido | null;
 }> = ({ isOpen, onClose, pedido }) => {
-  if (!isOpen || !pedido) return null;
+  if (!pedido) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden my-8">
-        {/* Header do Modal */}
-        <div className="bg-gradient-to-r from-green-500 to-green-700 p-6 text-white sticky top-0 z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-3 rounded-full">
-                <Package className="w-6 h-6" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold">Pedido #{pedido.pedido_id}</h2>
-                <p className="text-white/90 text-sm mt-1">
-                  📅 {new Date(pedido.data_pedido).toLocaleDateString('pt-BR', {
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Pedido #${pedido.pedido_id}`}
+      maxWidth="2xl"
+      footerContent={
+        <button
+          onClick={onClose}
+          className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-xl transition-colors font-medium"
+        >
+          Fechar
+        </button>
+      }
+    >
+      <div className="space-y-6">
+        {/* Data do pedido */}
+        <div className="text-sm text-gray-600">
+          📅 {new Date(pedido.data_pedido).toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+          })} às {new Date(pedido.data_pedido).toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </div>
+
+        {/* Status */}
+        <div className="flex items-center justify-between bg-green-50 p-4 rounded-lg">
+          <div>
+            <p className="text-sm text-gray-600 mb-1">Status do Pedido</p>
+            <p className="text-lg font-bold text-green-700">✓ Confirmado</p>
+          </div>
+          <span className="px-4 py-2 bg-green-500 text-white rounded-full font-semibold">
+            Ativo
+          </span>
+        </div>
+
+        {/* Informações da Feira */}
+        {pedido.feira && (
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-5">
+            <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Informações da Feira
+            </h3>
+            <div className="space-y-2">
+              <p className="text-gray-900">
+                <strong>Nome:</strong> {pedido.feira.nome || `Feira #${pedido.fk_feira}`}
+              </p>
+              {pedido.feira.local && (
+                <p className="text-gray-700">
+                  <strong>📍 Local:</strong> {pedido.feira.local}
+                </p>
+              )}
+              {pedido.feira.data_feira && (
+                <p className="text-gray-700">
+                  <strong>🗓️ Data de Retirada:</strong> {new Date(pedido.feira.data_feira).toLocaleDateString('pt-BR', {
                     day: '2-digit',
                     month: 'long',
                     year: 'numeric',
-                  })} às {new Date(pedido.data_pedido).toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
+                    weekday: 'long'
                   })}
                 </p>
-              </div>
+              )}
             </div>
-            <button
-              onClick={onClose}
-              className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
           </div>
-        </div>
+        )}
 
-        {/* Conteúdo do Modal */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          {/* Status */}
-          <div className="mb-6 flex items-center justify-between bg-green-50 p-4 rounded-lg">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Status do Pedido</p>
-              <p className="text-lg font-bold text-green-700">✓ Confirmado</p>
-            </div>
-            <span className="px-4 py-2 bg-green-500 text-white rounded-full font-semibold">
-              Ativo
-            </span>
-          </div>
-
-          {/* Informações da Feira */}
-          {pedido.feira && (
-            <div className="mb-6 bg-blue-50 border-2 border-blue-200 rounded-xl p-5">
-              <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Informações da Feira
-              </h3>
-              <div className="space-y-2">
-                <p className="text-gray-900">
-                  <strong>Nome:</strong> {pedido.feira.nome || `Feira #${pedido.fk_feira}`}
-                </p>
-                {pedido.feira.local && (
-                  <p className="text-gray-700">
-                    <strong>📍 Local:</strong> {pedido.feira.local}
-                  </p>
-                )}
-                {pedido.feira.data_feira && (
-                  <p className="text-gray-700">
-                    <strong>🗓️ Data de Retirada:</strong> {new Date(pedido.feira.data_feira).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: 'long',
-                      year: 'numeric',
-                      weekday: 'long'
-                    })}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Lista de Produtos */}
-          {pedido.produtos_no_pedido && pedido.produtos_no_pedido.length > 0 ? (
-            <div>
-              <h3 className="font-bold text-gray-900 mb-4 text-lg flex items-center gap-2">
-                <ShoppingBag className="w-5 h-5 text-green-600" />
-                Produtos ({pedido.produtos_no_pedido.length})
-              </h3>
-              <div className="space-y-4">
-                {pedido.produtos_no_pedido.map((item: any, index: number) => (
-                  <div 
-                    key={index}
-                    className="flex items-start gap-4 p-5 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-green-300 transition-all"
-                  >
-                    {/* Imagem do Produto */}
-                    <div className="flex-shrink-0">
-                      {item.produto?.image ? (
-                        <img 
-                          src={item.produto.image}
-                          alt={item.produto.nome}
-                          className="w-24 h-24 object-cover rounded-xl border-2 border-white shadow-md"
-                        />
-                      ) : (
-                        <div className="w-24 h-24 bg-gray-300 rounded-xl flex items-center justify-center">
-                          <Package className="w-10 h-10 text-gray-500" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Informações do Produto */}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-gray-900 text-xl mb-2">
-                        {item.produto?.nome || 'Produto'}
-                      </h4>
-                      
-                      {item.produto?.descricao && (
-                        <p className="text-sm text-gray-600 mb-3">
-                          {item.produto.descricao}
-                        </p>
-                      )}
-
-                      <div className="grid grid-cols-2 gap-3 text-sm mb-3">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-gray-700">Quantidade:</span>
-                          <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-bold">
-                            {item.quantidade} {item.produto?.unidade_medida || 'un'}
-                          </span>
-                        </div>
-                        
-                        {item.produto?.preco && (
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-gray-700">Preço Unit.:</span>
-                            <span className="text-green-600 font-bold">
-                              R$ {item.produto.preco.toFixed(2)}
-                            </span>
-                          </div>
-                        )}
+        {/* Lista de Produtos */}
+        {pedido.produtos_no_pedido && pedido.produtos_no_pedido.length > 0 ? (
+          <div>
+            <h3 className="font-bold text-gray-900 mb-4 text-lg flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-green-600" />
+              Produtos ({pedido.produtos_no_pedido.length})
+            </h3>
+            <div className="space-y-4">
+              {pedido.produtos_no_pedido.map((item: any, index: number) => (
+                <div 
+                  key={index}
+                  className="flex items-start gap-4 p-5 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-green-300 transition-all"
+                >
+                  {/* Imagem do Produto */}
+                  <div className="flex-shrink-0">
+                    {item.produto?.image ? (
+                      <img 
+                        src={item.produto.image}
+                        alt={item.produto.nome}
+                        className="w-24 h-24 object-cover rounded-xl border-2 border-white shadow-md"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 bg-gray-300 rounded-xl flex items-center justify-center">
+                        <Package className="w-10 h-10 text-gray-500" />
                       </div>
+                    )}
+                  </div>
 
-                      {item.produto?.categoria && (
-                        <div className="mb-2">
-                          <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-                            {item.produto.categoria.nome || item.produto.categoria}
+                  {/* Informações do Produto */}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-gray-900 text-xl mb-2">
+                      {item.produto?.nome || 'Produto'}
+                    </h4>
+                    
+                    {item.produto?.descricao && (
+                      <p className="text-sm text-gray-600 mb-3">
+                        {item.produto.descricao}
+                      </p>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-3 text-sm mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-700">Quantidade:</span>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-bold">
+                          {item.quantidade} {item.produto?.unidade_medida || 'un'}
+                        </span>
+                      </div>
+                      
+                      {item.produto?.preco && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-700">Preço Unit.:</span>
+                          <span className="text-green-600 font-bold">
+                            R$ {item.produto.preco.toFixed(2)}
                           </span>
-                        </div>
-                      )}
-
-                      {item.produto?.vendedor && (
-                        <div className="mt-3 pt-3 border-t border-gray-200">
-                          <p className="text-sm text-gray-600">
-                            👨‍🌾 <strong>Vendedor:</strong> {item.produto.vendedor.nome || 'Agricultor'}
-                          </p>
                         </div>
                       )}
                     </div>
 
-                    {/* Preço Total do Item */}
-                    {item.produto?.preco && (
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-sm text-gray-600 mb-1">Subtotal</p>
-                        <p className="text-3xl font-bold text-green-600">
-                          R$ {(item.produto.preco * item.quantidade).toFixed(2)}
+                    {item.produto?.categoria && (
+                      <div className="mb-2">
+                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                          {item.produto.categoria.nome || item.produto.categoria}
+                        </span>
+                      </div>
+                    )}
+
+                    {item.produto?.vendedor && (
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <p className="text-sm text-gray-600">
+                          👨‍🌾 <strong>Vendedor:</strong> {item.produto.vendedor.nome || 'Agricultor'}
                         </p>
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
 
-              {/* Total do Pedido */}
-              <div className="mt-6 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-xl p-6">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Valor Total do Pedido</p>
-                    <p className="text-base text-gray-700">
-                      {pedido.produtos_no_pedido.length} {pedido.produtos_no_pedido.length === 1 ? 'produto' : 'produtos'}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-4xl font-bold text-green-600">
-                      R$ {pedido.produtos_no_pedido.reduce((total: number, item: any) => {
-                        return total + (item.produto?.preco || 0) * item.quantidade;
-                      }, 0).toFixed(2)}
-                    </p>
-                  </div>
+                  {/* Preço Total do Item */}
+                  {item.produto?.preco && (
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-sm text-gray-600 mb-1">Subtotal</p>
+                      <p className="text-3xl font-bold text-green-600">
+                        R$ {(item.produto.preco * item.quantidade).toFixed(2)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Total do Pedido */}
+            <div className="mt-6 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-xl p-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Valor Total do Pedido</p>
+                  <p className="text-base text-gray-700">
+                    {pedido.produtos_no_pedido.length} {pedido.produtos_no_pedido.length === 1 ? 'produto' : 'produtos'}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-4xl font-bold text-green-600">
+                    R$ {pedido.produtos_no_pedido.reduce((total: number, item: any) => {
+                      return total + (item.produto?.preco || 0) * item.quantidade;
+                    }, 0).toFixed(2)}
+                  </p>
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="text-center py-12 text-gray-500">
-              <Package className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <p className="text-lg">Nenhum produto encontrado neste pedido</p>
-            </div>
-          )}
-        </div>
-
-        {/* Footer do Modal */}
-        <div className="bg-gray-50 px-6 py-4 border-t flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-medium"
-          >
-            Fechar
-          </button>
-        </div>
+          </div>
+        ) : (
+          <div className="text-center py-12 text-gray-500">
+            <Package className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+            <p className="text-lg">Nenhum produto encontrado neste pedido</p>
+          </div>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 };
 
-// Componente Modal
+// Componente Modal de Edição Cliente
 const EditModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -299,7 +282,6 @@ const EditModal: React.FC<{
 
   const handleInputChange = (field: string, value: string) => {
     if (field === 'telefone') {
-      // Formatar telefone automaticamente
       let formattedValue = value.replace(/\D/g, '');
       if (formattedValue.length >= 11) {
         formattedValue = formattedValue.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
@@ -317,15 +299,12 @@ const EditModal: React.FC<{
   };
 
   const handleSave = async () => {
-    // Validar todos os campos
     const fieldsToValidate = ['nome', 'email', 'telefone'];
     fieldsToValidate.forEach(field => {
       validateField(field, editData[field as keyof UpdateClienteData] || '');
     });
 
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
+    if (Object.keys(errors).length > 0) return;
 
     try {
       setLoading(true);
@@ -345,35 +324,42 @@ const EditModal: React.FC<{
            Object.keys(errors).length === 0;
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden">
-        {/* Header do Modal */}
-        <div className="bg-gradient-to-r from-green-500 to-green-700 p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-2 rounded-full">
-                <Edit3 className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold">Editar Perfil</h2>
-                <p className="text-white/80 text-sm">Atualize suas informações pessoais</p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors"
-              disabled={loading}
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Editar Perfil"
+      maxWidth="md"
+      footerContent={
+        <div className="flex gap-3 w-full">
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-medium disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={loading || !isFormValid()}
+            className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white rounded-xl hover:from-green-600 hover:to-green-800 transition-all font-semibold shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                Salvar
+              </>
+            )}
+          </button>
         </div>
-
-        {/* Conteúdo do Modal */}
-        <div className="p-6 space-y-6">
+      }
+    >
+      <div className="space-y-5">
           {/* Nome */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -463,42 +449,8 @@ const EditModal: React.FC<{
               🔒 CPF ocultado por segurança e não pode ser alterado
             </p>
           </div>
-        </div>
-
-        {/* Footer do Modal */}
-        <div className="bg-gray-50 px-6 py-4 border-t">
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              disabled={loading}
-              className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={loading || !isFormValid()}
-              className="flex-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white rounded-xl hover:from-green-600 hover:to-green-800 focus:ring-4 focus:ring-green-200 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  Salvar Alterações
-                </>
-              )}
-            </button>
-          </div>
-          <p className="text-xs text-gray-500 mt-3 text-center">
-            * Campos obrigatórios
-          </p>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 
@@ -742,6 +694,10 @@ const PerfilCliente: React.FC = () => {
   const [loadingPedidos, setLoadingPedidos] = useState(false);
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
   const [showPedidoModal, setShowPedidoModal] = useState(false);
+  const [fotoValor, setFotoValor] = useState<File | string>('');
+  const [fotoPreview, setFotoPreview] = useState<string>('');
+  const [fotoError, setFotoError] = useState<string>('');
+  const [fotoLoading, setFotoLoading] = useState<boolean>(false);
 
 
   useEffect(() => {
@@ -800,6 +756,10 @@ const PerfilCliente: React.FC = () => {
       
       setCliente(dadosCompletos.cliente);
       
+      // Carregar foto de perfil se existir
+      if (dadosCompletos?.cliente?.foto_perfil) {
+        setFotoPreview(dadosCompletos.cliente.foto_perfil);
+      }
 
       
     } catch (err: any) {
@@ -891,6 +851,57 @@ const PerfilCliente: React.FC = () => {
       }, 5000);
       
       throw err; // Re-throw para o modal tratar
+    }
+  };
+
+  const salvarFotoPerfil = async () => {
+    if (!user?.cliente?.cpf) return;
+    if (!fotoPreview) {
+      setFotoError('Selecione uma imagem antes de salvar');
+      return;
+    }
+
+    try {
+      setFotoLoading(true);
+      setFotoError('');
+
+      // fotoPreview já é base64 ou URL, pode enviar direto
+      const atualizado = await clienteService.atualizarFotoPerfil(user.cliente.cpf, fotoPreview);
+      setCliente(atualizado);
+      if (atualizado?.foto_perfil) {
+        setFotoPreview(atualizado.foto_perfil);
+      }
+      // Limpar fotoValor após salvar
+      setFotoValor('');
+
+      const successToast = document.createElement('div');
+      successToast.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50 transform translate-x-full transition-transform duration-300';
+      successToast.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="bg-white/20 p-1 rounded-full">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div>
+            <p class="font-semibold">Foto de perfil atualizada!</p>
+            <p class="text-sm opacity-90">Sua imagem foi salva com sucesso</p>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(successToast);
+      requestAnimationFrame(() => {
+        successToast.style.transform = 'translateX(0)';
+      });
+      setTimeout(() => {
+        successToast.style.transform = 'translateX(100%)';
+        setTimeout(() => successToast.remove(), 300);
+      }, 2500);
+    } catch (err: any) {
+      console.error('❌ Erro ao salvar foto de perfil:', err);
+      setFotoError(err.message || 'Erro ao atualizar foto de perfil');
+    } finally {
+      setFotoLoading(false);
     }
   };
 
@@ -1179,10 +1190,91 @@ const PerfilCliente: React.FC = () => {
           {/* Sidebar - Dados Pessoais */}
           <div className="lg:col-span-1">
             {/* Box da Foto de Perfil */}
-            <div className="mb-6 flex justify-center">
-              <div className="w-[167px] h-[167px] bg-gradient-to-br from-green-500 to-green-700 rounded-full overflow-hidden flex items-center justify-center">
-                <User className="w-20 h-20 text-white" />
+            <div className="mb-6 flex flex-col items-center gap-4">
+              <div className="relative w-[167px] h-[167px] group">
+                <div className="w-full h-full rounded-full overflow-hidden border-4 border-green-600 flex items-center justify-center bg-white shadow-lg">
+                  {fotoPreview ? (
+                    <img
+                      src={fotoPreview}
+                      alt="Foto de perfil"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
+                      <User className="w-20 h-20 text-white" />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Botão de editar foto sobreposto */}
+                <label 
+                  htmlFor="foto-perfil-input" 
+                  className="absolute bottom-2 right-2 bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-xl cursor-pointer transition-all hover:scale-110 group-hover:ring-4 group-hover:ring-green-200"
+                  title="Alterar foto de perfil"
+                >
+                  <Edit3 className="w-5 h-5" />
+                </label>
+                <input
+                  id="foto-perfil-input"
+                  type="file"
+                  accept="image/jpeg,image/png,image/jpg,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    
+                    // Validar tipo
+                    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+                    if (!validTypes.includes(file.type)) {
+                      setFotoError('Formato inválido. Use: JPG, PNG ou WEBP');
+                      return;
+                    }
+                    
+                    // Validar tamanho (2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                      setFotoError('A imagem deve ter no máximo 2MB');
+                      return;
+                    }
+                    
+                    setFotoError('');
+                    setFotoValor(file);
+                    
+                    // Criar preview
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setFotoPreview(reader.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                  className="hidden"
+                />
               </div>
+              
+              {/* Botão de salvar (só aparece quando há nova foto) */}
+              {fotoValor && (
+                <button
+                  onClick={salvarFotoPerfil}
+                  disabled={fotoLoading}
+                  className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-green-500 to-green-700 text-white font-bold shadow-lg hover:from-green-600 hover:to-green-800 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                >
+                  {fotoLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-5 h-5" />
+                      Salvar Foto de Perfil
+                    </>
+                  )}
+                </button>
+              )}
+              
+              {fotoError && (
+                <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+                  ⚠️ {fotoError}
+                </p>
+              )}
             </div>
             
             {/* Box de Dados Pessoais */}

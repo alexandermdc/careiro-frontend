@@ -89,7 +89,7 @@ function App() {
         <Route 
           path="/associacao/cadastro" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireRole="ADMIN">
               <CadastroAssociacao />
             </ProtectedRoute>
           } 

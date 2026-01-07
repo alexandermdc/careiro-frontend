@@ -13,12 +13,18 @@ export interface Associacao {
   id_associacao: string;
   nome: string;
   descricao: string;
+  image?: string;
+  endereco?: string;
+  data_hora?: string;
   vendedor?: Vendedor[];
 }
 
 export interface CreateAssociacaoData {
   nome: string;
   descricao: string;
+  image?: string;
+  endereco?: string;
+  data_hora?: string;
 }
 
 class AssociacaoService {

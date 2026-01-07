@@ -55,34 +55,40 @@ class FeiraService {
    */
   async criar(data: CreateFeiraData): Promise<Feira> {
     try {
-      // Se tiver arquivo de imagem, usar FormData
-      if (data.image instanceof File) {
-        const formData = new FormData();
-        formData.append('nome', data.nome);
-        
-        if (data.data_hora) formData.append('data_hora', data.data_hora);
-        if (data.descricao) formData.append('descricao', data.descricao);
-        formData.append('image', data.image);
+      console.log('🔍 feiraService.criar - Dados recebidos:', {
+        nome: data.nome,
+        data_hora: data.data_hora,
+        descricao: data.descricao,
+        imageType: data.image instanceof File ? 'File' : typeof data.image,
+        imageSize: data.image instanceof File ? data.image.size : (data.image ? data.image.length : 0)
+      });
 
-        console.log('📤 Enviando feira com imagem (FormData)');
-        const response = await api.post('/feira', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        return response.data;
+      // Converter File para Base64 se necessário
+      let imageBase64: string | undefined;
+      
+      if (data.image instanceof File) {
+        console.log('📸 Convertendo File para Base64...');
+        imageBase64 = await this.fileToBase64(data.image);
+        console.log('✅ Conversão concluída. Tamanho base64:', imageBase64.length);
+      } else if (typeof data.image === 'string' && data.image) {
+        console.log('📸 Imagem já é string (base64)');
+        imageBase64 = data.image;
       }
 
-      // Caso contrário, enviar JSON normal (sem imagem ou imagem como string)
       const payload = {
         nome: data.nome,
         ...(data.data_hora && { data_hora: data.data_hora }),
         ...(data.descricao && { descricao: data.descricao }),
-        ...(data.image && typeof data.image === 'string' && { image: data.image })
+        ...(imageBase64 && { image: imageBase64 })
       };
       
-      console.log('📤 Enviando feira sem arquivo (JSON):', payload);
+      console.log('📤 Enviando payload:', {
+        ...payload,
+        image: payload.image ? `Base64 com ${payload.image.length} chars` : 'sem imagem'
+      });
+      
       const response = await api.post('/feira', payload);
+      console.log('✅ Feira criada com sucesso:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Erro ao criar feira:', error);
@@ -105,8 +111,23 @@ class FeiraService {
    */
   async atualizar(id: number, data: Partial<CreateFeiraData>): Promise<Feira> {
     try {
+      // Converter File para Base64 se necessário
+      let imageBase64: string | undefined;
+      
+      if (data.image instanceof File) {
+        imageBase64 = await this.fileToBase64(data.image);
+      } else if (typeof data.image === 'string') {
+        imageBase64 = data.image;
+      }
 
-      const response = await api.put(`/feira/${id}`, data);
+      const payload = {
+        ...(data.nome && { nome: data.nome }),
+        ...(data.data_hora && { data_hora: data.data_hora }),
+        ...(data.descricao && { descricao: data.descricao }),
+        ...(imageBase64 && { image: imageBase64 })
+      };
+
+      const response = await api.put(`/feira/${id}`, payload);
 
       return response.data;
     } catch (error: any) {
@@ -145,6 +166,18 @@ class FeiraService {
         'Erro ao deletar feira'
       );
     }
+  }
+
+  /**
+   * Converter File para Base64
+   */
+  private fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
   }
 }
 
