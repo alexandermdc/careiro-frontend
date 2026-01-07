@@ -5,8 +5,7 @@ import { JoinAgriconnectBanner } from '../../../components/JoinAgriconnectBanner
 import Modal from '../../../components/Modal';
 import associacaoService from '../../../services/associacaoService';
 import type { Associacao } from '../../../services/associacaoService';
-import { Building2, MapPin, Clock, Edit, Upload, X, Save, Calendar, Users, Info } from 'lucide-react';
-import { useAuth } from '../../../contexts/AuthContext';
+import { Building2, MapPin, Clock, Users, Info } from 'lucide-react';
 
 export const MainContentSection = (): React.ReactElement => {
   const [associacoes, setAssociacoes] = useState<Associacao[]>([]);
@@ -14,20 +13,6 @@ export const MainContentSection = (): React.ReactElement => {
   const [error, setError] = useState('');
   const [selectedAssociacao, setSelectedAssociacao] = useState<Associacao | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editData, setEditData] = useState({
-    nome: '',
-    descricao: '',
-    image: '',
-    endereco: '',
-    data_hora: ''
-  });
-  const [imagemPreview, setImagemPreview] = useState<string>('');
-  const [imagemError, setImagemError] = useState<string>('');
-  const [editLoading, setEditLoading] = useState(false);
-  
-  const { userType } = useAuth();
-  const isAdmin = userType === 'ADMIN';
 
   useEffect(() => {
     carregarAssociacoes();
@@ -48,43 +33,6 @@ export const MainContentSection = (): React.ReactElement => {
   const handleVerMais = (associacao: Associacao) => {
     setSelectedAssociacao(associacao);
     setShowModal(true);
-  };
-
-  const handleEdit = () => {
-    if (!selectedAssociacao) return;
-    
-    setEditData({
-      nome: selectedAssociacao.nome,
-      descricao: selectedAssociacao.descricao,
-      image: selectedAssociacao.image || '',
-      endereco: selectedAssociacao.endereco || '',
-      data_hora: selectedAssociacao.data_hora || ''
-    });
-    setImagemPreview(selectedAssociacao.image || '');
-    setShowModal(false);
-    setShowEditModal(true);
-  };
-
-  const handleSaveEdit = async () => {
-    if (!selectedAssociacao) return;
-    
-    try {
-      setEditLoading(true);
-      await associacaoService.update(selectedAssociacao.id_associacao, editData);
-      setShowEditModal(false);
-      await carregarAssociacoes();
-      
-      // Toast de sucesso
-      const successToast = document.createElement('div');
-      successToast.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50';
-      successToast.innerHTML = '<p class="font-semibold">✅ Associação atualizada com sucesso!</p>';
-      document.body.appendChild(successToast);
-      setTimeout(() => successToast.remove(), 3000);
-    } catch (err: any) {
-      alert(err.message || 'Erro ao atualizar associação');
-    } finally {
-      setEditLoading(false);
-    }
   };
 
   if (loading) {
@@ -186,17 +134,7 @@ export const MainContentSection = (): React.ReactElement => {
         onClose={() => setShowModal(false)}
         title={selectedAssociacao?.nome || ''}
         maxWidth="2xl"
-        footerContent={isAdmin ? (
-          <div className="flex justify-end w-full">
-            <button
-              onClick={handleEdit}
-              className="px-6 py-3 bg-[#2D5016] text-white rounded-xl hover:bg-[#3a6b1e] transition-colors font-semibold shadow-lg flex items-center gap-2"
-            >
-              <Edit className="w-4 h-4" />
-              Editar Associação
-            </button>
-          </div>
-        ) : undefined}
+        showFooter={false}
       >
         {selectedAssociacao && (
           <div className="space-y-6">
@@ -304,149 +242,6 @@ export const MainContentSection = (): React.ReactElement => {
             )}
           </div>
         )}
-      </Modal>
-
-      {/* Modal de Edição */}
-      <Modal
-        isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
-        title="Editar Associação"
-        maxWidth="lg"
-        footerContent={
-          <div className="flex gap-3 w-full">
-            <button
-              onClick={() => setShowEditModal(false)}
-              disabled={editLoading}
-              className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-medium disabled:opacity-50"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleSaveEdit}
-              disabled={editLoading}
-              className="flex-1 px-6 py-3 bg-[#2D5016] text-white rounded-xl hover:bg-[#3a6b1e] transition-all font-semibold shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {editLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  Salvar Alterações
-                </>
-              )}
-            </button>
-          </div>
-        }
-      >
-        <div className="space-y-5">
-          {/* Upload de Imagem */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Imagem</label>
-            <div className="flex items-start gap-4">
-              <div className="relative w-24 h-24 flex-shrink-0">
-                {imagemPreview ? (
-                  <div className="relative w-full h-full group">
-                    <img src={imagemPreview} alt="Preview" className="w-full h-full object-cover rounded-lg border-2 border-gray-200" />
-                    <button
-                      type="button"
-                      onClick={() => { setImagemPreview(''); setEditData(prev => ({ ...prev, image: '' })); }}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="w-full h-full bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                    <Building2 className="w-8 h-8 text-gray-400" />
-                  </div>
-                )}
-              </div>
-              <div className="flex-1">
-                <label htmlFor="edit-image-upload" className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors border border-gray-300">
-                  <Upload className="w-4 h-4" />
-                  <span>Selecionar Imagem</span>
-                </label>
-                <input
-                  id="edit-image-upload"
-                  type="file"
-                  accept="image/jpeg,image/png,image/jpg,image/webp"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    if (file.size > 2 * 1024 * 1024) { setImagemError('Máx 2MB'); return; }
-                    setImagemError('');
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      const base64 = reader.result as string;
-                      setImagemPreview(base64);
-                      setEditData(prev => ({ ...prev, image: base64 }));
-                    };
-                    reader.readAsDataURL(file);
-                  }}
-                  className="hidden"
-                />
-                {imagemError && <p className="text-xs text-red-600 mt-1">⚠️ {imagemError}</p>}
-              </div>
-            </div>
-          </div>
-
-          {/* Nome */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Nome *</label>
-            <input
-              type="text"
-              value={editData.nome}
-              onChange={(e) => setEditData(prev => ({ ...prev, nome: e.target.value }))}
-              className="w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all"
-              required
-            />
-          </div>
-
-          {/* Descrição */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Descrição *</label>
-            <textarea
-              value={editData.descricao}
-              onChange={(e) => setEditData(prev => ({ ...prev, descricao: e.target.value }))}
-              rows={4}
-              className="w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all resize-none"
-              required
-            />
-          </div>
-
-          {/* Endereço */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Endereço</label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                value={editData.endereco}
-                onChange={(e) => setEditData(prev => ({ ...prev, endereco: e.target.value }))}
-                placeholder="Endereço completo"
-                className="w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all"
-              />
-            </div>
-          </div>
-
-          {/* Data/Hora */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Horário de Funcionamento</label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                value={editData.data_hora}
-                onChange={(e) => setEditData(prev => ({ ...prev, data_hora: e.target.value }))}
-                placeholder="Ex: Segunda a Sexta, 8h às 17h"
-                className="w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all"
-              />
-            </div>
-          </div>
-        </div>
       </Modal>
     </section>
   );

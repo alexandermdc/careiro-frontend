@@ -33,17 +33,7 @@ api.interceptors.request.use(
         config.headers['x-user-role'] = papelAtivo;
       }
     }
-    
-    // Log detalhado para requisições com FormData
-    if (config.data instanceof FormData) {
-      console.log('📤 Requisição FormData:', {
-        url: config.url,
-        method: config.method,
-        contentType: config.headers['Content-Type'],
-        hasAuth: !!config.headers.Authorization,
-        userRole: config.headers['x-user-role']
-      });
-    }
+
     
     return config;
   },

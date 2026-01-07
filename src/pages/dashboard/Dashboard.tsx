@@ -28,9 +28,9 @@ const Dashboard: React.FC = () => {
                   Gerencie suas informações pessoais
                 </p>
                 <div className="space-y-2 text-sm">
-                  <p><strong>Nome:</strong> {user?.nome}</p>
-                  <p><strong>Email:</strong> {user?.email}</p>
-                  <p><strong>Tipo:</strong> {user?.tipo}</p>
+                  <p><span className="font-semibold">Nome:</span> {user?.nome}</p>
+                  <p><span className="font-semibold">Email:</span> {user?.email}</p>
+                  <p><span className="font-semibold">Tipo:</span> {user?.tipo}</p>
                 </div>
               </div>
 

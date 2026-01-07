@@ -30,6 +30,7 @@ import MeusPedidos from './pages/pedidos/MeusPedidos';
 import Favoritos from './pages/favoritos/Favoritos';
 import BuscaResultados from './pages/busca/BuscaResultados';
 import PainelAdmin from './pages/admin/PainelAdmin';
+import GerenciarAssociacoes from './pages/admin/GerenciarAssociacoes';
 
 
 function App() {
@@ -83,6 +84,14 @@ function App() {
           element={
             <ProtectedRoute>
               <PainelAdmin />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/associacoes" 
+          element={
+            <ProtectedRoute requireRole="ADMIN">
+              <GerenciarAssociacoes />
             </ProtectedRoute>
           } 
         />
