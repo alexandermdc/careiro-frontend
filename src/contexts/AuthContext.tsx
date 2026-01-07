@@ -44,12 +44,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (usuario && authService.isAuthenticated()) {
       const papelAtivo = authService.getPapelAtivo() || usuario.papeis[0];
       
-      console.log('🔐 AuthContext - Inicializando com usuário:', {
-        email: usuario.email,
-        papeis: usuario.papeis,
-        papelAtivo: papelAtivo
-      });
-      
       setUser({
         tipo: papelAtivo,
         papeis: usuario.papeis,
@@ -71,14 +65,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { usuario } = response;
       if (usuario) {
         const papelAtivo = authService.getPapelAtivo() || usuario.papeis[0];
-        
-        console.log('🔐 AuthContext - Login realizado:', {
-          email: usuario.email,
-          papeis: usuario.papeis,
-          papelAtivo: papelAtivo,
-          isAdmin: papelAtivo === 'ADMIN'
-        });
-        
         setUser({
           tipo: papelAtivo,
           papeis: usuario.papeis,
@@ -102,12 +88,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       const { usuario } = response;
       if (usuario) {
-        console.log('🏪 AuthContext - Login de vendedor realizado:', {
-          email: usuario.email,
-          papeis: usuario.papeis,
-          papelAtivo: 'VENDEDOR'
-        });
-        
+  
         setUser({
           tipo: 'VENDEDOR',
           papeis: ['VENDEDOR'],
@@ -148,17 +129,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const isVendedor = authService.isVendedor();
   const isCliente = authService.isCliente();
 
-  // Debug logs
-  if (user) {
-    console.log('🎯 AuthContext - Estado atual:', {
-      userType,
-      isAdmin,
-      isVendedor,
-      isCliente,
-      papeis: user.papeis,
-      papelAtivo: user.tipo
-    });
-  }
+  // Debug log
 
   return (
     <AuthContext.Provider

@@ -105,14 +105,6 @@ class ProdutoService {
     try {
       // Criar FormData para enviar arquivo
       const formData = new FormData();
-
-      console.log('📦 Dados recebidos para cadastro:', {
-        nome: data.nome,
-        hasImage: !!data.image,
-        imageType: typeof data.image,
-        isFile: data.image instanceof File,
-        fileName: data.image instanceof File ? data.image.name : 'N/A'
-      });
       
       formData.append('nome', data.nome);
       formData.append('descricao', data.descricao);
@@ -129,26 +121,17 @@ class ProdutoService {
       // Adicionar arquivo de imagem - backend espera campo 'image'
       if (data.image instanceof File) {
         formData.append('image', data.image);
-        console.log('✅ Imagem adicionada ao FormData como "image":', data.image.name, `(${data.image.size} bytes)`);
+
       } else {
         console.error('❌ Imagem não é um File:', typeof data.image, data.image);
         throw new Error('Imagem do produto é obrigatória e deve ser um arquivo válido');
       }
       
       // Log do FormData para debug
-      console.log('📋 FormData entries:');
-      for (const [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          console.log(`  ${key}: [File] ${value.name} (${value.size} bytes)`);
-        } else {
-          console.log(`  ${key}: ${value}`);
-        }
-      }
-      
 
       
       // Não definir Content-Type manualmente - o browser define automaticamente com o boundary correto
-      console.log('🚀 Enviando requisição para /produto/cadastro...');
+
       
       const response = await api.post('/produto/cadastro', formData);
 
@@ -168,7 +151,7 @@ class ProdutoService {
   // Atualizar produto (requer autenticação)
   async atualizar(id: string, data: UpdateProdutoData | FormData): Promise<Produto> {
     try {
-      console.log('📝 Atualizando produto:', id);
+
       
       const response = await api.put(`/produto/${id}`, data);
       

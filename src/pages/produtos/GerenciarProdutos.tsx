@@ -56,8 +56,6 @@ const GerenciarProdutos: React.FC = () => {
       setLoading(true);
       setError('');
       const data = await produtoService.buscarPorVendedor(user.vendedor.id_vendedor.toString());
-      console.log('📦 Produtos carregados:', data);
-      console.log('🔍 Primeiro produto:', data[0]);
       setProdutos(data);
     } catch (err: any) {
       console.error('Erro ao carregar produtos:', err);
@@ -165,18 +163,11 @@ const GerenciarProdutos: React.FC = () => {
         formData.append('image', novaImagem);
       }
 
-      console.log('📋 Dados sendo enviados para atualização:');
-      for (const [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          console.log(`  ${key}: [File] ${value.name}`);
-        } else {
-          console.log(`  ${key}: ${value}`);
-        }
-      }
-
-      const produtoAtualizado = await produtoService.atualizar(produtoSelecionado.id_produto || produtoSelecionado.id!.toString(), formData);
+      // Atualizar produto no backend
+      const id = produtoSelecionado.id_produto || produtoSelecionado.id;
+      if (!id) throw new Error('ID do produto não encontrado');
       
-      console.log('✅ Produto atualizado:', produtoAtualizado);
+      await produtoService.atualizar(id.toString(), formData);
       
       // Recarregar produtos
       await carregarProdutos();
@@ -284,7 +275,7 @@ const GerenciarProdutos: React.FC = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {produtos.map((produto) => (
               <div
-                key={produto.id}
+                key={produto.id_produto || produto.id}
                 className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all"
               >
                 {/* Imagem do Produto */}

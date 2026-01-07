@@ -190,7 +190,7 @@ const PainelAdmin: React.FC = () => {
       title: 'Gerenciar Associações',
       description: 'Visualize, cadastre e edite associações',
       icon: Building2,
-      link: '/associacao',
+      link: '/admin/associacoes',
       color: 'bg-teal-50 hover:bg-teal-100 border-teal-200',
       iconColor: 'text-teal-600',
       badge: 'Gestão'

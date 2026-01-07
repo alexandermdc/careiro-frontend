@@ -5,6 +5,7 @@ export interface Feira {
   nome: string;
   data_hora?: string | null;
   descricao?: string | null;
+  localizacao?: string | null;
   image?: string | null;
 }
 
@@ -55,23 +56,17 @@ class FeiraService {
    */
   async criar(data: CreateFeiraData): Promise<Feira> {
     try {
-      console.log('🔍 feiraService.criar - Dados recebidos:', {
-        nome: data.nome,
-        data_hora: data.data_hora,
-        descricao: data.descricao,
-        imageType: data.image instanceof File ? 'File' : typeof data.image,
-        imageSize: data.image instanceof File ? data.image.size : (data.image ? data.image.length : 0)
-      });
+
 
       // Converter File para Base64 se necessário
       let imageBase64: string | undefined;
       
       if (data.image instanceof File) {
-        console.log('📸 Convertendo File para Base64...');
+
         imageBase64 = await this.fileToBase64(data.image);
-        console.log('✅ Conversão concluída. Tamanho base64:', imageBase64.length);
+
       } else if (typeof data.image === 'string' && data.image) {
-        console.log('📸 Imagem já é string (base64)');
+
         imageBase64 = data.image;
       }
 
@@ -82,13 +77,10 @@ class FeiraService {
         ...(imageBase64 && { image: imageBase64 })
       };
       
-      console.log('📤 Enviando payload:', {
-        ...payload,
-        image: payload.image ? `Base64 com ${payload.image.length} chars` : 'sem imagem'
-      });
+
       
       const response = await api.post('/feira', payload);
-      console.log('✅ Feira criada com sucesso:', response.data);
+
       return response.data;
     } catch (error: any) {
       console.error('❌ Erro ao criar feira:', error);

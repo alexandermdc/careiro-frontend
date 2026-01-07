@@ -94,12 +94,6 @@ const CadastrarFeira: React.FC = () => {
     setSucesso(false);
     
     try {
-      console.log('📋 Dados do formulário:', {
-        nome: formData.nome,
-        data_hora: formData.data_hora,
-        descricao: formData.descricao,
-        image: formData.image instanceof File ? `File: ${formData.image.name}` : formData.image
-      });
       
       await feiraService.criar(formData);
       
