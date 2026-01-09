@@ -5,11 +5,14 @@ import { useFavoritos } from '../../contexts/FavoritosContext';
 import { useCarrinho } from '../../contexts/CarrinhoContext';
 import { Card, CardContent } from '../../components/cards';
 import { Button } from '../../components';
+import { ModalNotificacao } from '../../components/ModalNotificacao';
+import { useNotificacao } from '../../hooks/useNotificacao';
 
 const Favoritos: React.FC = () => {
   const navigate = useNavigate();
   const { favoritos, loading, toggleFavorito } = useFavoritos();
   const { adicionarAoCarrinho } = useCarrinho();
+  const notificacao = useNotificacao();
 
   const formatarPreco = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -30,15 +33,15 @@ const Favoritos: React.FC = () => {
     };
 
     adicionarAoCarrinho(produtoCarrinho);
-    alert(`✅ ${produto.nome} adicionado ao carrinho!`);
+    notificacao.sucesso(`${produto.nome} adicionado ao carrinho!`);
   };
 
   const handleRemoverFavorito = async (produto_id: string | number) => {
     try {
       await toggleFavorito(produto_id);
-      alert('Produto removido dos favoritos!');
+      notificacao.sucesso('Produto removido dos favoritos!');
     } catch (error: any) {
-      alert(' Erro ao remover favorito: ' + error.message);
+      notificacao.erro('Erro ao remover favorito: ' + error.message);
     }
   };
 
@@ -173,6 +176,13 @@ const Favoritos: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de Notificação */}
+      <ModalNotificacao
+        isOpen={notificacao.isOpen}
+        onClose={notificacao.fechar}
+        {...notificacao.config}
+      />
     </div>
   );
 };

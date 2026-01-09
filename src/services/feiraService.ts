@@ -13,6 +13,7 @@ export interface CreateFeiraData {
   nome: string;
   data_hora?: string;
   descricao?: string;
+  localizacao?: string;
   image?: File | string;
 }
 
@@ -74,6 +75,7 @@ class FeiraService {
         nome: data.nome,
         ...(data.data_hora && { data_hora: data.data_hora }),
         ...(data.descricao && { descricao: data.descricao }),
+        ...(data.localizacao && { localizacao: data.localizacao }),
         ...(imageBase64 && { image: imageBase64 })
       };
       
@@ -114,8 +116,9 @@ class FeiraService {
 
       const payload = {
         ...(data.nome && { nome: data.nome }),
-        ...(data.data_hora && { data_hora: data.data_hora }),
-        ...(data.descricao && { descricao: data.descricao }),
+        ...(data.data_hora !== undefined && { data_hora: data.data_hora }),
+        ...(data.descricao !== undefined && { descricao: data.descricao }),
+        ...(data.localizacao !== undefined && { localizacao: data.localizacao }),
         ...(imageBase64 && { image: imageBase64 })
       };
 

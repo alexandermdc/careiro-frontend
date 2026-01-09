@@ -31,6 +31,7 @@ import Favoritos from './pages/favoritos/Favoritos';
 import BuscaResultados from './pages/busca/BuscaResultados';
 import PainelAdmin from './pages/admin/PainelAdmin';
 import GerenciarAssociacoes from './pages/admin/GerenciarAssociacoes';
+import GerenciarFeiras from './pages/admin/GerenciarFeiras';
 
 
 function App() {
@@ -92,6 +93,14 @@ function App() {
           element={
             <ProtectedRoute requireRole="ADMIN">
               <GerenciarAssociacoes />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/feiras" 
+          element={
+            <ProtectedRoute requireRole="ADMIN">
+              <GerenciarFeiras />
             </ProtectedRoute>
           } 
         />

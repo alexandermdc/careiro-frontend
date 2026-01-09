@@ -7,11 +7,14 @@ import { Card, CardContent } from '../../components/cards';
 import { Button } from '../../components';
 import { HeaderSection } from '../../components';
 import { FooterSection } from '../../components';
+import { ModalNotificacao } from '../../components/ModalNotificacao';
+import { useNotificacao } from '../../hooks/useNotificacao';
 
 const BuscaResultados: React.FC = () => {
   const navigate = useNavigate();
   const { resultados, loading, termoBusca } = useBusca();
   const { adicionarAoCarrinho } = useCarrinho();
+  const notificacao = useNotificacao();
 
   const formatarPreco = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -23,7 +26,7 @@ const BuscaResultados: React.FC = () => {
   const handleAdicionarAoCarrinho = (produto: any) => {
     const token = localStorage.getItem('accessToken');
     if (!token) {
-      alert('⚠️ Você precisa estar logado para adicionar produtos ao carrinho!');
+      notificacao.aviso('Você precisa estar logado para adicionar produtos ao carrinho!');
       navigate('/login');
       return;
     }
@@ -38,7 +41,7 @@ const BuscaResultados: React.FC = () => {
     };
 
     adicionarAoCarrinho(produtoCarrinho);
-    alert(`✅ ${produto.nome} adicionado ao carrinho!`);
+    notificacao.sucesso(`${produto.nome} adicionado ao carrinho!`);
   };
 
   const produtos = resultados.filter((r: any) => r.tipo === 'produto');
@@ -220,6 +223,13 @@ const BuscaResultados: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de Notificação */}
+      <ModalNotificacao
+        isOpen={notificacao.isOpen}
+        onClose={notificacao.fechar}
+        {...notificacao.config}
+      />
     </div>
     <FooterSection />
     </>
