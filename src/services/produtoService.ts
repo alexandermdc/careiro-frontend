@@ -1,5 +1,7 @@
 import api from './api';
 
+export type UnidadeMedida = 'UNIDADE' | 'KG' | 'MACO' | 'LITRO';
+
 export interface Produto {
     id?: number;
     id_produto?: string; // Backend pode retornar id_produto como UUID
@@ -11,6 +13,7 @@ export interface Produto {
     fk_feira?: number; // Opcional - backend pode não retornar
     image?: string;
     imagem?: string; // Backend pode retornar 'imagem' ou 'image'
+    unidade_medida?: UnidadeMedida;
     is_promocao?: boolean;
     preco_promocao?: number;
     feira?: {
@@ -32,6 +35,7 @@ export interface CreateProdutoData {
   nome: string;
   descricao: string;
   image: File | string; // Pode ser File (upload) ou string (URL)
+  unidade_medida: UnidadeMedida;
   is_promocao: boolean;
   preco: number;
   preco_promocao?: number;
@@ -44,6 +48,7 @@ export interface UpdateProdutoData {
   nome?: string;
   descricao?: string;
   imagem?: string;
+  unidade_medida?: UnidadeMedida;
   is_promocao?: boolean;
   preco?: number;
   preco_promocao?: number;

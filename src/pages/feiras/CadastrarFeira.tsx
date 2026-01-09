@@ -31,7 +31,8 @@ const CadastrarFeira: React.FC = () => {
     nome: '',
     image: '',
     data_hora: '',
-    descricao: ''
+    descricao: '',
+    localizacao: ''
   });
 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
@@ -199,6 +200,22 @@ const CadastrarFeira: React.FC = () => {
                 />
               </div>
 
+              {/* Localização */}
+              <div>
+                <label htmlFor="localizacao" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Localização
+                </label>
+                <input
+                  type="text"
+                  id="localizacao"
+                  value={formData.localizacao}
+                  onChange={(e) => handleInputChange('localizacao', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  placeholder="Ex: Praça Central, Centro"
+                  disabled={loading || sucesso}
+                />
+              </div>
+
               {/* Upload de Imagem */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -268,6 +285,7 @@ const CadastrarFeira: React.FC = () => {
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• Apenas o <span className="font-semibold">Nome</span> é obrigatório</li>
             <li>• A <span className="font-semibold">Data/Hora</span> é um campo de texto livre</li>
+            <li>• A <span className="font-semibold">Localização</span> ajuda os clientes a encontrarem a feira</li>
             <li>• A <span className="font-semibold">Imagem</span> será enviada direto para o servidor (máx 2MB)</li>
             <li>• A <span className="font-semibold">Descrição</span> ajuda os clientes a conhecerem melhor a feira</li>
           </ul>

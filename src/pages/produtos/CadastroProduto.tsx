@@ -16,10 +16,13 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import produtoService from '../../services/produtoService';
 import type { CreateProdutoData, Categoria } from '../../services/produtoService';
+import { ModalNotificacao } from '../../components/ModalNotificacao';
+import { useNotificacao } from '../../hooks/useNotificacao';
 
 const CadastroProduto: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const notificacao = useNotificacao();
   
   const [loading, setLoading] = useState(false);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -30,14 +33,14 @@ const CadastroProduto: React.FC = () => {
   // Verificar se é vendedor
   useEffect(() => {
     if (!user) {
-      alert('⚠️ Você precisa estar logado como vendedor para cadastrar produtos!');
+      notificacao.aviso('Você precisa estar logado como vendedor para cadastrar produtos!');
       navigate('/login');
       return;
     }
     
     // Verifica se o usuário TEM o papel de vendedor (não apenas se está ativo)
     if (!user.papeis?.includes('VENDEDOR') || !user.vendedor?.id_vendedor) {
-      alert('⚠️ Apenas vendedores podem cadastrar produtos!');
+      notificacao.aviso('Apenas vendedores podem cadastrar produtos!');
       navigate('/');
       return;
     }
@@ -47,6 +50,7 @@ const CadastroProduto: React.FC = () => {
     nome: '',
     descricao: '',
     image: '',
+    unidade_medida: 'UNIDADE',
     is_promocao: false,
     preco: 0,
     preco_promocao: undefined,
@@ -413,6 +417,25 @@ const CadastroProduto: React.FC = () => {
                 </select>
               </div>
 
+              {/* Unidade de Medida */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <Package className="w-4 h-4 inline mr-2" />
+                  Unidade de Medida *
+                </label>
+                <select
+                  value={formData.unidade_medida}
+                  onChange={(e) => handleInputChange('unidade_medida', e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all"
+                  disabled={loading}
+                >
+                  <option value="UNIDADE">Unidade</option>
+                  <option value="KG">Kg (Quilograma)</option>
+                  <option value="MACO">Maço</option>
+                  <option value="LITRO">Litro</option>
+                </select>
+              </div>
+
               {/* Disponível */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -608,6 +631,13 @@ const CadastroProduto: React.FC = () => {
           </div>
         </form>
       </div>
+
+      {/* Modal de Notificação */}
+      <ModalNotificacao
+        isOpen={notificacao.isOpen}
+        onClose={notificacao.fechar}
+        {...notificacao.config}
+      />
     </div>
   );
 };

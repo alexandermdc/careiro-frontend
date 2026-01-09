@@ -208,7 +208,7 @@ const PainelAdmin: React.FC = () => {
       title: 'Gerenciar Feiras',
       description: 'Administre todas as feiras cadastradas',
       icon: Store,
-      link: '/feiras',
+      link: '/admin/feiras',
       color: 'bg-orange-50 hover:bg-orange-100 border-orange-200',
       iconColor: 'text-orange-600',
       badge: 'Gestão'

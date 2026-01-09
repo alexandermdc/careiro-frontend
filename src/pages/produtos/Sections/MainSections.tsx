@@ -13,6 +13,9 @@ import produtoService, {
 import { useCarrinho } from '../../../contexts/CarrinhoContext';
 import { useFavoritos } from '../../../contexts/FavoritosContext';
 import { useNavigate } from 'react-router-dom';
+import { ModalDetalhesProduto } from '../../../components/ModalDetalhesProduto';
+import { ModalNotificacao } from '../../../components/ModalNotificacao';
+import { useNotificacao } from '../../../hooks/useNotificacao';
 
 // The original `Produto` type seems to be missing fields. Let's extend it.
 type Produto = ProdutoOriginal & {
@@ -27,12 +30,15 @@ export const MainContentSection = (): React.ReactElement => {
     const navigate = useNavigate();
     const { adicionarAoCarrinho } = useCarrinho();
     const { isFavorito, toggleFavorito } = useFavoritos();
+    const notificacao = useNotificacao();
     const [produtos, setProdutos] = useState<Produto[]>([]);
     const [categorias, setCategorias] = useState<Categoria[]>([]);
     const [categoriaAtiva, setCategoriaAtiva] = useState<string | null>(null);
     const [paginaAtual, setPaginaAtual] = useState(1);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [modalAberto, setModalAberto] = useState(false);
+    const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
     
     const PRODUTOS_POR_PAGINA = 16;
 
@@ -87,14 +93,14 @@ export const MainContentSection = (): React.ReactElement => {
         // Verificar se está logado
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            alert('⚠️ Você precisa estar logado para adicionar produtos ao carrinho!');
+            notificacao.aviso('Você precisa estar logado para adicionar produtos ao carrinho!');
             navigate('/login');
             return;
         }
 
         // Verificar se produto está disponível
         if (!produto.disponivel) {
-            alert('⚠️ Este produto não está disponível no momento.');
+            notificacao.aviso('Este produto não está disponível no momento.');
             return;
         }
 
@@ -114,7 +120,7 @@ export const MainContentSection = (): React.ReactElement => {
         adicionarAoCarrinho(produtoCarrinho);
         
         // Feedback visual
-        alert(`✅ ${produto.nome} adicionado ao carrinho!`);
+        notificacao.sucesso(`${produto.nome} adicionado ao carrinho!`);
     };
 
     const handleToggleFavorito = async (produto_id: string | number) => {
@@ -126,7 +132,7 @@ export const MainContentSection = (): React.ReactElement => {
         
         if (!token) {
             console.warn('⚠️ Usuário não autenticado');
-            alert('⚠️ Você precisa estar logado para favoritar produtos!');
+            notificacao.aviso('Você precisa estar logado para favoritar produtos!');
             navigate('/login');
             return;
         }
@@ -139,10 +145,10 @@ export const MainContentSection = (): React.ReactElement => {
             const isFav = isFavorito(produto_id);
  
             
-            alert(isFav ? 'Produto adicionado aos favoritos!' : 'Produto removido dos favoritos!');
+            notificacao.sucesso(isFav ? 'Produto adicionado aos favoritos!' : 'Produto removido dos favoritos!');
         } catch (error: any) {
             console.error('❌ Erro no handleToggleFavorito:', error);
-            alert('Erro ao atualizar favorito: ' + error.message);
+            notificacao.erro('Erro ao atualizar favorito: ' + error.message);
         }
     };
 
@@ -243,12 +249,6 @@ export const MainContentSection = (): React.ReactElement => {
                     </div>
                 )}
                 
-                {/* DEBUG - Remover depois */}
-                <div className="w-full mb-2 p-2 bg-yellow-50 text-xs">
-                    <p>✓ disponivel: {produto.disponivel ? 'true' : 'false'}</p>
-                    <p>✓ estoque: {produto.quantidade_estoque}</p>
-                </div>
-                
                 <div className="flex items-center gap-2 relative self-stretch w-full flex-[0_0_auto]">
                     {produto.is_promocao && produto.preco_promocao ? (
                         <>
@@ -266,23 +266,38 @@ export const MainContentSection = (): React.ReactElement => {
                     )}
                 </div>
 
-                <Button
-                    onClick={() => handleAdicionarAoCarrinho(produto)}
-                    disabled={!produto.disponivel}
-                    variant="outline"
-                    className={`h-auto w-fit border-[#9cb217] px-6 py-2.5 rounded-2xl mt-2 transition-colors ${
-                        produto.disponivel
-                            ? 'bg-fundo-claro text-verde-claro hover:bg-verde-claro hover:text-fundo-claro cursor-pointer'
-                            : 'bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed'
-                    }`}
-                >
-                    <span className="font-[number:var(--bot-es-font-weight)] text-[length:var(--bot-es-font-size)] font-bot-es">
-                        {produto.disponivel
-                            ? 'Adicionar à sacola'
-                            : 'Indisponível'}
-                    </span>
-                    <ShoppingBagIcon className="w-6 h-6 ml-2" />
-                </Button>
+                <div className="flex flex-col gap-2 w-full mt-2">
+                    <Button
+                        onClick={() => {
+                            setProdutoSelecionado(produto);
+                            setModalAberto(true);
+                        }}
+                        variant="outline"
+                        className="h-auto w-full border-verde-escuro px-6 py-2 rounded-2xl bg-white text-verde-escuro hover:bg-verde-escuro hover:text-white transition-colors"
+                    >
+                        <span className="font-[number:var(--bot-es-font-weight)] text-[length:var(--bot-es-font-size)] font-bot-es">
+                            Ver Detalhes
+                        </span>
+                    </Button>
+                    
+                    <Button
+                        onClick={() => handleAdicionarAoCarrinho(produto)}
+                        disabled={!produto.disponivel}
+                        variant="outline"
+                        className={`h-auto w-full border-[#9cb217] px-6 py-2.5 rounded-2xl transition-colors ${
+                            produto.disponivel
+                                ? 'bg-fundo-claro text-verde-claro hover:bg-verde-claro hover:text-fundo-claro cursor-pointer'
+                                : 'bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed'
+                        }`}
+                    >
+                        <span className="font-[number:var(--bot-es-font-weight)] text-[length:var(--bot-es-font-size)] font-bot-es">
+                            {produto.disponivel
+                                ? 'Adicionar à sacola'
+                                : 'Indisponível'}
+                        </span>
+                        <ShoppingBagIcon className="w-6 h-6 ml-2" />
+                    </Button>
+                </div>
             </CardContent>
         </Card>
     );
@@ -433,6 +448,23 @@ export const MainContentSection = (): React.ReactElement => {
             </div>
             
             <JoinAgriconnectBanner />
+
+            {/* Modal de Detalhes do Produto */}
+            <ModalDetalhesProduto
+                isOpen={modalAberto}
+                onClose={() => setModalAberto(false)}
+                produto={produtoSelecionado}
+                onAdicionarCarrinho={handleAdicionarAoCarrinho}
+                onToggleFavorito={handleToggleFavorito}
+                isFavorito={produtoSelecionado ? isFavorito(produtoSelecionado.id_produto || produtoSelecionado.id || '') : false}
+            />
+
+            {/* Modal de Notificação */}
+            <ModalNotificacao
+                isOpen={notificacao.isOpen}
+                onClose={notificacao.fechar}
+                {...notificacao.config}
+            />
         </section>
     );
 };

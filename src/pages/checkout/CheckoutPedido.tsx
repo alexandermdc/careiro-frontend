@@ -3,17 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { useCarrinho } from '../../contexts/CarrinhoContext';
 import pedidoService from '../../services/pedidoService';
 import pagamentoService from '../../services/pagamentoService';
+import { ModalNotificacao } from '../../components/ModalNotificacao';
+import { useNotificacao } from '../../hooks/useNotificacao';
 
 export default function CheckoutPedido() {
   const navigate = useNavigate();
   const { itens, valorTotal, limparCarrinho } = useCarrinho();
+  const notificacao = useNotificacao();
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
   const handleFinalizarPedido = async () => {
     // Validações
     if (itens.length === 0) {
-      alert('⚠️ Seu carrinho está vazio!');
+      notificacao.aviso('Seu carrinho está vazio!');
       navigate('/produtos');
       return;
     }
@@ -21,7 +24,7 @@ export default function CheckoutPedido() {
     // Verificar autenticação
     const token = localStorage.getItem('accessToken');
     if (!token) {
-      alert('⚠️ Você precisa estar logado para finalizar a compra!');
+      notificacao.aviso('Você precisa estar logado para finalizar a compra!');
       navigate('/login');
       return;
     }
@@ -182,6 +185,13 @@ export default function CheckoutPedido() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Notificação */}
+      <ModalNotificacao
+        isOpen={notificacao.isOpen}
+        onClose={notificacao.fechar}
+        {...notificacao.config}
+      />
     </div>
   );
 }
