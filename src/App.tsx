@@ -148,6 +148,28 @@ function App() {
           path="/vendedor/cadastro" 
           element={<CadastroVendedor />} 
         />
+        
+        {/* Rota 404 - Fallback */}
+        <Route 
+          path="*" 
+          element={
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+              <div className="text-center max-w-md p-8 bg-white rounded-2xl shadow-xl">
+                <div className="text-6xl mb-4">🔍</div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Página não encontrada</h2>
+                <p className="text-gray-600 mb-6">
+                  A página que você está procurando não existe.
+                </p>
+                <a
+                  href="/"
+                  className="inline-block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                >
+                  Voltar ao Início
+                </a>
+              </div>
+            </div>
+          } 
+        />
       </Routes>
         </BuscaProvider>
       </FavoritosProvider>

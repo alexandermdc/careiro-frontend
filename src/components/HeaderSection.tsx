@@ -27,7 +27,9 @@ export const HeaderSection = (): JSX.Element => {
     try {
       await logout();
       setMenuAberto(false);
+      navigate('/login', { replace: true });
     } catch (error) {
+      console.error('Erro ao fazer logout:', error);
     }
   };
 

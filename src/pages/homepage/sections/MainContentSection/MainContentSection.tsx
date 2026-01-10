@@ -59,17 +59,17 @@ const categories = [
   {
     title: "Legumes",
     backgroundImage:
-      "/img/card-categorias.png",
+      "/img/Card-Categorias.png",
   },
   {
     title: "Frutas",
     backgroundImage:
-      "/img/card-categorias.png",
+      "/img/Card-Categorias.png",
   },
   {
     title: "Verduras",
     backgroundImage:
-      "/img/card-categorias.png",
+      "/img/Card-Categorias.png",
   },
 ];
 

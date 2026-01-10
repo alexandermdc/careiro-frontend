@@ -64,10 +64,13 @@ api.interceptors.response.use(
           return api(originalRequest);
         }
       } catch (refreshError) {
-        // Token refresh falhou, redireciona para login
+        // Token refresh falhou, limpa dados e deixa o ProtectedRoute redirecionar
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        localStorage.removeItem('usuario');
+        localStorage.removeItem('papelAtivo');
+        // Não redireciona aqui - deixa o AuthContext/ProtectedRoute lidar com isso
+        // window.location.href = '/login';
       }
     }
     

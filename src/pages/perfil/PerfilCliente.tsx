@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   User, 
   Mail, 
@@ -684,6 +684,7 @@ const PerfilCliente: React.FC = () => {
   const { user, logout, userType } = useAuth();
   const { favoritos, removerFavorito, carregarFavoritos } = useFavoritos();
   const { adicionarAoCarrinho } = useCarrinho();
+  const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState('pedidos');
   const [loading, setLoading] = useState(true);
@@ -969,9 +970,10 @@ const PerfilCliente: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (window.confirm('Tem certeza que deseja sair?')) {
-      logout();
+      await logout();
+      navigate('/login', { replace: true });
     }
   };
 

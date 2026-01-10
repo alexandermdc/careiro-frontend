@@ -324,7 +324,8 @@ class AuthService {
       localStorage.removeItem('papelAtivo');
       // Mantém ultimoPapelUsado para lembrar a preferência do usuário no próximo login
       // localStorage.removeItem('ultimoPapelUsado');
-      window.location.href = '/login';
+      // Removido o redirecionamento forçado - será feito pelo AuthContext
+      // window.location.href = '/login';
     }
   }
 
@@ -335,8 +336,18 @@ class AuthService {
   }
 
   getCurrentUser(): Usuario | null {
-    const userStr = localStorage.getItem('usuario');
-    return userStr ? JSON.parse(userStr) : null;
+    try {
+      const userStr = localStorage.getItem('usuario');
+      if (!userStr) return null;
+      
+      const user = JSON.parse(userStr);
+      return user;
+    } catch (error) {
+      console.error('Erro ao parsear dados do usuário:', error);
+      // Limpar dados corrompidos
+      localStorage.removeItem('usuario');
+      return null;
+    }
   }
 
   getToken(): string | null {
