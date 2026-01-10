@@ -144,6 +144,10 @@ const CadastroVendedor: React.FC = () => {
       novosErros.numero_documento = 'CNPJ inválido (deve ter 14 dígitos)';
     }
 
+    if (!formData.fk_associacao || formData.fk_associacao.trim() === '') {
+      novosErros.fk_associacao = 'Associação é obrigatória';
+    }
+
     if (!formData.senha) {
       novosErros.senha = 'Senha é obrigatória';
     } else if (formData.senha.length < 6) {
@@ -168,14 +172,7 @@ const CadastroVendedor: React.FC = () => {
     setLoading(true);
 
     try {
-      
-      // Remover fk_associacao se estiver vazio
-      const dadosEnvio = {
-        ...formData,
-        fk_associacao: formData.fk_associacao || undefined,
-      };
-
-      const result = await vendedorService.criar(dadosEnvio);
+      const result = await vendedorService.criar(formData);
       
       
       // Exibir UUID do vendedor
@@ -194,7 +191,21 @@ const CadastroVendedor: React.FC = () => {
       }, 5000);
       
     } catch (error: any) {
-      alert(`❌ ${error.message}`);
+      console.error('Erro ao cadastrar vendedor:', error);
+      
+      // Tratar erro 400 de associação obrigatória
+      if (error.response?.status === 400) {
+        const mensagem = error.response?.data?.error || error.response?.data?.message || error.message;
+        
+        if (mensagem.toLowerCase().includes('associação')) {
+          setErrors({ fk_associacao: mensagem });
+          alert(`❌ ${mensagem}`);
+        } else {
+          alert(`❌ ${mensagem}`);
+        }
+      } else {
+        alert(`❌ ${error.message || 'Erro ao cadastrar vendedor'}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -347,25 +358,34 @@ const CadastroVendedor: React.FC = () => {
             {errors.endereco_venda && <p className="text-red-500 text-sm mt-1">{errors.endereco_venda}</p>}
           </div>
 
-          {/* Associação (opcional) */}
+          {/* Associação (obrigatório) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <Building2 className="inline mr-2" size={16} />
-              Associação (Opcional)
+              Associação *
             </label>
             <select
               name="fk_associacao"
               value={formData.fk_associacao}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              required
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                errors.fk_associacao ? 'border-red-500' : 'border-gray-300'
+              }`}
             >
-              <option value="">Selecione uma associação (opcional)</option>
+              <option value="">Selecione uma associação</option>
               {associacoes.map((assoc) => (
                 <option key={assoc.id_associacao} value={assoc.id_associacao}>
                   {assoc.nome}
                 </option>
               ))}
             </select>
+            {errors.fk_associacao && <p className="text-red-500 text-sm mt-1">{errors.fk_associacao}</p>}
+            {associacoes.length === 0 && (
+              <p className="text-amber-600 text-sm mt-1">
+                ⚠️ Nenhuma associação disponível. Entre em contato com o administrador.
+              </p>
+            )}
           </div>
 
           {/* Senha */}

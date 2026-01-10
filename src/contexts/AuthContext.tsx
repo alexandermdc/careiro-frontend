@@ -40,20 +40,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // Verifica se há um usuário logado ao inicializar
-    const usuario = authService.getCurrentUser();
-    if (usuario && authService.isAuthenticated()) {
-      const papelAtivo = authService.getPapelAtivo() || usuario.papeis[0];
-      
-      setUser({
-        tipo: papelAtivo,
-        papeis: usuario.papeis,
-        nome: usuario.cliente?.nome || usuario.vendedor?.nome || '',
-        email: usuario.email,
-        cliente: usuario.cliente,
-        vendedor: usuario.vendedor
-      });
+    try {
+      const usuario = authService.getCurrentUser();
+      if (usuario && authService.isAuthenticated()) {
+        const papelAtivo = authService.getPapelAtivo() || usuario.papeis[0];
+        
+        setUser({
+          tipo: papelAtivo,
+          papeis: usuario.papeis,
+          nome: usuario.cliente?.nome || usuario.vendedor?.nome || '',
+          email: usuario.email,
+          cliente: usuario.cliente,
+          vendedor: usuario.vendedor
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao carregar usuário do localStorage:', error);
+      // Limpar dados corrompidos
+      localStorage.removeItem('usuario');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('papelAtivo');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {

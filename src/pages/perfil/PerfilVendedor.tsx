@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   User, 
   Mail, 
@@ -153,10 +153,16 @@ const EditVendedorModal: React.FC<{
 
 const PerfilVendedor: React.FC = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [vendedor, setVendedor] = useState<Vendedor | null>(null);
   const [error, setError] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
+  };
 
   useEffect(() => {
     if (user?.vendedor?.id_vendedor) {
@@ -387,7 +393,7 @@ const PerfilVendedor: React.FC = () => {
           </Link>
 
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-4 group border-2 border-red-100 hover:border-red-200"
           >
             <div className="bg-red-50 p-3 rounded-lg group-hover:bg-red-100 transition-colors">
