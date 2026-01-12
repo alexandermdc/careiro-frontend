@@ -1,7 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-export const FooterSection = (): React.ReactElement => {
+interface FooterSectionProps {
+  sections?: Array<{
+    title: string;
+    links: Array<{ text: string; href: string }>;
+  }>;
+}
+
+export const FooterSection = ({}: FooterSectionProps): React.ReactElement => {
   return (
     <footer className="w-full bg-cinza py-8 md:py-10 lg:py-12 px-4 md:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">

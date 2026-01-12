@@ -59,11 +59,13 @@ export const HeaderSection = (): JSX.Element => {
       <div className="flex items-center justify-between px-4 md:px-8 lg:px-[166px] py-3 md:py-4 gap-4">
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <img
-        src="/img/logo-agriconnect-vertical.png"
-        alt="Logo Agriconnect"
-        className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-contain"
-          />
+          <Link to="/" aria-label="Ir para início" className="inline-flex items-center">
+            <img
+              src="/img/logo-agriconnect-vertical.png"
+              alt="Logo Agriconnect"
+              className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-contain"
+            />
+          </Link>
         </div>
 
         {/* Busca - Sempre visível */}
