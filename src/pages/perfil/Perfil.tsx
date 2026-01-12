@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 import PerfilCliente from './PerfilCliente';
 // @ts-ignore - Arquivo existe mas TypeScript pode não reconhecer imediatamente
 import PerfilVendedor from './PerfilVendedor';
@@ -30,12 +31,12 @@ const Perfil: React.FC = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Acesso Restrito</h2>
           <p className="text-gray-600 mb-6">Você precisa estar logado para acessar seu perfil.</p>
-          <a 
-            href="/login" 
+          <Link
+            to="/login"
             className="inline-block px-6 py-3 bg-verde-escuro text-white rounded-lg hover:bg-verde-claro transition-colors"
           >
             Fazer Login
-          </a>
+          </Link>
         </div>
       </div>
     );

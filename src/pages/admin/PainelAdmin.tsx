@@ -14,7 +14,6 @@ import {
   UserPlus, 
   Package, 
   Users, 
-  BarChart3,
   ShoppingCart,
   Settings,
   Shield,
@@ -214,6 +213,15 @@ const PainelAdmin: React.FC = () => {
       badge: 'Gestão'
     },
     {
+      title: 'Gerenciar Vendedores',
+      description: 'Visualize, edite e exclua vendedores',
+      icon: UserPlus,
+      link: '/admin/vendedores',
+      color: 'bg-indigo-50 hover:bg-indigo-100 border-indigo-200',
+      iconColor: 'text-indigo-600',
+      badge: 'Gestão'
+    },
+    {
       title: 'Gerenciar Usuários',
       description: 'Visualize e administre clientes e vendedores',
       icon: Users,
@@ -221,15 +229,6 @@ const PainelAdmin: React.FC = () => {
       color: 'bg-cyan-50 hover:bg-cyan-100 border-cyan-200',
       iconColor: 'text-cyan-600',
       badge: 'Gestão'
-    },
-    {
-      title: 'Relatórios',
-      description: 'Acesse relatórios e estatísticas do sistema',
-      icon: BarChart3,
-      link: '/dashboard',
-      color: 'bg-pink-50 hover:bg-pink-100 border-pink-200',
-      iconColor: 'text-pink-600',
-      badge: 'Análise'
     },
   ];
 

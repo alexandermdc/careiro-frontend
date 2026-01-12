@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+/* Fontes locais foram removidas temporariamente — coloque arquivos .woff2 reais em /public/fonts
+   ou restaure as regras @font-face quando tiver os binários corretos. */
 
 /* Variáveis globais para tokens do Tailwind via config existente */
 :root {

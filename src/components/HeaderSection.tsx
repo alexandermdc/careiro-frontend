@@ -56,33 +56,33 @@ export const HeaderSection = (): JSX.Element => {
   return (
     <header className="w-full bg-cinza relative">
       {/* Top Bar - Logo, Busca, Ações */}
-      <div className="flex items-center justify-between px-4 md:px-8 lg:px-[166px] py-4 md:py-[33px] gap-4">
+      <div className="flex items-center justify-between px-4 md:px-8 lg:px-[166px] py-3 md:py-4 gap-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-3">
           <img
-            className="w-12 h-12 md:w-[79px] md:h-[78px]"
-            alt="Logo Agriconnect"
-            src="https://c.animaapp.com/mfh1vpp1e8a9vm/img/ativo-1-2-1.png"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = "https://via.placeholder.com/79x78/1d4510/ffffff?text=Logo";
-            }}
+        src="/img/logo-agriconnect-vertical.png"
+        alt="Logo Agriconnect"
+        className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-contain"
           />
-          <div className="hidden md:block [font-family:'Inter',Helvetica] font-bold text-verde-escuro text-base md:text-[19px] tracking-[0] leading-[normal]">
-            Agriconnect
-          </div>
-        </Link>
+        </div>
 
         {/* Busca - Sempre visível */}
-        <div className="flex items-center bg-fundo-claro rounded-[30px] border border-solid border-[#d5d7d4] px-3 lg:px-6 py-2 lg:py-3 w-full max-w-[487px]">
+        <div className="flex items-center w-full max-w-[487px] px-6 py-0 justify-between rounded-[30px] border border-solid border-[#d5d7d4] bg-[var(--Fundo-claro,#FBFCFA)]">
           <Input
+            type="text"
             placeholder="O que você procura?"
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="border-0 bg-transparent [font-family:'Montserrat',Helvetica] font-normal text-texto text-sm lg:text-base flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 h-auto py-0"
+            className="border-0 bg-transparent rounded-[30px] px-0 [font-family:'Montserrat',Helvetica] font-normal text-texto text-sm lg:text-base flex-1 shadow-none outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-[48px] py-0 appearance-none -webkit-appearance-none box-border"
+            style={{ background: 'transparent', border: 'none', boxShadow: 'none', outline: 'none' }}
           />
-          <button onClick={handleBuscar} className="cursor-pointer flex-shrink-0">
+          <button
+            onClick={handleBuscar}
+            className="cursor-pointer flex-shrink-0 bg-transparent border-0 p-0 m-0 rounded-none shadow-none outline-none focus:outline-none focus-visible:ring-0 appearance-none -webkit-appearance-none"
+            aria-label="Buscar"
+            style={{ background: 'transparent', border: 'none', boxShadow: 'none', outline: 'none', padding: 0, margin: 0 }}
+          >
             <SearchIcon className="w-5 h-5 lg:w-6 lg:h-6 text-texto hover:text-verde-escuro transition-colors" />
           </button>
         </div>
