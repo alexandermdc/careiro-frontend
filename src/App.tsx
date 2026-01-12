@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { FavoritosProvider } from './contexts/FavoritosContext';
 import { BuscaProvider } from './contexts/BuscaContext';
@@ -32,6 +32,7 @@ import BuscaResultados from './pages/busca/BuscaResultados';
 import PainelAdmin from './pages/admin/PainelAdmin';
 import GerenciarAssociacoes from './pages/admin/GerenciarAssociacoes';
 import GerenciarFeiras from './pages/admin/GerenciarFeiras';
+import GerenciarVendedores from './pages/admin/GerenciarVendedores';
 
 
 function App() {
@@ -105,6 +106,14 @@ function App() {
           } 
         />
         <Route 
+          path="/admin/vendedores" 
+          element={
+            <ProtectedRoute requireRole="ADMIN">
+              <GerenciarVendedores />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/associacao/cadastro" 
           element={
             <ProtectedRoute requireRole="ADMIN">
@@ -160,12 +169,12 @@ function App() {
                 <p className="text-gray-600 mb-6">
                   A página que você está procurando não existe.
                 </p>
-                <a
-                  href="/"
+                <Link
+                  to="/"
                   className="inline-block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
                 >
                   Voltar ao Início
-                </a>
+                </Link>
               </div>
             </div>
           } 

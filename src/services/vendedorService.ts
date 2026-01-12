@@ -1,4 +1,5 @@
 import api from './api';
+import type { Associacao } from './associacaoService';
 
 export interface Vendedor {
   id_vendedor: string;
@@ -9,6 +10,8 @@ export interface Vendedor {
   tipo_documento: 'CPF' | 'CNPJ';
   numero_documento: string;
   fk_associacao?: string;
+  associacao?: Associacao;
+  image?: string;
 }
 
 export interface CreateVendedorData {
@@ -21,6 +24,7 @@ export interface CreateVendedorData {
   numero_documento: string;
   senha: string;
   fk_associacao?: string;
+  foto_base64?: string | null;
 }
 
 export interface UpdateVendedorData {
@@ -33,6 +37,7 @@ export interface UpdateVendedorData {
   numero_documento?: string;
   senha?: string;
   fk_associacao?: string;
+  image?: string;
 }
 
 class VendedorService {
@@ -81,6 +86,7 @@ class VendedorService {
         ...data,
         telefone: data.telefone.replace(/\D/g, ''),
         numero_documento: data.numero_documento.replace(/\D/g, ''),
+        // Se `foto_base64` estiver presente, é enviado sem alterações
       };
 
       const response = await api.post('/vendedor/cadastro', dadosLimpos);
@@ -123,6 +129,18 @@ class VendedorService {
     } catch (error: any) {
       throw new Error(
         error.response?.data?.message || 'Erro ao deletar vendedor'
+      );
+    }
+  }
+
+  // Atualizar foto de perfil
+  async atualizarFotoPerfil(id: string, foto_base64: string): Promise<Vendedor> {
+    try {
+      const response = await api.put(`/vendedor/${id}`, { image: foto_base64 });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Erro ao atualizar foto de perfil'
       );
     }
   }

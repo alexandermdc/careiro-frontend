@@ -25,7 +25,10 @@ const CadastroVendedor: React.FC = () => {
     numero_documento: '',
     senha: '',
     fk_associacao: '',
+    foto_base64: undefined,
   });
+
+  const [imagemPreview, setImagemPreview] = useState<string | null>(null);
 
   const [confirmarSenha, setConfirmarSenha] = useState('');
 
@@ -160,6 +163,38 @@ const CadastroVendedor: React.FC = () => {
 
     setErrors(novosErros);
     return Object.keys(novosErros).length === 0;
+  };
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve(result);
+      };
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Apenas imagens
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor selecione um arquivo de imagem.');
+      return;
+    }
+
+    try {
+      const base64 = await fileToBase64(file);
+      setFormData(prev => ({ ...prev, foto_base64: base64 }));
+      setImagemPreview(base64);
+    } catch (err) {
+      console.error('Erro ao ler arquivo:', err);
+      alert('Erro ao processar imagem');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -429,6 +464,25 @@ const CadastroVendedor: React.FC = () => {
               />
               {errors.confirmarSenha && <p className="text-red-500 text-sm mt-1">{errors.confirmarSenha}</p>}
             </div>
+          </div>
+
+          {/* Foto (Base64) opcional */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Foto do Vendedor (opcional)
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full"
+            />
+            {imagemPreview && (
+              <div className="mt-3">
+                <p className="text-sm text-gray-600 mb-2">Pré-visualização:</p>
+                <img src={imagemPreview} alt="preview" className="max-h-40 rounded-md" />
+              </div>
+            )}
           </div>
 
           {/* Botões */}

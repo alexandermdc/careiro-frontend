@@ -7,6 +7,7 @@ export interface Vendedor {
   tipo_vendedor: 'PF' | 'PJ';
   tipo_documento?: 'CPF' | 'CNPJ';
   numero_documento?: string;
+  image?: string;
 }
 
 export interface Associacao {

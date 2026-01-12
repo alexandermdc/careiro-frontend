@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import vendedorService from '../../services/vendedorService';
+import associacaoService from '../../services/associacaoService';
 import type { Vendedor, UpdateVendedorData } from '../../services/vendedorService';
 import { HeaderSection } from '../../components/HeaderSection';
 import { FooterSection } from '../../components/FooterSection';
@@ -35,6 +36,8 @@ const EditVendedorModal: React.FC<{
   });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
+  const [fotoPreview, setFotoPreview] = useState<string>(vendedor?.image || '');
+  const [fotoError, setFotoError] = useState<string>('');
 
   useEffect(() => {
     if (vendedor) {
@@ -43,6 +46,8 @@ const EditVendedorModal: React.FC<{
         telefone: vendedor.telefone || '',
         endereco_venda: vendedor.endereco_venda || '',
       });
+      setFotoPreview(vendedor.image || '');
+      setFotoError('');
     }
   }, [vendedor]);
 
@@ -106,6 +111,58 @@ const EditVendedorModal: React.FC<{
             </div>
           )}
 
+          {/* Foto de Perfil */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Foto de Perfil
+            </label>
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-300">
+                {fotoPreview ? (
+                  <img src={fotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                    <User className="w-10 h-10 text-gray-400" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                      setFotoError('Formato inválido. Use: JPG, PNG ou WEBP');
+                      return;
+                    }
+
+                    if (file.size > 2 * 1024 * 1024) {
+                      setFotoError('A imagem deve ter no máximo 2MB');
+                      return;
+                    }
+
+                    setFotoError('');
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      const base64 = reader.result as string;
+                      setFotoPreview(base64);
+                      setFormData({ ...formData, image: base64 });
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                  className="text-sm text-gray-600"
+                />
+                {fotoError && (
+                  <p className="text-xs text-red-600 mt-1">⚠️ {fotoError}</p>
+                )}
+                <p className="text-xs text-gray-500 mt-1">JPG, PNG ou WEBP (máx. 2MB)</p>
+              </div>
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Nome Completo / Razão Social
@@ -158,6 +215,11 @@ const PerfilVendedor: React.FC = () => {
   const [vendedor, setVendedor] = useState<Vendedor | null>(null);
   const [error, setError] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
+  const [nomeAssociacao, setNomeAssociacao] = useState<string | null>(null);
+  const [fotoValor, setFotoValor] = useState<File | string>('');
+  const [fotoPreview, setFotoPreview] = useState<string>('');
+  const [fotoError, setFotoError] = useState<string>('');
+  const [fotoLoading, setFotoLoading] = useState<boolean>(false);
 
   const handleLogout = async () => {
     await logout();
@@ -172,6 +234,44 @@ const PerfilVendedor: React.FC = () => {
     }
   }, [user]);
 
+  const salvarFotoPerfil = async () => {
+    if (!user?.vendedor?.id_vendedor) return;
+    if (!fotoPreview) {
+      setFotoError('Selecione uma imagem antes de salvar');
+      return;
+    }
+
+    try {
+      setFotoLoading(true);
+      setFotoError('');
+
+      const atualizado = await vendedorService.atualizarFotoPerfil(user.vendedor.id_vendedor, fotoPreview);
+      setVendedor(atualizado);
+      if (atualizado?.image) {
+        setFotoPreview(atualizado.image);
+      }
+      setFotoValor('');
+
+      const successToast = document.createElement('div');
+      successToast.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50';
+      successToast.innerHTML = `
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <span class="font-medium">Foto de perfil atualizada!</span>
+        </div>
+      `;
+      document.body.appendChild(successToast);
+      setTimeout(() => successToast.remove(), 3000);
+    } catch (err: any) {
+      console.error('Erro ao salvar foto:', err);
+      setFotoError(err.message || 'Erro ao salvar foto de perfil');
+    } finally {
+      setFotoLoading(false);
+    }
+  };
+
   const carregarDadosVendedor = async () => {
     if (!user?.vendedor?.id_vendedor) return;
     
@@ -182,11 +282,39 @@ const PerfilVendedor: React.FC = () => {
       const dadosCompletos = await vendedorService.buscarPorId(user.vendedor.id_vendedor);
       setVendedor(dadosCompletos);
       
+      // Carregar foto de perfil se existir
+      if (dadosCompletos?.image) {
+        setFotoPreview(dadosCompletos.image);
+      }
+      
+      // Se a resposta não trouxer o nome da associação completo, buscar pelo fk
+      if (dadosCompletos.associacao?.nome) {
+        setNomeAssociacao(dadosCompletos.associacao.nome);
+      } else if (dadosCompletos.fk_associacao) {
+        try {
+          const assoc = await associacaoService.getById(dadosCompletos.fk_associacao);
+          setNomeAssociacao(assoc.nome);
+        } catch (err) {
+          // se falhar, manter null e mostrar id como fallback
+          setNomeAssociacao(null);
+        }
+      }
+      
     } catch (err: any) {
       console.error('❌ Erro ao carregar dados do vendedor:', err);
       setError(err.message || 'Erro ao carregar dados do perfil');
-      // Se falhar, usa os dados do contexto
-      setVendedor(user.vendedor);
+      // Se falhar, usa os dados do contexto (com cast para compatibilidade)
+      setVendedor(user.vendedor as Vendedor);
+      if (user.vendedor?.associacao?.nome) {
+        setNomeAssociacao(user.vendedor.associacao.nome);
+      } else if (user.vendedor?.fk_associacao) {
+        try {
+          const assoc = await associacaoService.getById(user.vendedor.fk_associacao);
+          setNomeAssociacao(assoc.nome);
+        } catch (err) {
+          setNomeAssociacao(null);
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -276,15 +404,103 @@ const PerfilVendedor: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowEditModal(true)}
-                className="bg-white/20 hover:bg-white/30 p-3 rounded-xl transition-colors"
+                className="bg-[#1D4510] hover:bg-[#152f0b] text-white px-6 py-3 rounded-xl transition-colors font-montserrat font-bold text-base leading-6"
               >
-                <Edit3 className="w-5 h-5" />
+                Editar
               </button>
             </div>
           </div>
 
           {/* Corpo do Card */}
           <div className="p-8">
+            {/* Seção de Foto de Perfil */}
+            <div className="mb-8 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-200 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Foto de Perfil</h3>
+              
+              <div className="flex flex-col items-center gap-4">
+                {/* Preview da Foto */}
+                <div className="relative">
+                  <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                    {fotoPreview ? (
+                      <img src={fotoPreview} alt="Foto de perfil" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <User className="w-16 h-16 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  <label
+                    htmlFor="foto-upload"
+                    className="absolute bottom-0 right-0 bg-verde-escuro hover:bg-verde-claro text-white p-2 rounded-full cursor-pointer shadow-lg transition-colors"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </label>
+                </div>
+
+                {/* Input de Upload */}
+                <input
+                  id="foto-upload"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    // Validar tipo
+                    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                      setFotoError('Formato inválido. Use: JPG, PNG ou WEBP');
+                      return;
+                    }
+
+                    // Validar tamanho (2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                      setFotoError('A imagem deve ter no máximo 2MB');
+                      return;
+                    }
+
+                    setFotoError('');
+                    setFotoValor(file);
+
+                    // Criar preview em Base64
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setFotoPreview(reader.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                  className="hidden"
+                />
+
+                {/* Botão de Salvar */}
+                {fotoValor && (
+                  <button
+                    onClick={salvarFotoPerfil}
+                    disabled={fotoLoading}
+                    className="px-6 py-3 rounded-xl bg-[#1D4510] hover:bg-[#152f0b] text-white font-montserrat font-bold text-base leading-6 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                  >
+                    {fotoLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                        Salvando...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-5 h-5" />
+                        Salvar Foto de Perfil
+                      </>
+                    )}
+                  </button>
+                )}
+
+                {/* Mensagem de Erro */}
+                {fotoError && (
+                  <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+                    ⚠️ {fotoError}
+                  </p>
+                )}
+              </div>
+            </div>
+
             <div className="grid md:grid-cols-2 gap-6">
               {/* Informações Básicas */}
               <div className="space-y-4">
@@ -337,13 +553,15 @@ const PerfilVendedor: React.FC = () => {
                   <p className="text-gray-900 font-medium">{vendedorAtual?.endereco_venda || '-'}</p>
                 </div>
 
-                {vendedorAtual?.fk_associacao && (
+                {(nomeAssociacao || vendedorAtual?.associacao?.nome || vendedorAtual?.fk_associacao) && (
                   <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-200 p-4 rounded-lg">
                     <p className="text-sm text-blue-800 mb-2 flex items-center gap-2 font-semibold">
                       <Building2 className="w-4 h-4" />
                       Associação Vinculada
                     </p>
-                    <p className="text-blue-900 font-bold text-lg">ID: {vendedorAtual.fk_associacao}</p>
+                    <p className="text-blue-900 font-bold text-lg">
+                      {nomeAssociacao ?? vendedorAtual?.associacao?.nome ?? `ID: ${vendedorAtual?.fk_associacao}`}
+                    </p>
                   </div>
                 )}
               </div>
@@ -411,7 +629,7 @@ const PerfilVendedor: React.FC = () => {
       <EditVendedorModal
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
-        vendedor={vendedorAtual || null}
+        vendedor={(vendedorAtual as Vendedor) || null}
         onSave={handleSaveEdit}
       />
       </div>

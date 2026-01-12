@@ -194,15 +194,25 @@ export const MainContentSection = (): React.ReactElement => {
       {/* Producers Grid */}
       {vendedores.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full ">
-          {vendedores.map((vendedor) => (
+          {vendedores.map((vendedor) => {
+            console.log('Vendedor:', vendedor.nome, 'Image:', vendedor.image);
+            return (
             <div
               key={`vendedor-${vendedor.id_vendedor}`}
               className="flex flex-col items-center gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm"
             >
-              <div className="w-full h-[200px] bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
-                <span className="text-6xl font-bold text-verde-escuro">
-                  {vendedor.nome.charAt(0).toUpperCase()}
-                </span>
+              <div className="w-full h-[200px] rounded-lg overflow-hidden bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                {vendedor.image ? (
+                  <img 
+                    src={vendedor.image} 
+                    alt={vendedor.nome}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-6xl font-bold text-verde-escuro">
+                    {vendedor.nome.charAt(0).toUpperCase()}
+                  </span>
+                )}
               </div>
               <h3 className="[font-family:'Montserrat',Helvetica] font-bold text-texto text-lg text-center">
                 {vendedor.nome}
@@ -219,7 +229,8 @@ export const MainContentSection = (): React.ReactElement => {
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="text-center w-full py-8 text-gray-500">

@@ -217,8 +217,18 @@ export const MainContentSection = (): React.ReactElement => {
                   {selectedAssociacao.vendedor.map((vendedor) => (
                     <div key={vendedor.id_vendedor} className="bg-white border border-gray-200 rounded-lg p-4">
                       <div className="flex items-start gap-3">
-                        <div className="bg-green-100 p-2 rounded-full">
-                          <Users className="w-4 h-4 text-verde-escuro" />
+                        <div className="w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden">
+                          {vendedor.image ? (
+                            <img
+                              src={vendedor.image}
+                              alt={vendedor.nome}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-green-100 flex items-center justify-center">
+                              <Users className="w-6 h-6 text-verde-escuro" />
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-semibold text-gray-900 truncate">{vendedor.nome}</h4>
