@@ -9,19 +9,7 @@ import produtoService from '../../services/produtoService';
 import pedidoService from '../../services/pedidoService';
 import type { CreateCategoriaData } from '../../services/categoriaService';
 import type { LucideIcon } from 'lucide-react';
-import { 
-  Store, 
-  UserPlus, 
-  Package, 
-  Users, 
-  ShoppingCart,
-  Settings,
-  Shield,
-  Tag,
-  X,
-  Save,
-  Building2
-} from 'lucide-react';
+import { Store, UserPlus, Package, Users, ShoppingCart, Settings, Shield, Tag, X, Save, Building2 } from 'lucide-react';
 
 interface AdminCard {
   title: string;
@@ -48,6 +36,7 @@ const PainelAdmin: React.FC = () => {
   const [totalProdutos, setTotalProdutos] = useState<number>(0);
   const [totalPedidos, setTotalPedidos] = useState<number>(0);
   const [loadingStats, setLoadingStats] = useState(true);
+
 
   // Verificar se é admin
   useEffect(() => {
@@ -104,6 +93,8 @@ const PainelAdmin: React.FC = () => {
     }
   }, [isAdmin]);
 
+  
+
   const handleCriarCategoria = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -158,6 +149,15 @@ const PainelAdmin: React.FC = () => {
   };
 
   const adminCards: AdminCard[] = [
+    {
+      title: 'Pedidos',
+      description: 'Visualize pedidos e transações realizadas na plataforma',
+      icon: ShoppingCart,
+      link: '/admin/pedidos',
+      color: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200',
+      iconColor: 'text-emerald-600',
+      badge: 'Pedidos'
+    },
     {
       title: 'Cadastrar Feira',
       description: 'Adicione novas feiras e mercados ao sistema',
@@ -473,6 +473,8 @@ const PainelAdmin: React.FC = () => {
               </div>
             </div>
           </div>
+ 
+          
 
           {/* Info de Acesso */}
           <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">

@@ -247,262 +247,263 @@ const CadastroVendedor: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
-          >
-            <ArrowLeft size={20} />
-            Voltar
-          </button>
-          <h1 className="text-3xl font-bold text-gray-900">Cadastro de Vendedor</h1>
-          <p className="text-gray-600 mt-2">Preencha os dados para cadastrar um novo vendedor</p>
-        </div>
+    <div
+      className="min-h-screen w-full bg-cover bg-center flex items-center justify-center"
+      style={{ backgroundImage: `url(/img/Feira.png)` }}
+    >
+      <div className="absolute inset-0 bg-black/40" />
 
-        {/* Formulário */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6">
-          
-          {/* Tipo de Vendedor */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tipo de Vendedor *
-              </label>
-              <select
-                name="tipo_vendedor"
-                value={formData.tipo_vendedor}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              >
-                <option value="PF">Pessoa Física (PF)</option>
-                <option value="PJ">Pessoa Jurídica (PJ)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tipo de Documento *
-              </label>
-              <select
-                name="tipo_documento"
-                value={formData.tipo_documento}
-                onChange={handleTipoDocumentoChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              >
-                <option value="CPF">CPF</option>
-                <option value="CNPJ">CNPJ</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Nome */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <User className="inline mr-2" size={16} />
-              Nome Completo / Razão Social *
-            </label>
-            <input
-              type="text"
-              name="nome"
-              value={formData.nome}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.nome ? 'border-red-500' : 'border-gray-300'
-              }`}
-              placeholder="Digite o nome completo"
-            />
-            {errors.nome && <p className="text-red-500 text-sm mt-1">{errors.nome}</p>}
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <User className="inline mr-2" size={16} />
-              Email *
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.email ? 'border-red-500' : 'border-gray-300'
-              }`}
-              placeholder="Digite o email"
-            />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-          </div>
-
-          {/* Documento */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <FileText className="inline mr-2" size={16} />
-              {formData.tipo_documento} *
-            </label>
-            <input
-              type="text"
-              name="numero_documento"
-              value={formData.numero_documento}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.numero_documento ? 'border-red-500' : 'border-gray-300'
-              }`}
-              placeholder={formData.tipo_documento === 'CPF' ? '000.000.000-00' : '00.000.000/0000-00'}
-            />
-            {errors.numero_documento && <p className="text-red-500 text-sm mt-1">{errors.numero_documento}</p>}
-          </div>
-
-          {/* Telefone */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Phone className="inline mr-2" size={16} />
-              Telefone *
-            </label>
-            <input
-              type="text"
-              name="telefone"
-              value={formData.telefone}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.telefone ? 'border-red-500' : 'border-gray-300'
-              }`}
-              placeholder="(00) 00000-0000"
-            />
-            {errors.telefone && <p className="text-red-500 text-sm mt-1">{errors.telefone}</p>}
-          </div>
-
-          {/* Endereço de Venda */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <MapPin className="inline mr-2" size={16} />
-              Endereço de Venda *
-            </label>
-            <textarea
-              name="endereco_venda"
-              value={formData.endereco_venda}
-              onChange={handleInputChange}
-              rows={3}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.endereco_venda ? 'border-red-500' : 'border-gray-300'
-              }`}
-              placeholder="Rua, número, bairro, cidade..."
-            />
-            {errors.endereco_venda && <p className="text-red-500 text-sm mt-1">{errors.endereco_venda}</p>}
-          </div>
-
-          {/* Associação (obrigatório) */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Building2 className="inline mr-2" size={16} />
-              Associação *
-            </label>
-            <select
-              name="fk_associacao"
-              value={formData.fk_associacao}
-              onChange={handleInputChange}
-              required
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                errors.fk_associacao ? 'border-red-500' : 'border-gray-300'
-              }`}
-            >
-              <option value="">Selecione uma associação</option>
-              {associacoes.map((assoc) => (
-                <option key={assoc.id_associacao} value={assoc.id_associacao}>
-                  {assoc.nome}
-                </option>
-              ))}
-            </select>
-            {errors.fk_associacao && <p className="text-red-500 text-sm mt-1">{errors.fk_associacao}</p>}
-            {associacoes.length === 0 && (
-              <p className="text-amber-600 text-sm mt-1">
-                ⚠️ Nenhuma associação disponível. Entre em contato com o administrador.
-              </p>
-            )}
-          </div>
-
-          {/* Senha */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Lock className="inline mr-2" size={16} />
-                Senha *
-              </label>
-              <input
-                type="password"
-                name="senha"
-                value={formData.senha}
-                onChange={handleInputChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                  errors.senha ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Mínimo 6 caracteres"
-              />
-              {errors.senha && <p className="text-red-500 text-sm mt-1">{errors.senha}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Lock className="inline mr-2" size={16} />
-                Confirmar Senha *
-              </label>
-              <input
-                type="password"
-                value={confirmarSenha}
-                onChange={(e) => {
-                  setConfirmarSenha(e.target.value);
-                  if (errors.confirmarSenha) {
-                    setErrors(prev => ({ ...prev, confirmarSenha: '' }));
-                  }
-                }}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                  errors.confirmarSenha ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Repita a senha"
-              />
-              {errors.confirmarSenha && <p className="text-red-500 text-sm mt-1">{errors.confirmarSenha}</p>}
-            </div>
-          </div>
-
-          {/* Foto (Base64) opcional */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Foto do Vendedor (opcional)
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="w-full"
-            />
-            {imagemPreview && (
-              <div className="mt-3">
-                <p className="text-sm text-gray-600 mb-2">Pré-visualização:</p>
-                <img src={imagemPreview} alt="preview" className="max-h-40 rounded-md" />
+      <div className="relative z-10 w-full max-w-3xl px-4 py-12">
+        <div className="mx-auto max-w-xl relative">
+          <img
+            src="/img/logoagriconect.svg"
+            alt="Agriconnect"
+            className="w-28 h-auto absolute left-1/2 -translate-x-1/2 -top-14 bg-white rounded-full p-2"
+          />
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden pt-10">
+            <div className="p-8 pt-6 relative">
+              <div className="mb-6 text-center">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-2 mx-auto"
+                >
+                  <ArrowLeft size={20} />
+                  Voltar
+                </button>
+                <p className="text-gray-600 mt-1">Preencha os dados para cadastrar um novo vendedor</p>
               </div>
-            )}
-          </div>
 
-          {/* Botões */}
-          <div className="flex gap-4 pt-4">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Cadastrando...' : 'Cadastrar Vendedor'}
-            </button>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Tipo de Vendedor */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Vendedor *</label>
+                    <select
+                      name="tipo_vendedor"
+                      value={formData.tipo_vendedor}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    >
+                      <option value="PF">Pessoa Física (PF)</option>
+                      <option value="PJ">Pessoa Jurídica (PJ)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Documento *</label>
+                    <select
+                      name="tipo_documento"
+                      value={formData.tipo_documento}
+                      onChange={handleTipoDocumentoChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    >
+                      <option value="CPF">CPF</option>
+                      <option value="CNPJ">CNPJ</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Nome */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <User className="inline mr-2" size={16} />
+                    Nome Completo / Razão Social *
+                  </label>
+                  <input
+                    type="text"
+                    name="nome"
+                    value={formData.nome}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                      errors.nome ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Digite o nome completo"
+                  />
+                  {errors.nome && <p className="text-red-500 text-sm mt-1">{errors.nome}</p>}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <User className="inline mr-2" size={16} />
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                      errors.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Digite o email"
+                  />
+                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                </div>
+
+                {/* Documento */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <FileText className="inline mr-2" size={16} />
+                    {formData.tipo_documento} *
+                  </label>
+                  <input
+                    type="text"
+                    name="numero_documento"
+                    value={formData.numero_documento}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                      errors.numero_documento ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder={formData.tipo_documento === 'CPF' ? '000.000.000-00' : '00.000.000/0000-00'}
+                  />
+                  {errors.numero_documento && <p className="text-red-500 text-sm mt-1">{errors.numero_documento}</p>}
+                </div>
+
+                {/* Telefone */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Phone className="inline mr-2" size={16} />
+                    Telefone *
+                  </label>
+                  <input
+                    type="text"
+                    name="telefone"
+                    value={formData.telefone}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                      errors.telefone ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="(00) 00000-0000"
+                  />
+                  {errors.telefone && <p className="text-red-500 text-sm mt-1">{errors.telefone}</p>}
+                </div>
+
+                {/* Endereço de Venda */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <MapPin className="inline mr-2" size={16} />
+                    Endereço de Venda *
+                  </label>
+                  <textarea
+                    name="endereco_venda"
+                    value={formData.endereco_venda}
+                    onChange={handleInputChange}
+                    rows={3}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                      errors.endereco_venda ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Rua, número, bairro, cidade..."
+                  />
+                  {errors.endereco_venda && <p className="text-red-500 text-sm mt-1">{errors.endereco_venda}</p>}
+                </div>
+
+                {/* Associação (obrigatório) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Building2 className="inline mr-2" size={16} />
+                    Associação *
+                  </label>
+                  <select
+                    name="fk_associacao"
+                    value={formData.fk_associacao}
+                    onChange={handleInputChange}
+                    required
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                      errors.fk_associacao ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  >
+                    <option value="">Selecione uma associação</option>
+                    {associacoes.map((assoc) => (
+                      <option key={assoc.id_associacao} value={assoc.id_associacao}>
+                        {assoc.nome}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.fk_associacao && <p className="text-red-500 text-sm mt-1">{errors.fk_associacao}</p>}
+                  {associacoes.length === 0 && (
+                    <p className="text-amber-600 text-sm mt-1">
+                      ⚠️ Nenhuma associação disponível. Entre em contato com o administrador.
+                    </p>
+                  )}
+                </div>
+
+                {/* Senha */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Lock className="inline mr-2" size={16} />
+                      Senha *
+                    </label>
+                    <input
+                      type="password"
+                      name="senha"
+                      value={formData.senha}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                        errors.senha ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder="Mínimo 6 caracteres"
+                    />
+                    {errors.senha && <p className="text-red-500 text-sm mt-1">{errors.senha}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Lock className="inline mr-2" size={16} />
+                      Confirmar Senha *
+                    </label>
+                    <input
+                      type="password"
+                      value={confirmarSenha}
+                      onChange={(e) => {
+                        setConfirmarSenha(e.target.value);
+                        if (errors.confirmarSenha) {
+                          setErrors(prev => ({ ...prev, confirmarSenha: '' }));
+                        }
+                      }}
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                        errors.confirmarSenha ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder="Repita a senha"
+                    />
+                    {errors.confirmarSenha && <p className="text-red-500 text-sm mt-1">{errors.confirmarSenha}</p>}
+                  </div>
+                </div>
+
+                {/* Foto (Base64) opcional */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Foto do Vendedor (opcional)</label>
+                  <input type="file" accept="image/*" onChange={handleFileChange} className="w-full" />
+                  {imagemPreview && (
+                    <div className="mt-3">
+                      <p className="text-sm text-gray-600 mb-2">Pré-visualização:</p>
+                      <img src={imagemPreview} alt="preview" className="max-h-40 rounded-md" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Botões */}
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Cadastrando...' : 'Cadastrar Vendedor'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
