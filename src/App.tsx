@@ -33,6 +33,7 @@ import PainelAdmin from './pages/admin/PainelAdmin';
 import GerenciarAssociacoes from './pages/admin/GerenciarAssociacoes';
 import GerenciarFeiras from './pages/admin/GerenciarFeiras';
 import GerenciarVendedores from './pages/admin/GerenciarVendedores';
+import AdminPagamentos from './pages/pagamento/AdminPagamentos';
 
 
 function App() {
@@ -86,6 +87,14 @@ function App() {
           element={
             <ProtectedRoute>
               <PainelAdmin />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/pedidos" 
+          element={
+            <ProtectedRoute requireRole="ADMIN">
+              <AdminPagamentos />
             </ProtectedRoute>
           } 
         />

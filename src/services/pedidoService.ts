@@ -22,6 +22,19 @@ export interface Pedido {
   produtos_no_pedido?: any[]; // Novo campo retornado pelo backend
   cliente?: any;
   feira?: any;
+  mercadopago_payment_id?: string | null;
+}
+
+export interface MetaPaginacao {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: MetaPaginacao;
 }
 
 class PedidoService {
@@ -108,6 +121,67 @@ class PedidoService {
   async criarPedido(dados: CriarPedidoDTO): Promise<Pedido> {
     const response = await api.post('/pedido/cadastro', dados);
     return response.data;
+  }
+
+  /**
+   * Listar pedidos por status de pagamento (ex.: PAGO)
+   */
+  async listarPorStatus(status = 'PAGO', page = 1, limit = 25): Promise<PaginatedResponse<Pedido>> {
+    try {
+      const params: any = { status, page, limit };
+      const response = await api.get('/pedido/pagos', { params });
+
+      // Espera formato { data: [...], meta: { total, page, limit, totalPages } }
+      if (response.data && response.data.data && response.data.meta) {
+        return response.data as PaginatedResponse<Pedido>;
+      }
+
+      // Fallback: caso backend retorne array sem meta
+      const dataArray = Array.isArray(response.data) ? response.data : [];
+      return { data: dataArray, meta: { total: dataArray.length, page, limit, totalPages: 1 } };
+    } catch (error) {
+      console.error('❌ Erro ao buscar pedidos por status:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Buscar pedido pelo `mercadopago_payment_id`
+   */
+  async buscarPorPaymentId(paymentId: string): Promise<Pedido | null> {
+    try {
+      const response = await api.get(`/pedido/por-pagamento/${paymentId}`);
+      return response.data || null;
+    } catch (error: any) {
+      if (error.response && error.response.status === 404) return null;
+      console.error('❌ Erro ao buscar pedido por paymentId:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Listar pedidos via rota admin com filtros e paginação
+   */
+  async listarAdminPedidos(opts: { status?: string; payer_email?: string; page?: number; limit?: number } = {}): Promise<PaginatedResponse<Pedido>> {
+    try {
+      const params: any = {};
+      if (opts.status) params.status = opts.status;
+      if (opts.payer_email) params.payer_email = opts.payer_email;
+      params.page = opts.page ?? 1;
+      params.limit = opts.limit ?? 25;
+
+      const response = await api.get('/pedido/admin/pedidos', { params });
+
+      if (response.data && response.data.data && response.data.meta) {
+        return response.data as PaginatedResponse<Pedido>;
+      }
+
+      const dataArray = Array.isArray(response.data) ? response.data : [];
+      return { data: dataArray, meta: { total: dataArray.length, page: params.page, limit: params.limit, totalPages: 1 } };
+    } catch (error) {
+      console.error('❌ Erro ao buscar pedidos admin:', error);
+      throw error;
+    }
   }
 
   /**
