@@ -357,16 +357,16 @@ const PainelAdmin: React.FC = () => {
       )}
 
       <div className="min-h-screen bg-gray-50">
-        {/* Header com Gradiente */}
-        <div className="bg-gradient-to-r from-verde-escuro to-verde-claro text-white">
+        {/* Header com Cor Visível */}
+        <div className="bg-verde-escuro text-white">
           <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center gap-3 mb-4">
-              <Shield className="w-10 h-10" />
-              <div>
-                <h1 className="text-3xl font-bold">Painel Administrativo</h1>
-                <p className="text-green-50 mt-1">Bem-vindo, {user?.nome}</p>
-              </div>
-            </div>
+        <div className="flex items-center gap-3 mb-4">
+          <Shield className="w-10 h-10" />
+          <div>
+            <h1 className="text-3xl font-bold">Painel Administrativo</h1>
+            <p className="text-green-50 mt-1">Bem-vindo, {user?.nome}</p>
+          </div>
+        </div>
           </div>
         </div>
 
