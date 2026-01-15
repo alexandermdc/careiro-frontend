@@ -4,6 +4,7 @@ import {type JSX, useState, useEffect} from "react";
 import { Button } from "../../../../components/button";
 import { Card, CardContent } from "../../../../components/cards";
 import api from "../../../../services/api";
+import feiraService, { type Feira } from "../../../../services/feiraService";
 
 interface ProdutoAPI {
   id_produto: string;
@@ -20,40 +21,7 @@ interface ProdutoAPI {
   };
 }
 
-const fairs = [
-  {
-    image: "/img/pc_uniao.jpg",
-    title: "Feira do PC - união e força ",
-    location: "Estrada de Autazes Km 14",
-    date: "Domingos - 08h às 13h",
-    buttonText: "Ver produtos",
-    height: "h-[244.41px]",
-  },
-  {
-    image: "/img/feira_empreendedorismo.jpg",
-    title: "Feira de Empreendedorismo Rural - Grupo Mãos que Colhem",
-    location: "Ramal São José Km 11",
-    date: "Sábados - 08h às 13h",
-    buttonText: "Ver produtos",
-    height: "h-[244.41px]",
-  },
-  {
-    image: "/img/pc_uniao.jpg",
-    title: "Feira do PC - união e força ",
-    location: "Estrada de Autazes Km 14",
-    date: "Domingos - 08h às 13h",
-    buttonText: "Ver produtos",
-    height: "h-[244.41px]",
-  },
-  {
-    image: "/img/feira_empreendedorismo.jpg",
-    title: "Feira de Empreendedorismo Rural - Grupo Mãos que Colhem",
-    location: "Ramal São José Km 11",
-    date: "Domingos - 08h às 13h",
-    buttonText: "Ver produtos",
-    height: "h-[263px]",
-  },
-];
+// `fairs` carregadas dinamicamente dentro do componente
 
 const categories = [
   {
@@ -130,6 +98,35 @@ export const MainContentSection = (): JSX.Element => {
   const [produtosDestaque, setProdutosDestaque] = useState<ProdutoAPI[]>([]);
   const [carregandoProdutos, setCarregandoProdutos] = useState(true);
 
+  const [fairs, setFairs] = useState<Array<{
+    image?: string;
+    title: string;
+    location?: string;
+    date?: string;
+    buttonText?: string;
+    height?: string;
+  }>>([]);
+
+  useEffect(() => {
+    const carregarFeiras = async () => {
+      try {
+        const data = await feiraService.listarTodas();
+        const mapped = (data || []).map((f: Feira) => ({
+          image: f.image || '/img/feira_placeholder.jpg',
+          title: f.nome,
+          location: f.localizacao || f.descricao || '-',
+          date: f.data_hora ? String(f.data_hora) : '-',
+          buttonText: 'Ver produtos',
+          height: 'h-[244.41px]'
+        }));
+        setFairs(mapped);
+      } catch (err) {
+        console.error('Erro ao carregar feiras:', err);
+      }
+    };
+    carregarFeiras();
+  }, []);
+
   useEffect(() => {
     buscarProdutosDestaque();
   }, []);
@@ -183,7 +180,7 @@ export const MainContentSection = (): JSX.Element => {
                 return (
                   <Card
                     key={produto.id_produto}
-                    className="flex flex-col w-full items-start gap-3 md:gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-2xl md:rounded-[25px] overflow-hidden hover:shadow-lg transition-shadow"
+                    className="flex flex-col h-full w-full items-start gap-3 md:gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-2xl md:rounded-[25px] overflow-hidden hover:shadow-lg transition-shadow"
                   >
                     <div className="relative w-full">
                       <img
@@ -202,7 +199,7 @@ export const MainContentSection = (): JSX.Element => {
                       )}
                     </div>
                     
-                    <CardContent className="flex flex-col items-start px-3 md:px-4 py-0 relative self-stretch w-full flex-[0_0_auto]">
+                    <CardContent className="flex flex-col flex-1 items-start px-3 md:px-4 py-0 relative self-stretch w-full">
                       <div className="w-full font-medium text-texto text-sm md:text-base leading-tight relative [font-family:'Montserrat',Helvetica] tracking-[0] mb-2">
                         {produto.nome}
                       </div>
@@ -240,7 +237,7 @@ export const MainContentSection = (): JSX.Element => {
           {fairs.map((fair, index) => (
             <Card
               key={index}
-              className="flex flex-col w-full items-center gap-3 md:gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-2xl md:rounded-[25px] overflow-hidden hover:shadow-lg transition-shadow"
+              className="flex flex-col h-full w-full items-center gap-3 md:gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-2xl md:rounded-[25px] overflow-hidden hover:shadow-lg transition-shadow"
             >
               <img
                 className="h-[200px] sm:h-[220px] md:h-[244px] relative self-stretch w-full object-cover"
@@ -251,7 +248,7 @@ export const MainContentSection = (): JSX.Element => {
                   target.src = "https://via.placeholder.com/263x244/1d4510/ffffff?text=" + encodeURIComponent(fair.title);
                 }}
               />
-              <CardContent className="flex flex-col items-start gap-2 px-3 md:px-4 py-0 relative self-stretch w-full flex-[0_0_auto]">
+              <CardContent className="flex flex-col flex-1 items-start gap-2 px-3 md:px-4 py-0 relative self-stretch w-full">
                 <div className="w-full font-bold text-texto text-sm md:text-base leading-tight relative [font-family:'Montserrat',Helvetica] tracking-[0]">
                   {fair.title}
                 </div>
@@ -326,7 +323,7 @@ export const MainContentSection = (): JSX.Element => {
         {subscriptions.map((subscription, index) => (
           <Card
             key={index}
-            className="flex-col min-w-[263px] w-[263px] items-center gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-[25px] overflow-hidden"
+            className="flex-col h-full min-w-[263px] w-[263px] items-center gap-4 pt-0 pb-4 px-0 bg-fundo-claro border border-solid border-[#d5d7d4] shadow-[0px_0px_4px_#00000033] rounded-[25px] overflow-hidden"
           >
             <img
               className="h-[263px] relative self-stretch w-full object-cover"
@@ -337,7 +334,7 @@ export const MainContentSection = (): JSX.Element => {
                 target.src = "https://via.placeholder.com/263x263/9cb217/ffffff?text=" + encodeURIComponent(subscription.title);
               }}
             />
-            <CardContent className="flex flex-col items-start px-4 py-0 relative self-stretch w-full flex-[0_0_auto]">
+            <CardContent className="flex flex-col flex-1 items-start px-4 py-0 relative self-stretch w-full">
               <div className="w-[231px] h-6 mt-[-1.00px] font-medium text-texto text-base leading-[normal] relative [font-family:'Montserrat',Helvetica] tracking-[0]">
                 {subscription.title}
               </div>
