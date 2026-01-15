@@ -383,33 +383,33 @@ const PerfilVendedor: React.FC = () => {
           </div>
         )}
 
-        {/* Card Principal do Perfil */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
-          {/* Header do Card */}
-          <div className="bg-gradient-to-r from-verde-escuro to-verde-claro p-8 text-white">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
-                  <Store className="w-10 h-10" />
+              {/* Card Principal do Perfil */}
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
+              {/* Header do Card */}
+              <div className="bg-gradient-to-r from-verde-escuro to-verde-claro p-8">
+                <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+              <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
+                <Store className="w-10 h-10" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-semibold mb-2 text-gray-900">
+                {vendedorAtual?.nome || 'Vendedor'}
+                </h1>
+                <p className="text-gray-600 flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                {user?.email}
+                </p>
+              </div>
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold mb-2">
-                    {vendedorAtual?.nome || 'Vendedor'}
-                  </h1>
-                  <p className="text-white/90 flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    {user?.email}
-                  </p>
+                <button
+              onClick={() => setShowEditModal(true)}
+              className="bg-[#1D4510] hover:bg-[#152f0b] text-white px-6 py-3 rounded-xl transition-colors font-montserrat font-bold text-base leading-6"
+                >
+              Editar
+                </button>
                 </div>
               </div>
-              <button
-                onClick={() => setShowEditModal(true)}
-                className="bg-[#1D4510] hover:bg-[#152f0b] text-white px-6 py-3 rounded-xl transition-colors font-montserrat font-bold text-base leading-6"
-              >
-                Editar
-              </button>
-            </div>
-          </div>
 
           {/* Corpo do Card */}
           <div className="p-8">
