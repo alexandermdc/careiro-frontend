@@ -1,42 +1,20 @@
 import { type JSX } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../../../components/button";
-import { Card, CardContent } from "../../../components/cards";
+import HeroCTA from '../../../components/HeroCTA';
 
 export const AboutSectionSobreNos = (): JSX.Element => {
   const navigate = useNavigate();
 
   return (
-    <section className="w-full bg-gradient-to-br from-verde-claro/10 to-verde-escuro/5 py-20">
-      <div className="flex items-center justify-center px-4">
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-12 max-w-6xl w-full">
-          <div className="flex-1 text-center lg:text-left">
-              <img
-                src="/img/20230803_agriculturafamiliar.jpg"
-                alt="Agricultores conectando com consumidores"
-                className="w-full max-w-3xl mx-auto rounded-3xl shadow-2xl"
-                style={{ minHeight: "420px", minWidth: "360px" }}
-              />
-          </div>
-
-          <div className="flex-1 max-w-lg">
-            <Card className="bg-white border-0 shadow-2xl">
-              <CardContent className="p-10 text-center">
-                <h2 className="[font-family:'Montserrat',Helvetica] font-semibold text-verde-escuro text-3xl lg:text-4xl leading-tight mb-10">
-                  Conectando os melhores agricultores até você
-                </h2>
-
-                <Button
-                      className="bg-verde-escuro hover:bg-verde-escuro/90 text-white [font-family:'Montserrat',Helvetica] font-bold text-base sm:text-lg md:text-xl lg:text-2xl px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 h-auto transition-all duration-300 rounded-lg md:rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto"
-                      onClick={() => navigate("/produtos")}
-                    >
-                      COMPRE AGORA
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    </section>
+    <HeroCTA
+      imageSrc={'/img/20230803_agriculturafamiliar.jpg'}
+      imageAlt={'Agricultores conectando com consumidores'}
+      caption={'Produção agrícola em área cultivada, com colheita manual de hortaliças, destacando o trabalho no campo, a organização do plantio e a importância da agricultura sustentável na produção de alimentos.'}
+      title={"Conectando os melhores agricultores até você"}
+      buttonText={"COMPRE AGORA"}
+      onClick={() => navigate('/produtos')}
+      imageStyle={{ minHeight: 250, maxHeight: 500 }}
+      containerClassName="py-20"
+    />
   );
 };

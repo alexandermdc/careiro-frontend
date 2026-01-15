@@ -23,6 +23,22 @@ const AdminPagamentos: React.FC = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalPedido, setModalPedido] = useState<any | null>(null);
 
+	const fetchPedidos = async (status?: string, page?: number, limit?: number) => {
+		try {
+			setLoadingPagamentos(true);
+			setErrorPagamentos(null);
+			const opts: any = { page: page ?? 1, limit: limit ?? 25 };
+			if (status) opts.status = status;
+			const res = await pedidoService.listarAdminPedidos(opts);
+			setResultadosPagamentos(res.data || []);
+			setMetaPagamentos(res.meta || null);
+		} catch (err: any) {
+			setErrorPagamentos(err.message || 'Erro ao carregar pedidos');
+		} finally {
+			setLoadingPagamentos(false);
+		}
+	};
+
 	useEffect(() => {
 		if (!user) {
 			navigate('/login');
@@ -37,20 +53,7 @@ const AdminPagamentos: React.FC = () => {
 
 	useEffect(() => {
 		if (!isAdmin) return;
-		const carregarPedidos = async () => {
-			try {
-				setLoadingPagamentos(true);
-				setErrorPagamentos(null);
-				const res = await pedidoService.listarPorStatus(statusFiltro, paginaFiltro, limitFiltro ?? 25);
-				setResultadosPagamentos(res.data || []);
-				setMetaPagamentos(res.meta || null);
-			} catch (err: any) {
-				setErrorPagamentos(err.message || 'Erro ao carregar pedidos');
-			} finally {
-				setLoadingPagamentos(false);
-			}
-		};
-		carregarPedidos();
+		fetchPedidos(statusFiltro, paginaFiltro, limitFiltro ?? 25);
 	}, [isAdmin, statusFiltro, paginaFiltro, limitFiltro]);
 
 	const formatCPF = (cpf?: string) => {
@@ -105,7 +108,7 @@ const AdminPagamentos: React.FC = () => {
 			<div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 				<div className="flex items-center gap-3 mb-4">
 					<ShoppingCart className="w-6 h-6 text-gray-700" />
-					<h3 className="text-xl font-bold text-gray-900">Testes de Pagamentos</h3>
+					<h3 className="text-xl font-bold text-gray-900">Pagamentos</h3>
 				</div>
 
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -133,20 +136,8 @@ const AdminPagamentos: React.FC = () => {
 							/>
 							<button
 								onClick={async () => {
-									try {
-										setLoadingPagamentos(true);
-										setErrorPagamentos(null);
-										setPedidoEncontrado(null);
-										const res = await pedidoService.listarPorStatus(statusFiltro, paginaFiltro, limitFiltro ?? 25);
-										setResultadosPagamentos(res.data || []);
-										setMetaPagamentos(res.meta || null);
-									} catch (err: any) {
-										setErrorPagamentos(err.message || 'Erro ao listar pedidos por status');
-										setResultadosPagamentos(null);
-										setMetaPagamentos(null);
-									} finally {
-										setLoadingPagamentos(false);
-									}
+									setPedidoEncontrado(null);
+									await fetchPedidos(statusFiltro, paginaFiltro, limitFiltro ?? 25);
 								}}
 								className="px-4 py-2 bg-emerald-600 text-white rounded-lg"
 							>
@@ -263,16 +254,7 @@ const AdminPagamentos: React.FC = () => {
 									onClick={async () => {
 										const nova = Math.max(1, (metaPagamentos.page || paginaFiltro) - 1);
 										setPaginaFiltro(nova);
-										try {
-											setLoadingPagamentos(true);
-											const res = await pedidoService.listarPorStatus(statusFiltro, nova, limitFiltro ?? 25);
-											setResultadosPagamentos(res.data || []);
-											setMetaPagamentos(res.meta || null);
-										} catch (err: any) {
-											setErrorPagamentos(err.message || 'Erro ao carregar página');
-										} finally {
-											setLoadingPagamentos(false);
-										}
+										await fetchPedidos(statusFiltro, nova, limitFiltro ?? 25);
 									}}
 									className="px-3 py-1 bg-gray-200 rounded"
 								>
@@ -283,16 +265,7 @@ const AdminPagamentos: React.FC = () => {
 									onClick={async () => {
 										const nova = Math.min(metaPagamentos.totalPages, (metaPagamentos.page || paginaFiltro) + 1);
 										setPaginaFiltro(nova);
-										try {
-											setLoadingPagamentos(true);
-											const res = await pedidoService.listarPorStatus(statusFiltro, nova, limitFiltro ?? 25);
-											setResultadosPagamentos(res.data || []);
-											setMetaPagamentos(res.meta || null);
-										} catch (err: any) {
-											setErrorPagamentos(err.message || 'Erro ao carregar página');
-										} finally {
-											setLoadingPagamentos(false);
-										}
+										await fetchPedidos(statusFiltro, nova, limitFiltro ?? 25);
 									}}
 									className="px-3 py-1 bg-gray-200 rounded"
 								>
