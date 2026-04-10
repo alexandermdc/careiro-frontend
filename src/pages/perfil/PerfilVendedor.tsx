@@ -12,12 +12,18 @@ import {
   Store,
   FileText,
   Building2,
-  Plus
+  Plus,
+  Download,
+  ShoppingBag,
+  ClipboardList,
+  BadgeCheck,
+  Clock3
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import vendedorService from '../../services/vendedorService';
 import associacaoService from '../../services/associacaoService';
 import type { Vendedor, UpdateVendedorData } from '../../services/vendedorService';
+import pedidoService from '../../services/pedidoService';
 import { HeaderSection } from '../../components/HeaderSection';
 import { FooterSection } from '../../components/FooterSection';
 import Modal from '../../components/Modal';
@@ -220,6 +226,9 @@ const PerfilVendedor: React.FC = () => {
   const [fotoPreview, setFotoPreview] = useState<string>('');
   const [fotoError, setFotoError] = useState<string>('');
   const [fotoLoading, setFotoLoading] = useState<boolean>(false);
+  const [pedidosVendidos, setPedidosVendidos] = useState<any[]>([]);
+  const [loadingPedidos, setLoadingPedidos] = useState<boolean>(false);
+  const [erroPedidos, setErroPedidos] = useState<string>('');
 
   const handleLogout = async () => {
     await logout();
@@ -229,10 +238,191 @@ const PerfilVendedor: React.FC = () => {
   useEffect(() => {
     if (user?.vendedor?.id_vendedor) {
       carregarDadosVendedor();
+      carregarPedidosVendidos();
     } else {
       setLoading(false);
     }
   }, [user]);
+
+  const getItensPedido = (pedido: any): any[] => {
+    if (Array.isArray(pedido?.produtos_no_pedido)) return pedido.produtos_no_pedido;
+    if (Array.isArray(pedido?.atende_um)) return pedido.atende_um;
+    return [];
+  };
+
+  const getVendedorItem = (item: any) => {
+    return item?.produto?.vendedor || item?.vendedor || item?.vendedor_info || null;
+  };
+
+  const getNomeProduto = (item: any) => {
+    return item?.produto?.nome || item?.produto?.nome_produto || item?.nome || 'Produto';
+  };
+
+  const getQuantidadeItem = (item: any) => Number(item?.quantidade ?? item?.qty ?? 1) || 1;
+
+  const getValorItem = (item: any) => {
+    const valor = Number(item?.preco ?? item?.valor ?? item?.valor_unitario ?? item?.produto?.preco ?? item?.produto?.valor ?? item?.produto?.preco_venda ?? 0);
+    return Number.isNaN(valor) ? 0 : valor;
+  };
+
+  const formatCurrency = (value: number) =>
+    value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  const formatData = (data?: string) => {
+    if (!data) return '-';
+    const d = new Date(data);
+    return Number.isNaN(d.getTime()) ? data : d.toLocaleDateString('pt-BR');
+  };
+
+  const csvEscape = (value: any) => {
+    if (value === null || value === undefined) return '""';
+    return `"${String(value).replace(/"/g, '""')}"`;
+  };
+
+  const baixarCSV = (nomeArquivo: string, linhas: string[]) => {
+    const blob = new Blob([linhas.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nomeArquivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const gerarLinhasPedido = (pedido: any) => {
+    const resumo = calcularResumoPedido(pedido);
+
+    const cabecalho = [
+      'Pedido',
+      'Data',
+      'Comprador',
+      'Status',
+      'Pago',
+      'Produto',
+      'Quantidade',
+      'Valor Unitário',
+      'Valor do Item',
+      'Associação',
+      'Retirada',
+    ];
+
+    const linhas = resumo.itensDoVendedor.map((item: any) => {
+      const qtd = getQuantidadeItem(item);
+      const valorUnit = getValorItem(item);
+      return [
+        pedido?.pedido_id,
+        formatData(pedido?.data_pedido),
+        pedido?.cliente?.nome || '-',
+        getStatusPedido(pedido),
+        pedidoPago(pedido) ? 'Sim' : 'Não',
+        getNomeProduto(item),
+        qtd,
+        formatCurrency(valorUnit),
+        formatCurrency(qtd * valorUnit),
+        pedido?.associacao_retirada?.nome || pedido?.retirada_local || pedido?.feira?.nome || '-',
+        pedido?.retirada_local || pedido?.associacao_retirada?.endereco || pedido?.associacao_retirada?.data_hora || '-',
+      ].map(csvEscape).join(';');
+    });
+
+    return [cabecalho.map(csvEscape).join(';'), ...linhas];
+  };
+
+  const baixarPedido = (pedido: any) => {
+    const linhas = gerarLinhasPedido(pedido);
+    baixarCSV(`pedido_${pedido.pedido_id}_vendedor.csv`, linhas);
+  };
+
+  const baixarTodosPedidos = () => {
+    if (!pedidosVendidos.length) return;
+
+    const cabecalho = [
+      'Pedido',
+      'Data',
+      'Comprador',
+      'Status',
+      'Pago',
+      'Produto',
+      'Quantidade',
+      'Valor Unitário',
+      'Valor do Item',
+      'Associação',
+      'Retirada',
+    ];
+
+    const linhas = pedidosVendidos.flatMap((pedido) => {
+      const resumo = calcularResumoPedido(pedido);
+      return resumo.itensDoVendedor.map((item: any) => {
+        const qtd = getQuantidadeItem(item);
+        const valorUnit = getValorItem(item);
+        return [
+          pedido?.pedido_id,
+          formatData(pedido?.data_pedido),
+          pedido?.cliente?.nome || '-',
+          getStatusPedido(pedido),
+          pedidoPago(pedido) ? 'Sim' : 'Não',
+          getNomeProduto(item),
+          qtd,
+          formatCurrency(valorUnit),
+          formatCurrency(qtd * valorUnit),
+          pedido?.associacao_retirada?.nome || pedido?.retirada_local || pedido?.feira?.nome || '-',
+          pedido?.retirada_local || pedido?.associacao_retirada?.endereco || pedido?.associacao_retirada?.data_hora || '-',
+        ].map(csvEscape).join(';');
+      });
+    });
+
+    baixarCSV(`pedidos_vendedor_${new Date().toISOString().slice(0, 10)}.csv`, [cabecalho.map(csvEscape).join(';'), ...linhas]);
+  };
+
+  const pedidoPago = (pedido: any) => {
+    const status = String(pedido?.status || pedido?.pagamento?.status || '').toUpperCase();
+    return ['PAGO', 'APROVADO', 'APPROVED', 'PAID'].includes(status);
+  };
+
+  const getStatusPedido = (pedido: any) => {
+    return String(pedido?.status || pedido?.pagamento?.status || '-').toUpperCase();
+  };
+
+  const calcularResumoPedido = (pedido: any) => {
+    const itens = getItensPedido(pedido);
+    const itensDoVendedor = itens.filter((item) => {
+      const vendedorItem = getVendedorItem(item);
+      return vendedorItem?.id_vendedor === user?.vendedor?.id_vendedor || vendedorItem?.id === user?.vendedor?.id_vendedor;
+    });
+
+    const quantidade = itensDoVendedor.reduce((acc, item) => acc + getQuantidadeItem(item), 0);
+    const valor = itensDoVendedor.reduce((acc, item) => acc + (getQuantidadeItem(item) * getValorItem(item)), 0);
+
+    return { itensDoVendedor, quantidade, valor };
+  };
+
+  const carregarPedidosVendidos = async () => {
+    const idVendedor = user?.vendedor?.id_vendedor;
+    if (!idVendedor) return;
+
+    try {
+      setLoadingPedidos(true);
+      setErroPedidos('');
+
+      const pedidos = await pedidoService.listarPedidosDoVendedor(idVendedor);
+      const filtrados = (pedidos || []).filter((pedido: any) => {
+        const itens = getItensPedido(pedido);
+        return itens.some((item: any) => {
+          const vendedorItem = getVendedorItem(item);
+          return vendedorItem?.id_vendedor === idVendedor || vendedorItem?.id === idVendedor;
+        });
+      });
+
+      setPedidosVendidos(filtrados);
+    } catch (err: any) {
+      console.error('Erro ao carregar pedidos do vendedor:', err);
+      setErroPedidos('Não foi possível carregar os pedidos do vendedor no momento.');
+      setPedidosVendidos([]);
+    } finally {
+      setLoadingPedidos(false);
+    }
+  };
 
   const salvarFotoPerfil = async () => {
     if (!user?.vendedor?.id_vendedor) return;
@@ -622,6 +812,141 @@ const PerfilVendedor: React.FC = () => {
               <p className="text-sm text-red-500">Fazer logout</p>
             </div>
           </button>
+        </div>
+
+        {/* Pedidos / Vendas do Vendedor */}
+        <div className="mt-8 bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="p-6 border-b border-gray-100 flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <ShoppingBag className="w-5 h-5 text-verde-escuro" />
+                <h3 className="text-xl font-bold text-gray-900">Pedidos dos meus produtos</h3>
+              </div>
+              <p className="text-sm text-gray-600">
+                Veja quais pedidos saíram, quais produtos foram vendidos e o valor movimentado.
+              </p>
+            </div>
+
+            <button
+              onClick={carregarPedidosVendidos}
+              className="px-4 py-2 rounded-lg bg-verde-escuro text-white font-medium hover:bg-verde-claro transition-colors"
+            >
+              Atualizar pedidos
+            </button>
+
+            <button
+              onClick={baixarTodosPedidos}
+              disabled={!pedidosVendidos.length}
+              className="px-4 py-2 rounded-lg border border-verde-escuro text-verde-escuro font-medium hover:bg-green-50 transition-colors disabled:opacity-50 disabled:hover:bg-transparent flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Baixar todos
+            </button>
+          </div>
+
+          <div className="p-6">
+            {loadingPedidos ? (
+              <div className="py-10 text-center text-gray-600">
+                <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-verde-escuro mb-3"></div>
+                <p>Carregando pedidos vendidos...</p>
+              </div>
+            ) : erroPedidos ? (
+              <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700">
+                {erroPedidos}
+              </div>
+            ) : pedidosVendidos.length === 0 ? (
+              <div className="py-10 text-center text-gray-500">
+                <ClipboardList className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p className="font-medium">Nenhum pedido encontrado para seus produtos ainda.</p>
+                <p className="text-sm mt-1">Quando sair um pedido com seus itens, ele aparecerá aqui.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                    <p className="text-xs uppercase text-green-700 font-semibold">Pedidos encontrados</p>
+                    <p className="text-2xl font-bold text-green-900">{pedidosVendidos.length}</p>
+                  </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <p className="text-xs uppercase text-blue-700 font-semibold">Itens vendidos</p>
+                    <p className="text-2xl font-bold text-blue-900">
+                      {pedidosVendidos.reduce((acc, pedido) => acc + calcularResumoPedido(pedido).quantidade, 0)}
+                    </p>
+                  </div>
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <p className="text-xs uppercase text-amber-700 font-semibold">Valor total vendido</p>
+                    <p className="text-2xl font-bold text-amber-900">
+                      {formatCurrency(pedidosVendidos.reduce((acc, pedido) => acc + calcularResumoPedido(pedido).valor, 0))}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {pedidosVendidos.slice(0, 8).map((pedido) => {
+                    const resumo = calcularResumoPedido(pedido);
+                    return (
+                      <div key={pedido.pedido_id} className="border border-gray-200 rounded-2xl p-5 bg-gray-50/60">
+                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-2">
+                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-verde-escuro text-white text-xs font-semibold">
+                                <BadgeCheck className="w-3.5 h-3.5" />
+                                Pedido #{pedido.pedido_id}
+                              </span>
+                              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${pedidoPago(pedido) ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                <Clock3 className="w-3.5 h-3.5" />
+                                {pedidoPago(pedido) ? 'Pago' : 'Não pago'}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">
+                              Data: <span className="font-medium text-gray-800">{formatData(pedido.data_pedido)}</span>
+                            </p>
+                            <p className="text-sm text-gray-600 mb-2">
+                              Comprador: <span className="font-medium text-gray-800">{pedido?.cliente?.nome || '-'}</span>
+                            </p>
+                            <p className="text-sm text-gray-600 mb-2">
+                              Feira/Associação: <span className="font-medium text-gray-800">{pedido?.associacao_retirada?.nome || pedido?.retirada_local || pedido?.feira?.nome || '-'}</span>
+                            </p>
+                          </div>
+
+                          <div className="min-w-[220px] rounded-xl bg-white border border-gray-200 p-4">
+                            <p className="text-xs uppercase text-gray-500 font-semibold mb-1">Resumo dos meus itens</p>
+                            <p className="text-sm text-gray-700 mb-1">Itens meus no pedido: <strong>{resumo.quantidade}</strong></p>
+                            <p className="text-sm text-gray-700">Valor dos meus itens: <strong>{formatCurrency(resumo.valor)}</strong></p>
+
+                            <button
+                              onClick={() => baixarPedido(pedido)}
+                              className="mt-4 w-full px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                            >
+                              <Download className="w-4 h-4" />
+                              Baixar este pedido
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 border-t border-gray-200 pt-4">
+                          <p className="text-sm font-semibold text-gray-800 mb-2">Produtos seus neste pedido</p>
+                          <div className="flex flex-wrap gap-2">
+                            {resumo.itensDoVendedor.map((item: any, idx: number) => (
+                              <span key={idx} className="px-3 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700">
+                                {getNomeProduto(item)} x{getQuantidadeItem(item)} • {formatCurrency(getValorItem(item))}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {pedidosVendidos.length > 8 && (
+                  <p className="text-sm text-gray-500 text-center pt-2">
+                    Mostrando os 8 pedidos mais recentes com seus produtos.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

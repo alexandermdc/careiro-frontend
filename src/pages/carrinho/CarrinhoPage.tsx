@@ -1,20 +1,13 @@
 import { useCarrinho } from '../../contexts/CarrinhoContext';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import pedidoService from '../../services/pedidoService';
-import pagamentoService from '../../services/pagamentoService';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function CarrinhoPage() {
   const { itens, removerDoCarrinho, atualizarQuantidade, valorTotal } = useCarrinho();
   const { user, isCliente, isVendedor } = useAuth();
   const navigate = useNavigate();
-  const [processando, setProcessando] = useState(false);
-
-
-
-  const handleFinalizarCompra = async () => {
+  const handleFinalizarCompra = () => {
     if (itens.length === 0) {
       alert('Carrinho vazio!');
       return;
@@ -35,59 +28,8 @@ export default function CarrinhoPage() {
       return;
     }
 
-    setProcessando(true);
-
-    try {
-      // 1. Criar pedido no banco de dados
-      const dadosPedido: any = {
-        data_pedido: new Date().toISOString(),
-        fk_feira: null,
-        produtos: itens.map(item => ({
-          produto_id: String(item.id),
-          quantidade: item.quantidade,
-          id_vendedor: item.id_vendedor || '',
-        }))
-      };
-
-      // Se for vendedor, precisa informar CPF do cliente (pode ser vendedor comprando para si)
-      if (isVendedor && user?.cliente?.cpf) {
-        dadosPedido.cpf_cliente = user.cliente.cpf;
-      }
-      
-      const pedido = await pedidoService.criarPedido(dadosPedido);
-
-
-
-      // 2. Criar preferência de pagamento no Mercado Pago
-
-      
-      const { initPoint } = await pagamentoService.criarPreferencia(pedido.pedido_id);
-
-      // 3. Redirecionar para o Mercado Pago
-
-      pagamentoService.redirecionarParaCheckout(initPoint);
-
-    } catch (error: any) {
-      console.error('❌ Erro ao processar compra:', error);
-
-      // Tratamento de erro de permissão
-      if (error.response?.status === 403) {
-        alert('⚠️ Acesso negado!\n\nApenas clientes e vendedores podem fazer pedidos.\nVocê está logado como ' + (user?.tipo || 'usuário desconhecido') + '.\n\nFaça login novamente.');
-        navigate('/login');
-        return;
-      }
-
-      // Tratamento de erro de sessão expirada
-      if (error.message.includes('Sessão expirada') || error.response?.status === 401) {
-        alert('⚠️ Sessão expirada! Faça login novamente.');
-        localStorage.removeItem('accessToken');
-        navigate('/login');
-      } else {
-        alert(`Erro ao processar compra:\n${error.response?.data?.error || error.message}`);
-      }
-    } finally {
-      setProcessando(false);
-    }
+    // Etapa 1: seguir para o checkout antes de criar pedido/pagamento
+    navigate('/checkout-pedido');
   };
 
   if (itens.length === 0) {
@@ -273,9 +215,9 @@ export default function CarrinhoPage() {
           <button
             onClick={handleFinalizarCompra}
             className="bg-[#1D4510] hover:bg-[#163809] text-white px-10 py-4 rounded-2xl font-bold text-lg transition flex items-center gap-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={processando}
+            disabled={false}
           >
-            {processando ? 'Processando...' : 'Finalizar Compra'}
+            Finalizar Compra
             <ArrowRight className="w-6 h-6" />
           </button>
         </div>

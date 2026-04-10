@@ -44,34 +44,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
-    
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken,
-          });
-          
-          const { accessToken } = response.data;
-          localStorage.setItem('accessToken', accessToken);
-          
-          // Refaz a requisição original com o novo token
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          return api(originalRequest);
-        }
-      } catch (refreshError) {
-        // Token refresh falhou, limpa dados e deixa o ProtectedRoute redirecionar
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('usuario');
-        localStorage.removeItem('papelAtivo');
-        // Não redireciona aqui - deixa o AuthContext/ProtectedRoute lidar com isso
-        // window.location.href = '/login';
-      }
+    if (error.response?.status === 401) {
+      // O backend atual não expõe refresh token; limpar sessão evita loop de tentativas
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('usuario');
+      localStorage.removeItem('papelAtivo');
+      localStorage.removeItem('ultimoPapelUsado');
     }
     
     return Promise.reject(error);

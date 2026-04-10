@@ -75,6 +75,21 @@ export default function PagamentoPendenteReal() {
                 {pedido.produtos_no_pedido && (
                   <p><strong>Itens:</strong> {pedido.produtos_no_pedido.length} produtos</p>
                 )}
+                {(pedido.associacao_retirada || pedido.retirada_local) && (
+                  <>
+                    <p>
+                      <strong>Retirada:</strong>{' '}
+                      {pedido.associacao_retirada?.nome || pedido.retirada_local}
+                    </p>
+                    {(pedido.associacao_retirada?.endereco || pedido.associacao_retirada?.data_hora) && (
+                      <p>
+                        <strong>Local/Horário:</strong>{' '}
+                        {pedido.associacao_retirada?.endereco || 'Endereço não informado'}
+                        {pedido.associacao_retirada?.data_hora ? ` • ${pedido.associacao_retirada.data_hora}` : ''}
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           )}

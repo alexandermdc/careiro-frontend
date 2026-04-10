@@ -9,7 +9,7 @@ import produtoService from '../../services/produtoService';
 import pedidoService from '../../services/pedidoService';
 import type { CreateCategoriaData } from '../../services/categoriaService';
 import type { LucideIcon } from 'lucide-react';
-import { Store, UserPlus, Package, Users, ShoppingCart, Settings, Shield, Tag, X, Save, Building2 } from 'lucide-react';
+import { Store, UserPlus, Package, Users, ShoppingCart, Settings, Shield, Tag, X, Save, Building2, MapPin } from 'lucide-react';
 
 interface AdminCard {
   title: string;
@@ -193,6 +193,15 @@ const PainelAdmin: React.FC = () => {
       color: 'bg-teal-50 hover:bg-teal-100 border-teal-200',
       iconColor: 'text-teal-600',
       badge: 'Gestão'
+    },
+    {
+      title: 'Retirada no Checkout',
+      description: 'Defina quais associações ficam disponíveis como local de retirada',
+      icon: MapPin,
+      link: '/admin/associacoes',
+      color: 'bg-sky-50 hover:bg-sky-100 border-sky-200',
+      iconColor: 'text-sky-600',
+      badge: 'Retirada'
     },
     {
       title: 'Gerenciar Produtos',

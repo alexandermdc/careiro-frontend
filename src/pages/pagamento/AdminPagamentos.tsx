@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '../../components/PageLayout';
-import pedidoService from '../../services/pedidoService';
+import pedidoService, { type PedidoAdmin } from '../../services/pedidoService';
 import Modal from '../../components/Modal';
 import { ShoppingCart } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -10,18 +10,18 @@ const AdminPagamentos: React.FC = () => {
 	const { user, isAdmin } = useAuth();
 	const navigate = useNavigate();
 
-	const [statusFiltro, setStatusFiltro] = useState<string>('PENDENTE');
+	const [statusFiltro, setStatusFiltro] = useState<string>('');
 	const [limitFiltro, setLimitFiltro] = useState<number | undefined>(50);
 	const [paginaFiltro, setPaginaFiltro] = useState<number>(1);
 	const [paymentIdBusca, setPaymentIdBusca] = useState<string>('');
-	const [resultadosPagamentos, setResultadosPagamentos] = useState<any[] | null>(null);
+	const [resultadosPagamentos, setResultadosPagamentos] = useState<PedidoAdmin[] | null>(null);
 	const [metaPagamentos, setMetaPagamentos] = useState<any | null>(null);
-	const [pedidoEncontrado, setPedidoEncontrado] = useState<any | null>(null);
+	const [pedidoEncontrado, setPedidoEncontrado] = useState<PedidoAdmin | null>(null);
 	const [loadingPagamentos, setLoadingPagamentos] = useState(false);
 	const [errorPagamentos, setErrorPagamentos] = useState<string | null>(null);
 
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [modalPedido, setModalPedido] = useState<any | null>(null);
+	const [modalPedido, setModalPedido] = useState<PedidoAdmin | null>(null);
 
 	const fetchPedidos = async (status?: string, page?: number, limit?: number) => {
 		try {
@@ -76,6 +76,130 @@ const AdminPagamentos: React.FC = () => {
 		return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 	};
 
+	const getItensPedido = (pedido: PedidoAdmin | null): any[] => {
+		if (Array.isArray(pedido?.produtos_no_pedido)) return pedido.produtos_no_pedido;
+		if (Array.isArray(pedido?.atende_um)) return pedido.atende_um;
+		return [];
+	};
+
+	const getQuantidadeItem = (item: any): number => {
+		const q = Number(item?.quantidade ?? item?.qty ?? 1);
+		return Number.isNaN(q) ? 1 : q;
+	};
+
+	const getValorUnitarioItem = (item: any): number => {
+		const valor = Number(
+			item?.preco ?? item?.valor ?? item?.valor_unitario ?? item?.produto?.preco ?? item?.produto?.valor ?? item?.produto?.preco_venda ?? 0
+		);
+		return Number.isNaN(valor) ? 0 : valor;
+	};
+
+	const getPedidoTotal = (pedido: PedidoAdmin | null): number => {
+		const explicito = Number(pedido?.valor_total ?? pedido?.total ?? pedido?.pagamento?.transaction_amount ?? pedido?.pagamento?.amount ?? NaN);
+		if (!Number.isNaN(explicito)) return explicito;
+
+		const itens = getItensPedido(pedido);
+		return itens.reduce((acc: number, item: any) => acc + (getQuantidadeItem(item) * getValorUnitarioItem(item)), 0);
+	};
+
+	const getComprador = (pedido: PedidoAdmin | null) => {
+		return pedido?.cliente?.nome || pedido?.comprador?.nome || pedido?.nome_cliente || '-';
+	};
+
+	const getAssociacao = (pedido: PedidoAdmin | null) => {
+		return (
+			pedido?.associacao_retirada?.nome ||
+			pedido?.associacao?.nome ||
+			pedido?.nome_associacao ||
+			'-'
+		);
+	};
+
+	const getRetirada = (pedido: PedidoAdmin | null) => {
+		return pedido?.retirada_local || pedido?.associacao_retirada?.endereco || pedido?.associacao_retirada?.data_hora || '-';
+	};
+
+	const csvEscape = (value: any) => {
+		if (value === null || value === undefined) return '""';
+		return `"${String(value).replace(/"/g, '""')}"`;
+	};
+
+	const getResumoItens = (pedido: PedidoAdmin | null) => {
+		const itens = getItensPedido(pedido);
+		if (!itens.length) return '-';
+		return itens
+			.map((item: any) => `${produtoNome(item)} x${getQuantidadeItem(item)}`)
+			.join(' | ');
+	};
+
+	const exportarCSV = () => {
+		const pedidos = resultadosPagamentos || [];
+		if (!pedidos.length) return;
+
+		const cabecalho = [
+			'Pedido',
+			'Data',
+			'Comprador',
+			'CPF',
+			'E-mail',
+			'Status',
+			'Pago',
+			'Valor Total',
+			'Associação',
+			'Retirada',
+			'Feira',
+			'Payment ID',
+			'Payer Email',
+			'Vendedores',
+			'Itens',
+		];
+
+		const linhas = pedidos.map((pedido) => {
+			const vendedores = getVendedoresUnicosPedido(pedido)
+				.map((v: any) => v?.nome || v?.nome_vendedor || '-')
+				.filter(Boolean)
+				.join(' | ') || '-';
+
+			return [
+				pedido?.pedido_id,
+				formatarDataHora(pedido?.data_pedido),
+				getComprador(pedido),
+				pedido?.cliente?.cpf || '-',
+				pedido?.cliente?.email || '-',
+				getStatusPedido(pedido),
+				isPago(pedido) ? 'Sim' : 'Não',
+				formatCurrency(getPedidoTotal(pedido)),
+				getAssociacao(pedido),
+				getRetirada(pedido),
+				pedido?.feira?.nome || pedido?.nome_feira || pedido?.fk_feira || '-',
+				pedido?.mercadopago_payment_id || '-',
+				pedido?.payer_email || pedido?.pagamento?.payer_email || '-',
+				vendedores,
+				getResumoItens(pedido),
+			].map(csvEscape).join(';');
+		});
+
+		const csv = [cabecalho.map(csvEscape).join(';'), ...linhas].join('\n');
+		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = `pedidos_controle_${new Date().toISOString().slice(0, 10)}.csv`;
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(url);
+	};
+
+	const getStatusPedido = (pedido: PedidoAdmin | null) => {
+		return String(pedido?.status || pedido?.pagamento?.status || '-').toUpperCase();
+	};
+
+	const isPago = (pedido: PedidoAdmin | null) => {
+		const status = getStatusPedido(pedido);
+		return ['PAGO', 'APROVADO', 'APPROVED', 'PAID'].includes(status);
+	};
+
 	const produtoNome = (item: any) => {
 		if (!item) return '-';
 		if (item.produto && (item.produto.nome || item.produto.nome_produto)) return item.produto.nome || item.produto.nome_produto;
@@ -103,17 +227,38 @@ const AdminPagamentos: React.FC = () => {
 		);
 	};
 
+	const getVendedoresUnicosPedido = (pedido: PedidoAdmin | null) => {
+		const itens = getItensPedido(pedido);
+		const vendedores = itens.map((item: any) => getVendedorFromItem(item)).filter(Boolean);
+		return Array.from(new Map(vendedores.map((v: any) => [v.id_vendedor || v.id || v.nome, v])).values());
+	};
+
+	const totalPedidos = resultadosPagamentos?.length || 0;
+	const totalValorPedidos = (resultadosPagamentos || []).reduce((acc, pedido) => acc + getPedidoTotal(pedido), 0);
+	const totalPedidosPagos = (resultadosPagamentos || []).filter((pedido) => isPago(pedido)).length;
+	const totalPedidosNaoPagos = totalPedidos - totalPedidosPagos;
+
+	const formatarDataHora = (valor: string) => {
+		if (!valor) return '-';
+		const data = new Date(valor);
+		if (Number.isNaN(data.getTime())) return valor;
+		return data.toLocaleString('pt-BR');
+	};
+
 	return (
 		<PageLayout>
 			<div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 				<div className="flex items-center gap-3 mb-4">
 					<ShoppingCart className="w-6 h-6 text-gray-700" />
-					<h3 className="text-xl font-bold text-gray-900">Pagamentos</h3>
+					<h3 className="text-xl font-bold text-gray-900">Controle de Pedidos</h3>
 				</div>
+				<p className="text-sm text-gray-600 mb-4">
+					Visualize pedidos com comprador, vendedores, itens, status de pagamento, associação, retirada e total para controle interno.
+				</p>
 
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 					<div className="col-span-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
-						<p className="text-sm font-medium text-gray-700 mb-2">Listar pedidos por status</p>
+						<p className="text-sm font-medium text-gray-700 mb-2">Listar pedidos (todos ou por status)</p>
 						<div className="flex gap-2">
 							<select
 								value={statusFiltro}
@@ -142,6 +287,13 @@ const AdminPagamentos: React.FC = () => {
 								className="px-4 py-2 bg-emerald-600 text-white rounded-lg"
 							>
 								{loadingPagamentos ? 'Carregando...' : 'Listar'}
+							</button>
+							<button
+								onClick={exportarCSV}
+								disabled={!resultadosPagamentos?.length}
+								className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+							>
+								Baixar CSV
 							</button>
 						</div>
 					</div>
@@ -178,6 +330,27 @@ const AdminPagamentos: React.FC = () => {
 					</div>
 				</div>
 
+				{resultadosPagamentos && (
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+						<div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+							<p className="text-xs text-gray-500 uppercase">Pedidos</p>
+							<p className="text-2xl font-bold text-gray-900">{totalPedidos}</p>
+						</div>
+						<div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+							<p className="text-xs text-gray-500 uppercase">Valor total</p>
+							<p className="text-2xl font-bold text-gray-900">{formatCurrency(totalValorPedidos)}</p>
+						</div>
+						<div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+							<p className="text-xs text-emerald-700 uppercase">Pagos</p>
+							<p className="text-2xl font-bold text-emerald-700">{totalPedidosPagos}</p>
+						</div>
+						<div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+							<p className="text-xs text-amber-700 uppercase">Não pagos</p>
+							<p className="text-2xl font-bold text-amber-700">{totalPedidosNaoPagos}</p>
+						</div>
+					</div>
+				)}
+
 				{errorPagamentos && (
 					<div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded">
 						{errorPagamentos}
@@ -196,23 +369,34 @@ const AdminPagamentos: React.FC = () => {
 									<tr>
 										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pedido</th>
 										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payer Email / PaymentId</th>
+										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Comprador</th>
+										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Associação / Retirada</th>
+										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Itens</th>
 										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vendedores</th>
+										<th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor</th>
+										<th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Pago?</th>
 										<th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
 									</tr>
 								</thead>
 								<tbody className="bg-white divide-y divide-gray-100">
-									{resultadosPagamentos.map((pedido: any) => {
-										const vendedores = (pedido.produtos_no_pedido || []).map((p: any) => p.produto?.vendedor).filter(Boolean);
-										const vendedoresUnicos = Array.from(new Map(vendedores.map((v: any) => [v.id_vendedor, v])).values());
+									{resultadosPagamentos.map((pedido) => {
+										const vendedoresUnicos = getVendedoresUnicosPedido(pedido);
+										const itensPedido = getItensPedido(pedido);
+										const quantidadeItens = itensPedido.reduce((acc, item) => acc + getQuantidadeItem(item), 0);
+										const pedidoPago = isPago(pedido);
 										return (
 											<React.Fragment key={pedido.pedido_id}>
 												<tr className="hover:bg-gray-50">
 													<td className="px-4 py-3 text-sm text-gray-900">#{pedido.pedido_id}</td>
-													<td className="px-4 py-3 text-sm text-gray-700">{pedido.data_pedido}</td>
-													<td className="px-4 py-3 text-sm text-gray-700">{pedido.status}</td>
-													<td className="px-4 py-3 text-sm text-gray-700">{pedido.payer_email || pedido.mercadopago_payment_id || '-'}</td>
+													<td className="px-4 py-3 text-sm text-gray-700">{formatarDataHora(pedido.data_pedido)}</td>
+													<td className="px-4 py-3 text-sm text-gray-700">{getComprador(pedido)}</td>
+													<td className="px-4 py-3 text-sm text-gray-700">
+														<div className="flex flex-col">
+															<span>{getAssociacao(pedido)}</span>
+															<span className="text-xs text-gray-500">Retirada: {getRetirada(pedido)}</span>
+														</div>
+													</td>
+													<td className="px-4 py-3 text-sm text-gray-700">{quantidadeItens} item(ns)</td>
 													<td className="px-4 py-3 text-sm text-gray-700">
 														{vendedoresUnicos.length > 0 ? (
 															<div className="flex flex-col">
@@ -228,6 +412,14 @@ const AdminPagamentos: React.FC = () => {
 														) : (
 															<span className="text-xs text-gray-400">—</span>
 														)}
+													</td>
+													<td className="px-4 py-3 text-sm text-gray-900 text-right font-semibold">
+														{formatCurrency(getPedidoTotal(pedido))}
+													</td>
+													<td className="px-4 py-3 text-center text-sm">
+														<span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${pedidoPago ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+															{pedidoPago ? 'Pago' : 'Não pago'}
+														</span>
 													</td>
 													<td className="px-4 py-3 text-right">
 														<button
@@ -284,7 +476,7 @@ const AdminPagamentos: React.FC = () => {
 								<div>
 									<h5 className="font-semibold mb-2">Cliente</h5>
 									<div className="text-sm">
-										<div><strong>Nome:</strong> {pedidoEncontrado.cliente?.nome || '-'}</div>
+											<div><strong>Nome:</strong> {getComprador(pedidoEncontrado)}</div>
 										<div><strong>CPF:</strong> {formatCPF(pedidoEncontrado.cliente?.cpf)}</div>
 										<div><strong>Email:</strong> {pedidoEncontrado.cliente?.email || '-'}</div>
 									</div>
@@ -320,8 +512,11 @@ const AdminPagamentos: React.FC = () => {
 								<div>
 									<h5 className="font-semibold mb-2">Transação</h5>
 									<div className="text-sm">
-										<div><strong>Status:</strong> {pedidoEncontrado.status || '-'}</div>
-										<div><strong>Valor:</strong> {formatCurrency(pedidoEncontrado.valor_total ?? pedidoEncontrado.total)}</div>
+											<div><strong>Status:</strong> {getStatusPedido(pedidoEncontrado)}</div>
+											<div><strong>Pago?</strong> {isPago(pedidoEncontrado) ? 'Sim' : 'Não'}</div>
+											<div><strong>Valor:</strong> {formatCurrency(getPedidoTotal(pedidoEncontrado))}</div>
+											<div><strong>Associação:</strong> {getAssociacao(pedidoEncontrado)}</div>
+											<div><strong>Retirada:</strong> {getRetirada(pedidoEncontrado)}</div>
 									</div>
 								</div>
 							</div>
@@ -344,7 +539,7 @@ const AdminPagamentos: React.FC = () => {
 								<div className="min-w-0">
 									<h5 className="font-semibold mb-3">Cliente</h5>
 									<div className="bg-white p-3 rounded border space-y-2 text-sm">
-										<div><span className="font-medium">Nome:</span> <span className="ml-2 break-words">{modalPedido.cliente?.nome || '-'}</span></div>
+										<div><span className="font-medium">Nome:</span> <span className="ml-2 break-words">{getComprador(modalPedido)}</span></div>
 										<div><span className="font-medium">CPF:</span> <span className="ml-2">{formatCPF(modalPedido.cliente?.cpf)}</span></div>
 										<div><span className="font-medium">E-mail:</span> <span className="ml-2 break-words">{modalPedido.cliente?.email || '-'}</span></div>
 										<div><span className="font-medium">Telefone:</span> <span className="ml-2">{formatPhone(modalPedido.cliente?.telefone)}</span></div>
@@ -382,12 +577,16 @@ const AdminPagamentos: React.FC = () => {
 								</div>
 
 								<div className="min-w-0">
-									<h5 className="font-semibold mb-3">Transação</h5>
+									<h5 className="font-semibold mb-3">Nota de controle</h5>
 									<div className="bg-white p-3 rounded border text-sm space-y-2">
+										<div><span className="font-medium">Data do pedido:</span> <span className="ml-2">{formatarDataHora(modalPedido.data_pedido)}</span></div>
+										<div><span className="font-medium">Associação:</span> <span className="ml-2 break-words">{getAssociacao(modalPedido)}</span></div>
+										<div><span className="font-medium">Retirada:</span> <span className="ml-2 break-words">{getRetirada(modalPedido)}</span></div>
 										<div><span className="font-medium">Payment ID:</span> <span className="ml-2 break-words">{modalPedido.mercadopago_payment_id || '-'}</span></div>
 										<div><span className="font-medium">Payer Email:</span> <span className="ml-2 break-words">{modalPedido.payer_email || modalPedido.pagamento?.payer_email || '-'}</span></div>
-										<div><span className="font-medium">Status:</span> <span className="ml-2">{modalPedido.status || modalPedido.pagamento?.status || '-'}</span></div>
-										<div><span className="font-medium">Valor:</span> <span className="ml-2">{formatCurrency(modalPedido.valor_total ?? modalPedido.total ?? modalPedido.pagamento?.transaction_amount ?? modalPedido.pagamento?.amount)}</span></div>
+										<div><span className="font-medium">Status:</span> <span className="ml-2">{getStatusPedido(modalPedido)}</span></div>
+										<div><span className="font-medium">Pago?</span> <span className="ml-2">{isPago(modalPedido) ? 'Sim' : 'Não'}</span></div>
+										<div><span className="font-medium">Valor total:</span> <span className="ml-2">{formatCurrency(getPedidoTotal(modalPedido))}</span></div>
 									</div>
 								</div>
 							</div>

@@ -9,6 +9,7 @@ export interface ItemPedido {
 export interface CriarPedidoDTO {
   data_pedido: string;
   fk_feira: number | null;
+  fk_associacao_retirada?: string | null;
   produtos: ItemPedido[];
   cpf_cliente?: string; // Obrigatório quando vendedor faz pedido
 }
@@ -18,11 +19,86 @@ export interface Pedido {
   data_pedido: string;
   fk_feira: number | null;
   fk_cliente: string;
+  retirada_local?: string | null;
   atende_um?: any[];
   produtos_no_pedido?: any[]; // Novo campo retornado pelo backend
   cliente?: any;
   feira?: any;
+  associacao_retirada?: any;
   mercadopago_payment_id?: string | null;
+}
+
+export interface PedidoAdminItem {
+  produto_id?: string;
+  quantidade?: number;
+  produto?: {
+    id_produto?: string;
+    nome?: string;
+    preco?: number;
+    vendedor?: {
+      id_vendedor?: string;
+      nome?: string;
+      telefone?: string;
+      email?: string;
+    };
+  };
+  vendedor?: {
+    id_vendedor?: string;
+    nome?: string;
+    telefone?: string;
+    email?: string;
+  };
+}
+
+export interface PedidoAdmin {
+  pedido_id: number;
+  data_pedido: string;
+  status?: string;
+  pago?: boolean;
+  valor_total_calculado?: number;
+  total_itens?: number;
+  valor_total?: number;
+  total?: number;
+  comprador?: {
+    nome?: string;
+  };
+  nome_cliente?: string;
+  cliente?: {
+    id_cliente?: string;
+    nome?: string;
+    cpf?: string;
+    email?: string;
+    telefone?: string;
+  };
+  feira?: {
+    id_feira?: number;
+    nome?: string;
+    data_feira?: string;
+  };
+  nome_feira?: string;
+  fk_feira?: number | null;
+  associacao_retirada?: {
+    id_associacao?: string;
+    nome?: string;
+    endereco?: string;
+    data_hora?: string;
+  };
+  associacao?: {
+    id_associacao?: string;
+    nome?: string;
+  };
+  nome_associacao?: string;
+  retirada_local?: string | null;
+  mercadopago_payment_id?: string | null;
+  payer_email?: string | null;
+  pagamento?: {
+    payer_email?: string | null;
+    status?: string;
+    transaction_amount?: number;
+    amount?: number;
+  };
+  produtos_no_pedido?: PedidoAdminItem[];
+  atende_um?: PedidoAdminItem[];
 }
 
 export interface MetaPaginacao {
@@ -162,7 +238,7 @@ class PedidoService {
   /**
    * Listar pedidos via rota admin com filtros e paginação
    */
-  async listarAdminPedidos(opts: { status?: string; payer_email?: string; page?: number; limit?: number } = {}): Promise<PaginatedResponse<Pedido>> {
+  async listarAdminPedidos(opts: { status?: string; payer_email?: string; page?: number; limit?: number } = {}): Promise<PaginatedResponse<PedidoAdmin>> {
     try {
       const params: any = {};
       if (opts.status) params.status = opts.status;
@@ -173,7 +249,7 @@ class PedidoService {
       const response = await api.get('/pedido/admin/pedidos', { params });
 
       if (response.data && response.data.data && response.data.meta) {
-        return response.data as PaginatedResponse<Pedido>;
+        return response.data as PaginatedResponse<PedidoAdmin>;
       }
 
       const dataArray = Array.isArray(response.data) ? response.data : [];
@@ -181,6 +257,28 @@ class PedidoService {
     } catch (error) {
       console.error('❌ Erro ao buscar pedidos admin:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Listar pedidos que contêm produtos de um vendedor específico
+   * Mantém fallback seguro para evitar quebrar o perfil caso o backend ainda não exponha a rota.
+   */
+  async listarPedidosDoVendedor(idVendedor: string): Promise<Pedido[]> {
+    try {
+      const response = await api.get(`/pedido/vendedor/${idVendedor}`);
+
+      if (response.data && !Array.isArray(response.data)) {
+        const possibleArray = response.data.pedidos || response.data.data || response.data.results;
+        if (Array.isArray(possibleArray)) {
+          return possibleArray;
+        }
+      }
+
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error: any) {
+      console.warn('⚠️ Não foi possível listar pedidos do vendedor:', error.response?.status || error.message);
+      return [];
     }
   }
 

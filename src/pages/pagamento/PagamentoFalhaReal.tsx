@@ -19,6 +19,13 @@ export default function PagamentoFalhaReal() {
             Infelizmente seu pagamento não pôde ser processado.
           </p>
 
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h2 className="font-semibold text-blue-800 mb-3">E agora?</h2>
+            <p className="text-left text-gray-700">
+              Você pode conferir seus pedidos e tentar novamente pelo carrinho.
+            </p>
+          </div>
+
           {/* Detalhes */}
           {(status || paymentId) && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
@@ -48,6 +55,12 @@ export default function PagamentoFalhaReal() {
               className="bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition font-semibold"
             >
               Tentar Novamente
+            </button>
+            <button
+              onClick={() => navigate('/pedidos')}
+              className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
+            >
+              Ver Meus Pedidos
             </button>
             <button
               onClick={() => navigate('/')}
