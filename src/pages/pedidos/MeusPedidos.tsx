@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
 import pedidoService from '../../services/pedidoService';
 import type { Pedido } from '../../services/pedidoService';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function MeusPedidos() {
   const navigate = useNavigate();
+  const { isAuthenticated, isCliente } = useAuth();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -15,6 +17,18 @@ export default function MeusPedidos() {
   }, []);
 
   const buscarPedidos = async () => {
+    if (!isAuthenticated) {
+      setErro('Você precisa estar logado para ver seus pedidos.');
+      setCarregando(false);
+      return;
+    }
+
+    if (!isCliente) {
+      setErro('Apenas clientes podem acessar Meus Pedidos.');
+      setCarregando(false);
+      return;
+    }
+
     try {
       setCarregando(true);
       setErro(null);
@@ -194,24 +208,35 @@ export default function MeusPedidos() {
   }
 
   if (erro) {
+    const acessoNegado = erro.includes('Apenas clientes');
+
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
         <div className="bg-white rounded-lg shadow-md p-8 max-w-md text-center">
           <div className="text-red-600 text-5xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Erro</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">{acessoNegado ? 'Acesso negado' : 'Erro'}</h2>
           <p className="text-gray-600 mb-6">{erro}</p>
           <div className="flex gap-4 justify-center">
-            <button
-              onClick={() => navigate('/login')}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
-            >
-              Fazer Login
-            </button>
+            {acessoNegado ? (
+              <button
+                onClick={() => navigate('/perfil')}
+                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
+              >
+                Ir para meu perfil
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate('/login')}
+                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
+              >
+                Fazer Login
+              </button>
+            )}
             <button
               onClick={buscarPedidos}
               className="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-400 transition"
             >
-              Tentar Novamente
+              {acessoNegado ? 'Voltar' : 'Tentar Novamente'}
             </button>
           </div>
         </div>
