@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { jsPDF } from 'jspdf';
 import { 
   User, 
   Mail, 
@@ -13,7 +14,8 @@ import {
   LogOut,
   Save,
   X,
-  ShoppingBag
+  ShoppingBag,
+  Download
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFavoritos } from '../../contexts/FavoritosContext';
@@ -745,6 +747,131 @@ const PerfilCliente: React.FC = () => {
     }
   };
 
+  const formatarMoeda = (valor: number) => {
+    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
+
+  const getItensPedido = (pedido: Pedido) => {
+    if (Array.isArray(pedido.produtos_no_pedido) && pedido.produtos_no_pedido.length > 0) return pedido.produtos_no_pedido;
+    if (Array.isArray(pedido.atende_um) && pedido.atende_um.length > 0) return pedido.atende_um;
+    return [];
+  };
+
+  const getNomeProduto = (item: any) => item?.produto?.nome || item?.produto?.nome_produto || item?.nome || `Produto ${item?.fk_produto || ''}`;
+  const getQuantidadeItem = (item: any) => Number(item?.quantidade ?? item?.qty ?? 1) || 1;
+  const getValorUnitario = (item: any) => Number(item?.preco ?? item?.valor ?? item?.valor_unitario ?? item?.produto?.preco ?? item?.produto?.valor ?? item?.produto?.preco_venda ?? 0) || 0;
+  const getVendedorItem = (item: any) => item?.produto?.vendedor || item?.vendedor || item?.vendedor_info || item?.associacao || null;
+
+  const getTotalPedido = (pedido: Pedido) => {
+    const itens = getItensPedido(pedido);
+    return itens.reduce((acc, item) => acc + (getQuantidadeItem(item) * getValorUnitario(item)), 0);
+  };
+
+  const pedidoFoiPago = (pedido: Pedido) => {
+    const status = String((pedido as any)?.status || (pedido as any)?.pagamento?.status || '').toUpperCase();
+    return ['PAGO', 'APROVADO', 'APPROVED', 'PAID'].includes(status);
+  };
+
+  const baixarComprovantePDF = (pedido: Pedido) => {
+    const doc = new jsPDF();
+    const margemX = 14;
+    let y = 16;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text(`Comprovante do Pedido #${pedido.pedido_id}`, margemX, y);
+    y += 8;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, margemX, y);
+    y += 10;
+
+    doc.setDrawColor(210, 210, 210);
+    doc.line(margemX, y, 196, y);
+    y += 8;
+
+    const clienteNome = (pedido as any)?.cliente?.nome || '-';
+    const clienteCpf = (pedido as any)?.cliente?.cpf || '-';
+    const feiraNome = pedido.feira?.nome || `Feira #${pedido.fk_feira}` || '-';
+    const retiradaNome = pedido.associacao_retirada?.nome || pedido.retirada_local || 'Não informado';
+    const retiradaEndereco = pedido.associacao_retirada?.endereco || '';
+    const retiradaHorario = pedido.associacao_retirada?.data_hora || '';
+
+    const linhasInformacoes = [
+      `Data do pedido: ${new Date(pedido.data_pedido).toLocaleString('pt-BR')}`,
+      `Cliente: ${clienteNome}`,
+      `CPF: ${clienteCpf}`,
+      `Feira: ${feiraNome}`,
+      `Local de retirada: ${retiradaNome}`,
+      retiradaEndereco ? `Endereço: ${retiradaEndereco}` : '',
+      retiradaHorario ? `Horário: ${retiradaHorario}` : '',
+      `Status: ${String((pedido as any)?.status || (pedido as any)?.pagamento?.status || '-').toUpperCase()}`,
+      `Pagamento: ${pedidoFoiPago(pedido) ? 'Confirmado' : 'Pendente'}`,
+    ].filter(Boolean);
+
+    linhasInformacoes.forEach((linha) => {
+      const wrapped = doc.splitTextToSize(linha, 180);
+      doc.text(wrapped, margemX, y);
+      y += wrapped.length * 6;
+    });
+
+    y += 4;
+    doc.setDrawColor(210, 210, 210);
+    doc.line(margemX, y, 196, y);
+    y += 8;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text('Produtos', margemX, y);
+    y += 7;
+
+    const itens = getItensPedido(pedido);
+    if (itens.length === 0) {
+      doc.setFont('helvetica', 'normal');
+      doc.text('Nenhum item encontrado.', margemX, y);
+      y += 8;
+    } else {
+      itens.forEach((item) => {
+        const vendedor = getVendedorItem(item);
+        const nomeVendedor = vendedor?.nome || vendedor?.nome_vendedor || '-';
+        const quantidade = getQuantidadeItem(item);
+        const valorUnit = getValorUnitario(item);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        const nomeProduto = doc.splitTextToSize(getNomeProduto(item), 140);
+        doc.text(nomeProduto, margemX, y);
+        y += nomeProduto.length * 5;
+
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Quantidade: ${quantidade}`, margemX, y);
+        y += 5;
+        doc.text(`Vendedor: ${nomeVendedor}`, margemX, y);
+        y += 5;
+        doc.text(`Valor unitário: ${formatarMoeda(valorUnit)}`, margemX, y);
+        y += 5;
+        doc.text(`Subtotal: ${formatarMoeda(quantidade * valorUnit)}`, margemX, y);
+        y += 7;
+
+        if (y > 270) {
+          doc.addPage();
+          y = 16;
+        }
+      });
+    }
+
+    y += 2;
+    doc.setDrawColor(210, 210, 210);
+    doc.line(margemX, y, 196, y);
+    y += 8;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Total do pedido: ${formatarMoeda(getTotalPedido(pedido))}`, margemX, y);
+
+    doc.save(`comprovante_pedido_${pedido.pedido_id}.pdf`);
+  };
+
   const carregarDadosCompletos = async () => {
     if (!user?.cliente?.cpf) return;
     
@@ -1418,6 +1545,10 @@ const PerfilCliente: React.FC = () => {
                   Pedidos
                 </h3>
 
+                <div className="mb-6 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+                  Aqui você pode revisar seus pedidos e baixar o comprovante em PDF quando precisar mostrar o pagamento.
+                </div>
+
                 {loadingPedidos ? (
                   <div className="p-8 text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
@@ -1481,22 +1612,31 @@ const PerfilCliente: React.FC = () => {
                             </div>
                           </div>
 
-                          {/* Botão Ver Detalhes */}
-                          <button
-                            onClick={() => {
-                              setPedidoSelecionado(pedido);
-                              setShowPedidoModal(true);
-                            }}
-                            className="w-full px-4 py-2 rounded-lg transition-colors font-semibold text-sm"
-                            style={{
-                              fontFamily: 'Montserrat, sans-serif',
-                              background: 'rgba(146, 169, 22, 1)',
-                              color: '#ffffff',
-                              border: 'none'
-                            }}
-                          >
-                            Ver detalhes
-                          </button>
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            <button
+                              onClick={() => {
+                                setPedidoSelecionado(pedido);
+                                setShowPedidoModal(true);
+                              }}
+                              className="flex-1 px-4 py-2 rounded-lg transition-colors font-semibold text-sm"
+                              style={{
+                                fontFamily: 'Montserrat, sans-serif',
+                                background: 'rgba(146, 169, 22, 1)',
+                                color: '#ffffff',
+                                border: 'none'
+                              }}
+                            >
+                              Ver detalhes
+                            </button>
+
+                            <button
+                              onClick={() => baixarComprovantePDF(pedido)}
+                              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 border-green-600 text-green-700 font-semibold text-sm hover:bg-green-50 transition-colors"
+                            >
+                              <Download className="w-4 h-4" />
+                              Baixar PDF
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}

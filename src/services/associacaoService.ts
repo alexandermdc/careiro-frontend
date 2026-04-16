@@ -17,6 +17,7 @@ export interface Associacao {
   image?: string;
   endereco?: string;
   data_hora?: string;
+  disponivel_retirada?: boolean;
   vendedor?: Vendedor[];
 }
 
@@ -26,15 +27,40 @@ export interface CreateAssociacaoData {
   image?: string;
   endereco?: string;
   data_hora?: string;
+  disponivel_retirada?: boolean;
 }
 
 class AssociacaoService {
+  private normalizarLista(data: any): Associacao[] {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+    if (Array.isArray(data?.associacoes)) return data.associacoes;
+    return [];
+  }
+
   async getAll(): Promise<Associacao[]> {
     try {
-      const response = await api.get('/associacao');
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Erro ao buscar associações');
+      const response = await api.get('/associacoes');
+      return this.normalizarLista(response.data);
+    } catch (errorPlural: any) {
+      try {
+        const fallbackResponse = await api.get('/associacao');
+        return this.normalizarLista(fallbackResponse.data);
+      } catch (errorSingular: any) {
+        throw new Error(errorSingular.response?.data?.message || errorPlural.response?.data?.message || 'Erro ao buscar associações');
+      }
+    }
+  }
+
+  async getDisponiveisRetirada(): Promise<Associacao[]> {
+    try {
+      const response = await api.get('/associacoes', {
+        params: { disponivel_retirada: true }
+      });
+      return this.normalizarLista(response.data);
+    } catch {
+      const todas = await this.getAll();
+      return todas.filter((assoc) => assoc.disponivel_retirada === true);
     }
   }
 
@@ -80,6 +106,20 @@ class AssociacaoService {
       }
       
       throw new Error(error.response?.data?.message || error.response?.data?.error || 'Erro ao atualizar associação');
+    }
+  }
+
+  async atualizarDisponibilidadeRetirada(id: string, disponivel: boolean): Promise<Associacao> {
+    try {
+      const response = await api.patch(`/associacoes/${id}`, {
+        disponivel_retirada: disponivel,
+      });
+      return response.data.associacao || response.data;
+    } catch {
+      const response = await api.put(`/associacao/${id}`, {
+        disponivel_retirada: disponivel,
+      });
+      return response.data.associacao || response.data;
     }
   }
 

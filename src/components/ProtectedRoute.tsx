@@ -27,6 +27,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireRole }
 
   // Verificar papel se especificado
   if (requireRole && userType !== requireRole) {
+    const roleLabel = {
+      ADMIN: 'administradores',
+      VENDEDOR: 'vendedores',
+      CLIENTE: 'clientes',
+    }[requireRole];
+
     return (
       <div className="flex justify-center items-center h-screen bg-gray-50">
         <div className="text-center max-w-md p-8 bg-white rounded-2xl shadow-xl">
@@ -34,7 +40,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireRole }
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Acesso Negado</h2>
           <p className="text-gray-600 mb-6">
             Você não tem permissão para acessar esta página.
-            {requireRole === 'ADMIN' && ' Apenas administradores podem acessar esta área.'}
+            {` Apenas ${roleLabel} podem acessar esta área.`}
           </p>
           <a
             href="/"

@@ -37,6 +37,16 @@ export default function PagamentoSucessoReal() {
     carregarPedido();
   }, [pedidoId, paymentId, status, preferenceId]);
 
+  useEffect(() => {
+    if (loading) return;
+
+    const timeout = setTimeout(() => {
+      navigate('/pedidos');
+    }, 4000);
+
+    return () => clearTimeout(timeout);
+  }, [loading, navigate]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
@@ -82,6 +92,21 @@ export default function PagamentoSucessoReal() {
                 {pedido.produtos_no_pedido && (
                   <p><strong>Itens:</strong> {pedido.produtos_no_pedido.length} produtos</p>
                 )}
+                {(pedido.associacao_retirada || pedido.retirada_local) && (
+                  <>
+                    <p>
+                      <strong>Retirada:</strong>{' '}
+                      {pedido.associacao_retirada?.nome || pedido.retirada_local}
+                    </p>
+                    {(pedido.associacao_retirada?.endereco || pedido.associacao_retirada?.data_hora) && (
+                      <p>
+                        <strong>Local/Horário:</strong>{' '}
+                        {pedido.associacao_retirada?.endereco || 'Endereço não informado'}
+                        {pedido.associacao_retirada?.data_hora ? ` • ${pedido.associacao_retirada.data_hora}` : ''}
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -99,10 +124,10 @@ export default function PagamentoSucessoReal() {
           {/* Ações */}
           <div className="flex gap-4 justify-center">
             <button
-              onClick={() => navigate('/produtos')}
+              onClick={() => navigate('/pedidos')}
               className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition font-semibold"
             >
-              Continuar Comprando
+              Ver Meus Pedidos
             </button>
             <button
               onClick={() => navigate('/')}

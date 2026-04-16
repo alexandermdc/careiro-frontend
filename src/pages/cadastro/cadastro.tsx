@@ -10,6 +10,7 @@ export default function FormCliente() {
   const [cpf, setCPF] = useState('');
   const [telefone, setTelefone] = useState('');
   const [senha, setSenha] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,6 +35,8 @@ export default function FormCliente() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (isSubmitting) return;
+
     const cpfLimpo = limparCPF(cpf);
     if (!validarCPF(cpfLimpo)) {
       alert('CPF inválido! Por favor, verifique o CPF digitado.');
@@ -41,6 +44,8 @@ export default function FormCliente() {
     }
 
     try {
+      setIsSubmitting(true);
+
       const payload = {
         nome,
         email,
@@ -55,6 +60,8 @@ export default function FormCliente() {
     } catch (err) {
       console.error('Erro ao cadastrar cliente:', err);
       alert('Ocorreu um erro ao processar seu cadastro. Tente novamente.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -133,8 +140,12 @@ export default function FormCliente() {
                 </div>
 
                 <div>
-                  <button type="submit" className="w-full bg-verde-escuro text-white py-3 rounded-full hover:bg-verde-claro transition">
-                    Fazer Cadastro
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-verde-escuro text-white py-3 rounded-full font-semibold shadow-md transition-transform transition-colors duration-150 hover:bg-verde-claro active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-verde-claro focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-verde-escuro"
+                  >
+                    {isSubmitting ? 'Finalizando cadastro...' : 'Fazer Cadastro'}
                   </button>
                 </div>
 
