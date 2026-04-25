@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useCarrinho } from '../../contexts/CarrinhoContext';
 import pedidoService from '../../services/pedidoService';
 import pagamentoService from '../../services/pagamentoService';
-import associacaoService from '../../services/associacaoService';
-import type { Associacao } from '../../services/associacaoService';
+import feiraService from '../../services/feiraService';
+import type { Feira } from '../../services/feiraService';
 import { ModalNotificacao } from '../../components/ModalNotificacao';
 import { useNotificacao } from '../../hooks/useNotificacao';
 
@@ -14,24 +14,24 @@ export default function CheckoutPedido() {
   const notificacao = useNotificacao();
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
-  const [associacoes, setAssociacoes] = useState<Associacao[]>([]);
+  const [feiras, setFeiras] = useState<Feira[]>([]);
   const [formaEntrega, setFormaEntrega] = useState<'retirada' | 'entrega'>('retirada');
-  const [fkAssociacaoRetirada, setFkAssociacaoRetirada] = useState('');
+  const [fkFeiraRetirada, setFkFeiraRetirada] = useState('');
 
-  const associacaoSelecionada = associacoes.find((assoc) => assoc.id_associacao === fkAssociacaoRetirada) || null;
+  const feiraSelecionada = feiras.find((feira) => feira.id_feira.toString() === fkFeiraRetirada) || null;
 
   useEffect(() => {
-    const carregarAssociacoes = async () => {
+    const carregarFeiras = async () => {
       try {
-        const data = await associacaoService.getDisponiveisRetirada();
-        setAssociacoes(data || []);
+        const data = await feiraService.getDisponiveisRetirada();
+        setFeiras(data || []);
       } catch (error) {
-        console.error('❌ Erro ao carregar associações:', error);
-        setAssociacoes([]);
+        console.error('❌ Erro ao carregar feiras:', error);
+        setFeiras([]);
       }
     };
 
-    carregarAssociacoes();
+    carregarFeiras();
   }, []);
 
   const handleFinalizarPedido = async () => {
@@ -57,22 +57,18 @@ export default function CheckoutPedido() {
       return;
     }
 
-    if (!fkAssociacaoRetirada) {
+    if (!fkFeiraRetirada) {
       setErro('Selecione o local de retirada antes de continuar.');
       return;
     }
 
-    if (!associacaoSelecionada) {
+    if (!feiraSelecionada) {
       setErro('O local de retirada selecionado não está disponível. Escolha outro.');
       return;
     }
 
-    // Usar primeira feira encontrada ou null se não houver
-    // Verificar se fk_feira é um número válido
-    const primeiraFeira = itens.find(item => item.fk_feira)?.fk_feira;
-    const fk_feira = primeiraFeira && !isNaN(Number(primeiraFeira)) 
-      ? Number(primeiraFeira) 
-      : null;
+    const fkFeiraRetiradaNumero = Number(fkFeiraRetirada);
+    const fk_feira = !Number.isNaN(fkFeiraRetiradaNumero) ? fkFeiraRetiradaNumero : null;
 
     setProcessando(true);
     setErro(null);
@@ -89,7 +85,7 @@ export default function CheckoutPedido() {
       const dadosPedido = {
         data_pedido: new Date().toISOString(),
         fk_feira: fk_feira,
-        fk_associacao_retirada: fkAssociacaoRetirada,
+        fk_feira_retirada: fk_feira,
         produtos: produtos
       };
 
@@ -154,7 +150,7 @@ export default function CheckoutPedido() {
                 <p className="text-sm font-semibold uppercase tracking-wide text-verde-escuro">Checkout</p>
                 <h2 className="text-2xl font-bold text-gray-900">Revise sua compra e escolha a retirada</h2>
                 <p className="mt-1 text-sm text-gray-600">
-                  O sistema mostra apenas as associações liberadas pelo administrador.
+                  O sistema mostra apenas as feiras liberadas pelo administrador.
                 </p>
               </div>
 
@@ -174,16 +170,16 @@ export default function CheckoutPedido() {
             {formaEntrega === 'retirada' && (
               <div className="mt-5 rounded-2xl border border-green-200 bg-white p-4">
                 <p className="text-sm font-semibold text-gray-700">Local de retirada selecionado</p>
-                {associacaoSelecionada ? (
+                {feiraSelecionada ? (
                   <div className="mt-2">
-                    <p className="text-lg font-bold text-verde-escuro">{associacaoSelecionada.nome}</p>
+                    <p className="text-lg font-bold text-verde-escuro">{feiraSelecionada.nome}</p>
                     <p className="text-sm text-gray-600">
-                      {associacaoSelecionada.endereco || associacaoSelecionada.descricao || 'Local de retirada'}
+                      {feiraSelecionada.localizacao || feiraSelecionada.descricao || 'Local de retirada'}
                     </p>
                   </div>
                 ) : (
                   <p className="mt-2 text-sm text-amber-700">
-                    Selecione uma associação abaixo para continuar.
+                    Selecione uma feira abaixo para continuar.
                   </p>
                 )}
               </div>
@@ -257,17 +253,17 @@ export default function CheckoutPedido() {
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-3">Local de Retirada</h2>
               <p className="text-sm text-gray-600 mb-4">
-                Escolha uma associação disponível para retirar seu pedido.
+                Escolha uma feira disponível para retirar seu pedido.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {associacoes.map((assoc) => {
-                  const selecionado = fkAssociacaoRetirada === assoc.id_associacao;
+                {feiras.map((feira) => {
+                  const selecionado = fkFeiraRetirada === feira.id_feira.toString();
                   return (
                     <button
-                      key={assoc.id_associacao}
+                      key={feira.id_feira}
                       type="button"
-                      onClick={() => setFkAssociacaoRetirada(assoc.id_associacao)}
+                      onClick={() => setFkFeiraRetirada(feira.id_feira.toString())}
                       className={`text-left rounded-2xl border-2 px-4 py-4 transition-all ${
                         selecionado
                           ? 'bg-green-50 border-verde-escuro shadow-md'
@@ -278,10 +274,10 @@ export default function CheckoutPedido() {
                         <div className={`mt-1 w-3 h-3 rounded-full ${selecionado ? 'bg-verde-escuro' : 'bg-gray-300'}`} />
                         <div className="min-w-0">
                           <p className={`font-semibold truncate ${selecionado ? 'text-verde-escuro' : 'text-gray-800'}`}>
-                            {assoc.nome}
+                            {feira.nome}
                           </p>
                           <p className="text-sm text-gray-600 line-clamp-2 mt-1">
-                            {assoc.endereco || assoc.descricao || 'Local de retirada'}
+                            {feira.localizacao || feira.descricao || 'Local de retirada'}
                           </p>
                         </div>
                       </div>
@@ -290,9 +286,9 @@ export default function CheckoutPedido() {
                 })}
               </div>
 
-              {associacoes.length === 0 && (
+              {feiras.length === 0 && (
                 <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
-                    Nenhuma associação foi liberada pelo administrador para retirada no momento.
+                    Nenhuma feira foi liberada pelo administrador para retirada no momento.
                 </div>
               )}
             </div>
@@ -319,7 +315,7 @@ export default function CheckoutPedido() {
                   type="button"
                   className="px-5 py-3 rounded-full border-2 font-semibold bg-white border-gray-200 text-gray-700 hover:border-verde-escuro hover:text-verde-escuro text-left"
                 >
-                  Sede da Associação
+                  Ponto da Feira
                 </button>
               </div>
 
@@ -358,9 +354,9 @@ export default function CheckoutPedido() {
           <div className="min-w-0">
             <p className="text-sm text-gray-600">Total a pagar</p>
             <p className="text-2xl font-bold text-verde-escuro">R$ {valorTotal.toFixed(2)}</p>
-            {formaEntrega === 'retirada' && associacaoSelecionada && (
+            {formaEntrega === 'retirada' && feiraSelecionada && (
               <p className="text-xs text-gray-500 mt-1 truncate">
-                Retirada: {associacaoSelecionada.nome}
+                Retirada: {feiraSelecionada.nome}
               </p>
             )}
           </div>
@@ -376,7 +372,7 @@ export default function CheckoutPedido() {
 
             <button
               onClick={handleFinalizarPedido}
-              disabled={processando || (formaEntrega === 'retirada' && !fkAssociacaoRetirada)}
+              disabled={processando || (formaEntrega === 'retirada' && !fkFeiraRetirada)}
               className="px-6 py-3 rounded-2xl bg-verde-escuro text-white font-bold hover:bg-verde-escuro/90 transition flex items-center gap-2 shadow-lg disabled:opacity-50"
             >
               {processando ? (

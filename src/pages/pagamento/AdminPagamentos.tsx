@@ -106,9 +106,11 @@ const AdminPagamentos: React.FC = () => {
 		return pedido?.cliente?.nome || pedido?.comprador?.nome || pedido?.nome_cliente || '-';
 	};
 
-	const getAssociacao = (pedido: PedidoAdmin | null) => {
+	const getLocalRetirada = (pedido: PedidoAdmin | null) => {
 		return (
+			pedido?.feira_retirada?.nome ||
 			pedido?.associacao_retirada?.nome ||
+			pedido?.feira?.nome ||
 			pedido?.associacao?.nome ||
 			pedido?.nome_associacao ||
 			'-'
@@ -116,7 +118,7 @@ const AdminPagamentos: React.FC = () => {
 	};
 
 	const getRetirada = (pedido: PedidoAdmin | null) => {
-		return pedido?.retirada_local || pedido?.associacao_retirada?.endereco || pedido?.associacao_retirada?.data_hora || '-';
+		return pedido?.retirada_local || pedido?.feira_retirada?.localizacao || pedido?.feira_retirada?.data_hora || pedido?.associacao_retirada?.endereco || pedido?.associacao_retirada?.data_hora || '-';
 	};
 
 	const csvEscape = (value: any) => {
@@ -145,7 +147,7 @@ const AdminPagamentos: React.FC = () => {
 			'Status',
 			'Pago',
 			'Valor Total',
-			'Associação',
+			'Feira de retirada',
 			'Retirada',
 			'Feira',
 			'Payment ID',
@@ -169,7 +171,7 @@ const AdminPagamentos: React.FC = () => {
 				getStatusPedido(pedido),
 				isPago(pedido) ? 'Sim' : 'Não',
 				formatCurrency(getPedidoTotal(pedido)),
-				getAssociacao(pedido),
+				getLocalRetirada(pedido),
 				getRetirada(pedido),
 				pedido?.feira?.nome || pedido?.nome_feira || pedido?.fk_feira || '-',
 				pedido?.mercadopago_payment_id || '-',
@@ -253,7 +255,7 @@ const AdminPagamentos: React.FC = () => {
 					<h3 className="text-xl font-bold text-gray-900">Controle de Pedidos</h3>
 				</div>
 				<p className="text-sm text-gray-600 mb-4">
-					Visualize pedidos com comprador, vendedores, itens, status de pagamento, associação, retirada e total para controle interno.
+					Visualize pedidos com comprador, vendedores, itens, status de pagamento, feira de retirada e total para controle interno.
 				</p>
 
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -370,7 +372,7 @@ const AdminPagamentos: React.FC = () => {
 										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pedido</th>
 										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
 										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Comprador</th>
-										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Associação / Retirada</th>
+										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Feira de retirada</th>
 										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Itens</th>
 										<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vendedores</th>
 										<th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor</th>
@@ -392,8 +394,8 @@ const AdminPagamentos: React.FC = () => {
 													<td className="px-4 py-3 text-sm text-gray-700">{getComprador(pedido)}</td>
 													<td className="px-4 py-3 text-sm text-gray-700">
 														<div className="flex flex-col">
-															<span>{getAssociacao(pedido)}</span>
-															<span className="text-xs text-gray-500">Retirada: {getRetirada(pedido)}</span>
+																<span>{getLocalRetirada(pedido)}</span>
+																	<span className="text-xs text-gray-500">Local/Horário: {getRetirada(pedido)}</span>
 														</div>
 													</td>
 													<td className="px-4 py-3 text-sm text-gray-700">{quantidadeItens} item(ns)</td>
@@ -515,7 +517,7 @@ const AdminPagamentos: React.FC = () => {
 											<div><strong>Status:</strong> {getStatusPedido(pedidoEncontrado)}</div>
 											<div><strong>Pago?</strong> {isPago(pedidoEncontrado) ? 'Sim' : 'Não'}</div>
 											<div><strong>Valor:</strong> {formatCurrency(getPedidoTotal(pedidoEncontrado))}</div>
-											<div><strong>Associação:</strong> {getAssociacao(pedidoEncontrado)}</div>
+											<div><strong>Feira de retirada:</strong> {getLocalRetirada(pedidoEncontrado)}</div>
 											<div><strong>Retirada:</strong> {getRetirada(pedidoEncontrado)}</div>
 									</div>
 								</div>
@@ -580,7 +582,7 @@ const AdminPagamentos: React.FC = () => {
 									<h5 className="font-semibold mb-3">Nota de controle</h5>
 									<div className="bg-white p-3 rounded border text-sm space-y-2">
 										<div><span className="font-medium">Data do pedido:</span> <span className="ml-2">{formatarDataHora(modalPedido.data_pedido)}</span></div>
-										<div><span className="font-medium">Associação:</span> <span className="ml-2 break-words">{getAssociacao(modalPedido)}</span></div>
+										<div><span className="font-medium">Feira de retirada:</span> <span className="ml-2 break-words">{getLocalRetirada(modalPedido)}</span></div>
 										<div><span className="font-medium">Retirada:</span> <span className="ml-2 break-words">{getRetirada(modalPedido)}</span></div>
 										<div><span className="font-medium">Payment ID:</span> <span className="ml-2 break-words">{modalPedido.mercadopago_payment_id || '-'}</span></div>
 										<div><span className="font-medium">Payer Email:</span> <span className="ml-2 break-words">{modalPedido.payer_email || modalPedido.pagamento?.payer_email || '-'}</span></div>

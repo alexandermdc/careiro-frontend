@@ -321,8 +321,8 @@ const PerfilVendedor: React.FC = () => {
         qtd,
         formatCurrency(valorUnit),
         formatCurrency(qtd * valorUnit),
-        pedido?.associacao_retirada?.nome || pedido?.retirada_local || pedido?.feira?.nome || '-',
-        pedido?.retirada_local || pedido?.associacao_retirada?.endereco || pedido?.associacao_retirada?.data_hora || '-',
+        pedido?.feira_retirada?.nome || pedido?.associacao_retirada?.nome || pedido?.retirada_local || pedido?.feira?.nome || '-',
+        pedido?.retirada_local || pedido?.feira_retirada?.localizacao || pedido?.feira_retirada?.data_hora || pedido?.associacao_retirada?.endereco || pedido?.associacao_retirada?.data_hora || '-',
       ].map(csvEscape).join(';');
     });
 
@@ -366,8 +366,8 @@ const PerfilVendedor: React.FC = () => {
           qtd,
           formatCurrency(valorUnit),
           formatCurrency(qtd * valorUnit),
-          pedido?.associacao_retirada?.nome || pedido?.retirada_local || pedido?.feira?.nome || '-',
-          pedido?.retirada_local || pedido?.associacao_retirada?.endereco || pedido?.associacao_retirada?.data_hora || '-',
+          pedido?.feira_retirada?.nome || pedido?.associacao_retirada?.nome || pedido?.retirada_local || pedido?.feira?.nome || '-',
+          pedido?.retirada_local || pedido?.feira_retirada?.localizacao || pedido?.feira_retirada?.data_hora || pedido?.associacao_retirada?.endereco || pedido?.associacao_retirada?.data_hora || '-',
         ].map(csvEscape).join(';');
       });
     });
@@ -905,7 +905,7 @@ const PerfilVendedor: React.FC = () => {
                               Comprador: <span className="font-medium text-gray-800">{pedido?.cliente?.nome || '-'}</span>
                             </p>
                             <p className="text-sm text-gray-600 mb-2">
-                              Feira/Associação: <span className="font-medium text-gray-800">{pedido?.associacao_retirada?.nome || pedido?.retirada_local || pedido?.feira?.nome || '-'}</span>
+                              Feira de retirada: <span className="font-medium text-gray-800">{pedido?.feira_retirada?.nome || pedido?.associacao_retirada?.nome || pedido?.retirada_local || pedido?.feira?.nome || '-'}</span>
                             </p>
                           </div>
 

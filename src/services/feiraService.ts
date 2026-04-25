@@ -7,6 +7,7 @@ export interface Feira {
   descricao?: string | null;
   localizacao?: string | null;
   image?: string | null;
+  disponivel_retirada?: boolean;
 }
 
 export interface CreateFeiraData {
@@ -18,13 +19,20 @@ export interface CreateFeiraData {
 }
 
 class FeiraService {
+  private normalizarLista(data: any): Feira[] {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+    if (Array.isArray(data?.feiras)) return data.feiras;
+    return [];
+  }
+
   /**
    * Listar todas as feiras
    */
   async listarTodas(): Promise<Feira[]> {
     try {
       const response = await api.get('/feira');
-      return response.data;
+      return this.normalizarLista(response.data);
     } catch (error: any) {
       console.error('❌ Erro ao buscar feiras:', error);
       throw new Error(
@@ -49,6 +57,21 @@ class FeiraService {
         error.response?.data?.message || 
         'Erro ao buscar feira'
       );
+    }
+  }
+
+  /**
+   * Listar feiras disponíveis para retirada
+   */
+  async getDisponiveisRetirada(): Promise<Feira[]> {
+    try {
+      const response = await api.get('/feira', {
+        params: { disponivel_retirada: true }
+      });
+      return this.normalizarLista(response.data);
+    } catch {
+      const todas = await this.listarTodas();
+      return todas.filter((feira) => feira.disponivel_retirada === true);
     }
   }
 
@@ -160,6 +183,20 @@ class FeiraService {
         error.response?.data?.error ||
         'Erro ao deletar feira'
       );
+    }
+  }
+
+  async atualizarDisponibilidadeRetirada(id: number, disponivel: boolean): Promise<Feira> {
+    try {
+      const response = await api.patch(`/feira/${id}`, {
+        disponivel_retirada: disponivel,
+      });
+      return response.data.feira || response.data;
+    } catch {
+      const response = await api.put(`/feira/${id}`, {
+        disponivel_retirada: disponivel,
+      });
+      return response.data.feira || response.data;
     }
   }
 

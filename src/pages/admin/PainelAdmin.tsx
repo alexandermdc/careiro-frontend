@@ -196,9 +196,9 @@ const PainelAdmin: React.FC = () => {
     },
     {
       title: 'Retirada no Checkout',
-      description: 'Defina quais associações ficam disponíveis como local de retirada',
+      description: 'Defina quais feiras ficam disponíveis como local de retirada',
       icon: MapPin,
-      link: '/admin/associacoes',
+      link: '/admin/feiras',
       color: 'bg-sky-50 hover:bg-sky-100 border-sky-200',
       iconColor: 'text-sky-600',
       badge: 'Retirada'

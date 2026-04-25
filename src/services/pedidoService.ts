@@ -9,6 +9,7 @@ export interface ItemPedido {
 export interface CriarPedidoDTO {
   data_pedido: string;
   fk_feira: number | null;
+  fk_feira_retirada?: number | null;
   fk_associacao_retirada?: string | null;
   produtos: ItemPedido[];
   cpf_cliente?: string; // Obrigatório quando vendedor faz pedido
@@ -18,12 +19,14 @@ export interface Pedido {
   pedido_id: number;
   data_pedido: string;
   fk_feira: number | null;
+  fk_feira_retirada?: number | null;
   fk_cliente: string;
   retirada_local?: string | null;
   atende_um?: any[];
   produtos_no_pedido?: any[]; // Novo campo retornado pelo backend
   cliente?: any;
   feira?: any;
+  feira_retirada?: any;
   associacao_retirada?: any;
   mercadopago_payment_id?: string | null;
 }
@@ -81,6 +84,12 @@ export interface PedidoAdmin {
     id_associacao?: string;
     nome?: string;
     endereco?: string;
+    data_hora?: string;
+  };
+  feira_retirada?: {
+    id_feira?: number;
+    nome?: string;
+    localizacao?: string;
     data_hora?: string;
   };
   associacao?: {

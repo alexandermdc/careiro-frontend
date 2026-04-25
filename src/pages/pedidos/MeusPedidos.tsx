@@ -116,9 +116,9 @@ export default function MeusPedidos() {
     const clienteNome = (pedido as any)?.cliente?.nome || '-';
     const clienteCpf = (pedido as any)?.cliente?.cpf || '-';
     const feiraNome = pedido.feira?.nome || `Feira #${pedido.fk_feira}` || '-';
-    const retiradaNome = pedido.associacao_retirada?.nome || pedido.retirada_local || 'Não informado';
-    const retiradaEndereco = pedido.associacao_retirada?.endereco || '';
-    const retiradaHorario = pedido.associacao_retirada?.data_hora || '';
+    const retiradaNome = pedido.feira_retirada?.nome || pedido.associacao_retirada?.nome || pedido.retirada_local || 'Não informado';
+    const retiradaEndereco = pedido.feira_retirada?.localizacao || pedido.associacao_retirada?.endereco || '';
+    const retiradaHorario = pedido.feira_retirada?.data_hora || pedido.associacao_retirada?.data_hora || '';
 
     const dadosBloco = [
       `Data do pedido: ${formatarData(pedido.data_pedido)}`,
@@ -313,16 +313,16 @@ export default function MeusPedidos() {
                   </div>
                 )}
 
-                {(pedido.associacao_retirada || pedido.retirada_local) && (
+                {(pedido.feira_retirada || pedido.associacao_retirada || pedido.retirada_local) && (
                   <div className="mb-4 p-3 bg-green-50 rounded-lg border border-green-100">
                     <p className="text-sm text-gray-700">
-                      <strong>Retirada:</strong>{' '}
-                      {pedido.associacao_retirada?.nome || pedido.retirada_local || 'Local informado no pedido'}
+                      <strong>Feira de retirada:</strong>{' '}
+                      {pedido.feira_retirada?.nome || pedido.associacao_retirada?.nome || pedido.retirada_local || 'Local informado no pedido'}
                     </p>
-                    {(pedido.associacao_retirada?.endereco || pedido.associacao_retirada?.data_hora) && (
+                    {(pedido.feira_retirada?.localizacao || pedido.feira_retirada?.data_hora || pedido.associacao_retirada?.endereco || pedido.associacao_retirada?.data_hora) && (
                       <p className="text-xs text-gray-600 mt-1">
-                        {pedido.associacao_retirada?.endereco || 'Endereço não informado'}
-                        {pedido.associacao_retirada?.data_hora ? ` • ${pedido.associacao_retirada.data_hora}` : ''}
+                        {pedido.feira_retirada?.localizacao || pedido.associacao_retirada?.endereco || 'Endereço não informado'}
+                        {(pedido.feira_retirada?.data_hora || pedido.associacao_retirada?.data_hora) ? ` • ${pedido.feira_retirada?.data_hora || pedido.associacao_retirada?.data_hora}` : ''}
                       </p>
                     )}
                   </div>

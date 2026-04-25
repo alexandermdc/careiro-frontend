@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Modal from './Modal';
 import { ShoppingBagIcon, Tag, Package, Heart } from 'lucide-react';
-import feiraService from '../services/feiraService';
 import vendedorService from '../services/vendedorService';
 import associacaoService from '../services/associacaoService';
 
@@ -23,7 +22,6 @@ import associacaoService from '../services/associacaoService';
     isFavorito,
   }) => {
     const [vendedorNomeCarregado, setVendedorNomeCarregado] = useState('');
-    const [feiraNomeCarregada, setFeiraNomeCarregada] = useState('');
     const [associacaoNomeCarregada, setAssociacaoNomeCarregada] = useState('');
 
     const produtoAny = produto as any;
@@ -52,13 +50,6 @@ import associacaoService from '../services/associacaoService';
       produtoAny?.vendedor?.id_vendedor ||
       '';
 
-    const feiraId =
-      produtoAny?.fk_feira ||
-      produtoAny?.id_feira ||
-      produtoAny?.feira?.id_feira ||
-      produtoAny?.feira?.id ||
-      '';
-
     const associacaoId =
       produtoAny?.fk_associacao ||
       produtoAny?.id_associacao ||
@@ -72,13 +63,6 @@ import associacaoService from '../services/associacaoService';
       produtoAny?.vendedor?.nome_vendedor ||
       produtoAny?.nome_vendedor ||
       produtoAny?.vendedor_nome ||
-      '';
-
-    const feiraNome =
-      feiraNomeCarregada ||
-      produtoAny?.feira?.nome ||
-      produtoAny?.nome_feira ||
-      produtoAny?.feira_nome ||
       '';
 
     const associacaoNome =
@@ -96,15 +80,10 @@ import associacaoService from '../services/associacaoService';
         if (!isOpen || !produto) return;
 
         setVendedorNomeCarregado('');
-        setFeiraNomeCarregada('');
         setAssociacaoNomeCarregada('');
 
         if (produtoAny?.vendedor?.nome) {
           setVendedorNomeCarregado(produtoAny.vendedor.nome);
-        }
-
-        if (produtoAny?.feira?.nome) {
-          setFeiraNomeCarregada(produtoAny.feira.nome);
         }
 
         if (produtoAny?.associacao?.nome) {
@@ -112,13 +91,6 @@ import associacaoService from '../services/associacaoService';
         }
 
         try {
-          if (feiraId && !produtoAny?.feira?.nome) {
-            const feira = await feiraService.buscarPorId(Number(feiraId));
-            if (ativo && feira?.nome) {
-              setFeiraNomeCarregada(feira.nome);
-            }
-          }
-
           if (vendedorId) {
             const vendedor = await vendedorService.buscarPorId(String(vendedorId));
             if (!ativo) return;
@@ -153,7 +125,7 @@ import associacaoService from '../services/associacaoService';
       return () => {
         ativo = false;
       };
-    }, [isOpen, produto, vendedorId, feiraId, associacaoId, produtoAny]);
+    }, [isOpen, produto, vendedorId, associacaoId, produtoAny]);
 
     if (!produto) return null;
 
@@ -303,11 +275,6 @@ import associacaoService from '../services/associacaoService';
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Vendedor</p>
                   <p className="text-gray-900 font-medium">{vendedorNome || 'Não informado'}</p>
-                </div>
-
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Feira</p>
-                  <p className="text-gray-600 text-sm">{feiraNome || 'Não informado'}</p>
                 </div>
 
                 <div>
