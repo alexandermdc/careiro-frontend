@@ -44,6 +44,8 @@ const GerenciarFeiras: React.FC = () => {
   });
   const [imagemPreview, setImagemPreview] = useState<string>('');
   const [editLoading, setEditLoading] = useState(false);
+  const [atualizandoRetiradaId, setAtualizandoRetiradaId] = useState<number | null>(null);
+  const [atualizandoTodasRetirada, setAtualizandoTodasRetirada] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -147,6 +149,43 @@ const GerenciarFeiras: React.FC = () => {
     }
   };
 
+  const alternarRetirada = async (idFeira: number, disponibilidadeAtual: boolean) => {
+    try {
+      setAtualizandoRetiradaId(idFeira);
+      const atualizado = await feiraService.atualizarDisponibilidadeRetirada(idFeira, !disponibilidadeAtual);
+
+      setFeiras((prev) => prev.map((feira) => (
+        feira.id_feira === idFeira
+          ? { ...feira, disponivel_retirada: atualizado.disponivel_retirada ?? !disponibilidadeAtual }
+          : feira
+      )));
+    } catch (err: any) {
+      toast.error('Erro ao atualizar retirada', err.message || 'Tente novamente.');
+    } finally {
+      setAtualizandoRetiradaId(null);
+    }
+  };
+
+  const liberarTodasRetirada = async () => {
+    const pendentes = feiras.filter((feira) => feira.disponivel_retirada !== true);
+    if (pendentes.length === 0) return;
+
+    try {
+      setAtualizandoTodasRetirada(true);
+
+      await Promise.all(
+        pendentes.map((feira) => feiraService.atualizarDisponibilidadeRetirada(feira.id_feira, true))
+      );
+
+      setFeiras((prev) => prev.map((feira) => ({ ...feira, disponivel_retirada: true })));
+      toast.success('Retirada liberada para todas as feiras!');
+    } catch (err: any) {
+      toast.error('Erro ao liberar retirada para todas', err.message || 'Tente novamente.');
+    } finally {
+      setAtualizandoTodasRetirada(false);
+    }
+  };
+
   // Filtrar feiras
   const feirasFiltradas = feiras.filter(f => 
     f.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -226,6 +265,31 @@ const GerenciarFeiras: React.FC = () => {
           <span className="text-gray-400 text-sm">-</span>
         )
       )
+    },
+    {
+      key: 'disponivel_retirada',
+      label: 'Retirada',
+      render: (feira) => (
+        <button
+          onClick={() => alternarRetirada(feira.id_feira, Boolean(feira.disponivel_retirada))}
+          disabled={atualizandoRetiradaId === feira.id_feira || atualizandoTodasRetirada}
+          className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-sm font-medium ${
+            feira.disponivel_retirada
+              ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm hover:bg-emerald-700'
+              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+          } disabled:opacity-50`}
+          title="Definir disponibilidade para retirada"
+        >
+          <span className={`w-2.5 h-2.5 rounded-full ${
+            feira.disponivel_retirada
+              ? 'bg-white'
+              : 'bg-gray-400'
+          }`} />
+          {feira.disponivel_retirada
+            ? 'Retirada ativa'
+            : 'Retirada inativa'}
+        </button>
+      )
     }
   ];
 
@@ -299,6 +363,22 @@ const GerenciarFeiras: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-verde-escuro focus:ring-2 focus:ring-verde-escuro/20 transition-all"
             />
+          </div>
+
+          <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <p className="font-semibold text-blue-900">Feiras disponíveis para retirada</p>
+              <p className="text-sm text-blue-700">
+                Selecione quais feiras aparecerão no checkout como local de retirada.
+              </p>
+            </div>
+            <button
+              onClick={liberarTodasRetirada}
+              disabled={atualizandoTodasRetirada}
+              className="px-4 py-2 rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-100 transition-colors disabled:opacity-50"
+            >
+              {atualizandoTodasRetirada ? 'Atualizando...' : 'Liberar todas'}
+            </button>
           </div>
         </div>
 

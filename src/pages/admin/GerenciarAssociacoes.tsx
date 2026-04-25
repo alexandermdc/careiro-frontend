@@ -42,8 +42,6 @@ const GerenciarAssociacoes: React.FC = () => {
   });
   const [imagemPreview, setImagemPreview] = useState<string>('');
   const [editLoading, setEditLoading] = useState(false);
-  const [atualizandoRetiradaId, setAtualizandoRetiradaId] = useState<string | null>(null);
-  const [atualizandoTodasRetirada, setAtualizandoTodasRetirada] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -109,41 +107,6 @@ const GerenciarAssociacoes: React.FC = () => {
     setEditModal(true);
   };
 
-  const alternarRetirada = async (idAssociacao: string, disponibilidadeAtual: boolean) => {
-    try {
-      setAtualizandoRetiradaId(idAssociacao);
-      const atualizado = await associacaoService.atualizarDisponibilidadeRetirada(idAssociacao, !disponibilidadeAtual);
-
-      setAssociacoes((prev) => prev.map((assoc) => (
-        assoc.id_associacao === idAssociacao
-          ? { ...assoc, disponivel_retirada: atualizado.disponivel_retirada ?? !disponibilidadeAtual }
-          : assoc
-      )));
-    } catch (err: any) {
-      alert(`Erro ao atualizar retirada: ${err.message || 'Tente novamente.'}`);
-    } finally {
-      setAtualizandoRetiradaId(null);
-    }
-  };
-
-  const liberarTodasRetirada = async () => {
-    const pendentes = associacoes.filter((assoc) => assoc.disponivel_retirada !== true);
-    if (pendentes.length === 0) return;
-
-    try {
-      setAtualizandoTodasRetirada(true);
-
-      await Promise.all(
-        pendentes.map((assoc) => associacaoService.atualizarDisponibilidadeRetirada(assoc.id_associacao, true))
-      );
-
-      setAssociacoes((prev) => prev.map((assoc) => ({ ...assoc, disponivel_retirada: true })));
-    } catch (err: any) {
-      alert(`Erro ao liberar retirada para todas: ${err.message || 'Tente novamente.'}`);
-    } finally {
-      setAtualizandoTodasRetirada(false);
-    }
-  };
 
   const handleImagemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -260,22 +223,6 @@ const GerenciarAssociacoes: React.FC = () => {
             </Link>
           </div>
 
-          <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <p className="font-semibold text-blue-900">Associações disponíveis para retirada</p>
-              <p className="text-sm text-blue-700">
-                Selecione quais associações aparecerão no checkout como local de retirada.
-              </p>
-            </div>
-            <button
-              onClick={liberarTodasRetirada}
-              disabled={atualizandoTodasRetirada}
-              className="px-4 py-2 rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-100 transition-colors disabled:opacity-50"
-            >
-              {atualizandoTodasRetirada ? 'Atualizando...' : 'Liberar todas'}
-            </button>
-          </div>
-
           {/* Busca */}
           <div className="relative">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -316,7 +263,6 @@ const GerenciarAssociacoes: React.FC = () => {
                     <th className="px-6 py-4 text-left text-sm font-semibold">Descrição</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold">Localização</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold">Vendedores</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold">Retirada</th>
                     <th className="px-6 py-4 text-center text-sm font-semibold">Ações</th>
                   </tr>
                 </thead>
@@ -365,27 +311,6 @@ const GerenciarAssociacoes: React.FC = () => {
                           <Users className="w-4 h-4" />
                           {associacao.vendedor?.length || 0}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <button
-                          onClick={() => alternarRetirada(associacao.id_associacao, Boolean(associacao.disponivel_retirada))}
-                          disabled={atualizandoRetiradaId === associacao.id_associacao || atualizandoTodasRetirada}
-                          className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-sm font-medium ${
-                            associacao.disponivel_retirada
-                              ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm hover:bg-emerald-700'
-                              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                          } disabled:opacity-50`}
-                          title="Definir disponibilidade para retirada"
-                        >
-                          <span className={`w-2.5 h-2.5 rounded-full ${
-                            associacao.disponivel_retirada
-                              ? 'bg-white'
-                              : 'bg-gray-400'
-                          }`} />
-                          {associacao.disponivel_retirada
-                            ? 'Retirada ativa'
-                            : 'Retirada inativa'}
-                        </button>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">

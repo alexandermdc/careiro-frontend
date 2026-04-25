@@ -17,9 +17,26 @@ export interface Produto {
     is_promocao?: boolean;
     preco_promocao?: number;
     feira?: {
-        id: number;
+      id?: number;
+      id_feira?: number;
         nome: string;
     };
+    feiras?: Array<{
+      id?: number;
+      id_feira?: number;
+      nome?: string;
+      nome_feira?: string;
+    }>;
+    produto_feiras?: Array<{
+      feira?: {
+        id?: number;
+        id_feira?: number;
+        nome?: string;
+        nome_feira?: string;
+      };
+      nome?: string;
+      nome_feira?: string;
+    }>;
     categoria?: {
         id_categoria: string;
         nome: string;
